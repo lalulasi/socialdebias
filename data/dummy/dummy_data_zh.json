@@ -1,0 +1,2253 @@
+[
+  {
+    "id": "dummy_zh_56112",
+    "text": "报告表明近期发布的关于公共交通的报告，出现了新的研究发现。分析显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于公共交通的第0条评论。",
+      "这是关于公共交通的第1条评论。",
+      "这是关于公共交通的第2条评论。",
+      "这是关于公共交通的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 92134,
+      "friend_count": 3727,
+      "verified": 1,
+      "account_age_days": 1285
+    },
+    "propagation_stats": {
+      "retweet_count": 257,
+      "reply_count": 118,
+      "spread_velocity": 1.2065588475230582
+    }
+  },
+  {
+    "id": "dummy_zh_89887",
+    "text": "研究指出近期发布的关于教育政策的报告，出现了新的研究发现。调查显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于教育政策的第0条评论。",
+      "这是关于教育政策的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 50150,
+      "friend_count": 1982,
+      "verified": 1,
+      "account_age_days": 2418
+    },
+    "propagation_stats": {
+      "retweet_count": 146,
+      "reply_count": 118,
+      "spread_velocity": 4.611499133549976
+    }
+  },
+  {
+    "id": "dummy_zh_48696",
+    "text": "【神奇方法】关于农业生产的重磅！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于农业生产的第0条评论。",
+      "这是关于农业生产的第1条评论。",
+      "这是关于农业生产的第2条评论。",
+      "这是关于农业生产的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 2885,
+      "friend_count": 3252,
+      "verified": 1,
+      "account_age_days": 63
+    },
+    "propagation_stats": {
+      "retweet_count": 579,
+      "reply_count": 442,
+      "spread_velocity": 6.857994927340121
+    }
+  },
+  {
+    "id": "dummy_zh_11220",
+    "text": "【已被封杀】关于科技发展的神奇方法！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于科技发展的第0条评论。",
+      "这是关于科技发展的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 60078,
+      "friend_count": 4622,
+      "verified": 0,
+      "account_age_days": 330
+    },
+    "propagation_stats": {
+      "retweet_count": 550,
+      "reply_count": 109,
+      "spread_velocity": 5.058846940487653
+    }
+  },
+  {
+    "id": "dummy_zh_40162",
+    "text": "调查显示近期发布的关于经济形势的报告，出现了新的研究发现。证据表明过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于经济形势的第0条评论。",
+      "这是关于经济形势的第1条评论。",
+      "这是关于经济形势的第2条评论。",
+      "这是关于经济形势的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 79579,
+      "friend_count": 2896,
+      "verified": 0,
+      "account_age_days": 2637
+    },
+    "propagation_stats": {
+      "retweet_count": 194,
+      "reply_count": 317,
+      "spread_velocity": 2.5062680004361604
+    }
+  },
+  {
+    "id": "dummy_zh_18834",
+    "text": "【不敢相信】关于经济形势的震惊！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于经济形势的第0条评论。",
+      "这是关于经济形势的第1条评论。",
+      "这是关于经济形势的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 4127,
+      "friend_count": 2716,
+      "verified": 0,
+      "account_age_days": 2135
+    },
+    "propagation_stats": {
+      "retweet_count": 243,
+      "reply_count": 142,
+      "spread_velocity": 6.689777782962806
+    }
+  },
+  {
+    "id": "dummy_zh_75323",
+    "text": "证据表明近期发布的关于气候变化的报告，出现了新的研究发现。研究人员发现过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于气候变化的第0条评论。",
+      "这是关于气候变化的第1条评论。",
+      "这是关于气候变化的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 93936,
+      "friend_count": 2400,
+      "verified": 1,
+      "account_age_days": 1731
+    },
+    "propagation_stats": {
+      "retweet_count": 854,
+      "reply_count": 247,
+      "spread_velocity": 9.802446326033754
+    }
+  },
+  {
+    "id": "dummy_zh_56984",
+    "text": "【神奇方法】关于经济形势的震惊！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于经济形势的第0条评论。",
+      "这是关于经济形势的第1条评论。",
+      "这是关于经济形势的第2条评论。",
+      "这是关于经济形势的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 49141,
+      "friend_count": 3538,
+      "verified": 0,
+      "account_age_days": 1030
+    },
+    "propagation_stats": {
+      "retweet_count": 543,
+      "reply_count": 210,
+      "spread_velocity": 5.659280619159368
+    }
+  },
+  {
+    "id": "dummy_zh_39256",
+    "text": "据报道近期发布的关于气候变化的报告，出现了新的研究发现。官方确认过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于气候变化的第0条评论。",
+      "这是关于气候变化的第1条评论。",
+      "这是关于气候变化的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 18299,
+      "friend_count": 849,
+      "verified": 0,
+      "account_age_days": 2448
+    },
+    "propagation_stats": {
+      "retweet_count": 432,
+      "reply_count": 16,
+      "spread_velocity": 0.29797219438070344
+    }
+  },
+  {
+    "id": "dummy_zh_91959",
+    "text": "专家称近期发布的关于科技发展的报告，出现了新的研究发现。研究指出过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于科技发展的第0条评论。",
+      "这是关于科技发展的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 39127,
+      "friend_count": 4168,
+      "verified": 0,
+      "account_age_days": 656
+    },
+    "propagation_stats": {
+      "retweet_count": 382,
+      "reply_count": 390,
+      "spread_velocity": 1.6154903575315338
+    }
+  },
+  {
+    "id": "dummy_zh_80912",
+    "text": "【你绝对想不到】关于公共交通的神奇方法！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于公共交通的第0条评论。",
+      "这是关于公共交通的第1条评论。",
+      "这是关于公共交通的第2条评论。",
+      "这是关于公共交通的第3条评论。",
+      "这是关于公共交通的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 4715,
+      "friend_count": 570,
+      "verified": 0,
+      "account_age_days": 2615
+    },
+    "propagation_stats": {
+      "retweet_count": 700,
+      "reply_count": 471,
+      "spread_velocity": 2.8737900404204364
+    }
+  },
+  {
+    "id": "dummy_zh_69878",
+    "text": "官方确认近期发布的关于农业生产的报告，出现了新的研究发现。分析显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于农业生产的第0条评论。",
+      "这是关于农业生产的第1条评论。",
+      "这是关于农业生产的第2条评论。",
+      "这是关于农业生产的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 39609,
+      "friend_count": 1641,
+      "verified": 1,
+      "account_age_days": 3525
+    },
+    "propagation_stats": {
+      "retweet_count": 494,
+      "reply_count": 54,
+      "spread_velocity": 2.372057019275746
+    }
+  },
+  {
+    "id": "dummy_zh_31319",
+    "text": "【秘密揭露】关于科学研究的已被封杀！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于科学研究的第0条评论。",
+      "这是关于科学研究的第1条评论。",
+      "这是关于科学研究的第2条评论。",
+      "这是关于科学研究的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 48530,
+      "friend_count": 2920,
+      "verified": 0,
+      "account_age_days": 2775
+    },
+    "propagation_stats": {
+      "retweet_count": 273,
+      "reply_count": 359,
+      "spread_velocity": 9.36654587712494
+    }
+  },
+  {
+    "id": "dummy_zh_60432",
+    "text": "研究指出近期发布的关于教育政策的报告，出现了新的研究发现。分析显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于教育政策的第0条评论。",
+      "这是关于教育政策的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 50029,
+      "friend_count": 4891,
+      "verified": 1,
+      "account_age_days": 2197
+    },
+    "propagation_stats": {
+      "retweet_count": 257,
+      "reply_count": 497,
+      "spread_velocity": 5.532258962152875
+    }
+  },
+  {
+    "id": "dummy_zh_59968",
+    "text": "据报道近期发布的关于科学研究的报告，出现了新的研究发现。报告表明过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于科学研究的第0条评论。",
+      "这是关于科学研究的第1条评论。",
+      "这是关于科学研究的第2条评论。",
+      "这是关于科学研究的第3条评论。",
+      "这是关于科学研究的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 50614,
+      "friend_count": 1256,
+      "verified": 1,
+      "account_age_days": 181
+    },
+    "propagation_stats": {
+      "retweet_count": 129,
+      "reply_count": 257,
+      "spread_velocity": 9.653535901768537
+    }
+  },
+  {
+    "id": "dummy_zh_70910",
+    "text": "官方确认近期发布的关于气候变化的报告，出现了新的研究发现。证据表明过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于气候变化的第0条评论。",
+      "这是关于气候变化的第1条评论。",
+      "这是关于气候变化的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 74701,
+      "friend_count": 3114,
+      "verified": 1,
+      "account_age_days": 147
+    },
+    "propagation_stats": {
+      "retweet_count": 506,
+      "reply_count": 435,
+      "spread_velocity": 3.2501416788875948
+    }
+  },
+  {
+    "id": "dummy_zh_73993",
+    "text": "专家称近期发布的关于科学研究的报告，出现了新的研究发现。调查显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于科学研究的第0条评论。",
+      "这是关于科学研究的第1条评论。",
+      "这是关于科学研究的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 28770,
+      "friend_count": 2245,
+      "verified": 1,
+      "account_age_days": 2019
+    },
+    "propagation_stats": {
+      "retweet_count": 29,
+      "reply_count": 199,
+      "spread_velocity": 3.3612954369838244
+    }
+  },
+  {
+    "id": "dummy_zh_74942",
+    "text": "研究指出近期发布的关于气候变化的报告，出现了新的研究发现。报告表明过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于气候变化的第0条评论。",
+      "这是关于气候变化的第1条评论。",
+      "这是关于气候变化的第2条评论。",
+      "这是关于气候变化的第3条评论。",
+      "这是关于气候变化的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 37787,
+      "friend_count": 3290,
+      "verified": 0,
+      "account_age_days": 1892
+    },
+    "propagation_stats": {
+      "retweet_count": 90,
+      "reply_count": 161,
+      "spread_velocity": 2.523988509422077
+    }
+  },
+  {
+    "id": "dummy_zh_20735",
+    "text": "【秘密揭露】关于科学研究的你绝对想不到！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于科学研究的第0条评论。",
+      "这是关于科学研究的第1条评论。",
+      "这是关于科学研究的第2条评论。",
+      "这是关于科学研究的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 61654,
+      "friend_count": 168,
+      "verified": 0,
+      "account_age_days": 1463
+    },
+    "propagation_stats": {
+      "retweet_count": 229,
+      "reply_count": 332,
+      "spread_velocity": 0.6861837045276942
+    }
+  },
+  {
+    "id": "dummy_zh_45003",
+    "text": "证据表明近期发布的关于城市规划的报告，出现了新的研究发现。据报道过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于城市规划的第0条评论。",
+      "这是关于城市规划的第1条评论。",
+      "这是关于城市规划的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 71997,
+      "friend_count": 1083,
+      "verified": 1,
+      "account_age_days": 1824
+    },
+    "propagation_stats": {
+      "retweet_count": 901,
+      "reply_count": 357,
+      "spread_velocity": 4.8471179694999815
+    }
+  },
+  {
+    "id": "dummy_zh_65723",
+    "text": "【秘密揭露】关于医疗改革的重磅！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于医疗改革的第0条评论。",
+      "这是关于医疗改革的第1条评论。",
+      "这是关于医疗改革的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 15053,
+      "friend_count": 4471,
+      "verified": 0,
+      "account_age_days": 2682
+    },
+    "propagation_stats": {
+      "retweet_count": 152,
+      "reply_count": 465,
+      "spread_velocity": 2.656324716406402
+    }
+  },
+  {
+    "id": "dummy_zh_10336",
+    "text": "报告表明近期发布的关于科学研究的报告，出现了新的研究发现。专家称过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于科学研究的第0条评论。",
+      "这是关于科学研究的第1条评论。",
+      "这是关于科学研究的第2条评论。",
+      "这是关于科学研究的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 37082,
+      "friend_count": 2455,
+      "verified": 1,
+      "account_age_days": 3574
+    },
+    "propagation_stats": {
+      "retweet_count": 152,
+      "reply_count": 228,
+      "spread_velocity": 5.385805777038737
+    }
+  },
+  {
+    "id": "dummy_zh_39831",
+    "text": "证据表明近期发布的关于医疗改革的报告，出现了新的研究发现。报告表明过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于医疗改革的第0条评论。",
+      "这是关于医疗改革的第1条评论。",
+      "这是关于医疗改革的第2条评论。",
+      "这是关于医疗改革的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 29229,
+      "friend_count": 203,
+      "verified": 0,
+      "account_age_days": 1662
+    },
+    "propagation_stats": {
+      "retweet_count": 336,
+      "reply_count": 142,
+      "spread_velocity": 8.643529420302864
+    }
+  },
+  {
+    "id": "dummy_zh_60277",
+    "text": "【已被封杀】关于医疗改革的他们不想让你知道！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于医疗改革的第0条评论。",
+      "这是关于医疗改革的第1条评论。",
+      "这是关于医疗改革的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 24993,
+      "friend_count": 4920,
+      "verified": 0,
+      "account_age_days": 3569
+    },
+    "propagation_stats": {
+      "retweet_count": 71,
+      "reply_count": 141,
+      "spread_velocity": 7.72675132677005
+    }
+  },
+  {
+    "id": "dummy_zh_70946",
+    "text": "数据显示近期发布的关于科技发展的报告，出现了新的研究发现。分析显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于科技发展的第0条评论。",
+      "这是关于科技发展的第1条评论。",
+      "这是关于科技发展的第2条评论。",
+      "这是关于科技发展的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 57915,
+      "friend_count": 3632,
+      "verified": 0,
+      "account_age_days": 2123
+    },
+    "propagation_stats": {
+      "retweet_count": 484,
+      "reply_count": 406,
+      "spread_velocity": 9.011808258282542
+    }
+  },
+  {
+    "id": "dummy_zh_88193",
+    "text": "官方确认近期发布的关于农业生产的报告，出现了新的研究发现。据报道过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于农业生产的第0条评论。",
+      "这是关于农业生产的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 56969,
+      "friend_count": 2841,
+      "verified": 1,
+      "account_age_days": 1817
+    },
+    "propagation_stats": {
+      "retweet_count": 620,
+      "reply_count": 261,
+      "spread_velocity": 1.1564578402933046
+    }
+  },
+  {
+    "id": "dummy_zh_69682",
+    "text": "【神奇方法】关于国际关系的他们不想让你知道！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于国际关系的第0条评论。",
+      "这是关于国际关系的第1条评论。",
+      "这是关于国际关系的第2条评论。",
+      "这是关于国际关系的第3条评论。",
+      "这是关于国际关系的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 42186,
+      "friend_count": 1555,
+      "verified": 0,
+      "account_age_days": 2372
+    },
+    "propagation_stats": {
+      "retweet_count": 392,
+      "reply_count": 119,
+      "spread_velocity": 8.560129759873782
+    }
+  },
+  {
+    "id": "dummy_zh_70217",
+    "text": "【重磅】关于国际关系的秘密揭露！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于国际关系的第0条评论。",
+      "这是关于国际关系的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 70294,
+      "friend_count": 1032,
+      "verified": 1,
+      "account_age_days": 352
+    },
+    "propagation_stats": {
+      "retweet_count": 565,
+      "reply_count": 150,
+      "spread_velocity": 8.294046642529949
+    }
+  },
+  {
+    "id": "dummy_zh_31992",
+    "text": "【已被封杀】关于医疗改革的秘密揭露！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于医疗改革的第0条评论。",
+      "这是关于医疗改革的第1条评论。",
+      "这是关于医疗改革的第2条评论。",
+      "这是关于医疗改革的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 79425,
+      "friend_count": 4984,
+      "verified": 0,
+      "account_age_days": 3215
+    },
+    "propagation_stats": {
+      "retweet_count": 838,
+      "reply_count": 83,
+      "spread_velocity": 9.647207730340877
+    }
+  },
+  {
+    "id": "dummy_zh_91691",
+    "text": "证据表明近期发布的关于气候变化的报告，出现了新的研究发现。官方确认过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于气候变化的第0条评论。",
+      "这是关于气候变化的第1条评论。",
+      "这是关于气候变化的第2条评论。",
+      "这是关于气候变化的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 90804,
+      "friend_count": 3266,
+      "verified": 0,
+      "account_age_days": 3518
+    },
+    "propagation_stats": {
+      "retweet_count": 336,
+      "reply_count": 436,
+      "spread_velocity": 6.743574951540095
+    }
+  },
+  {
+    "id": "dummy_zh_93202",
+    "text": "【秘密揭露】关于城市规划的医生都恨！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于城市规划的第0条评论。",
+      "这是关于城市规划的第1条评论。",
+      "这是关于城市规划的第2条评论。",
+      "这是关于城市规划的第3条评论。",
+      "这是关于城市规划的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 64461,
+      "friend_count": 757,
+      "verified": 1,
+      "account_age_days": 1455
+    },
+    "propagation_stats": {
+      "retweet_count": 418,
+      "reply_count": 170,
+      "spread_velocity": 3.2105825595657156
+    }
+  },
+  {
+    "id": "dummy_zh_96200",
+    "text": "【你绝对想不到】关于气候变化的他们不想让你知道！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于气候变化的第0条评论。",
+      "这是关于气候变化的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 71128,
+      "friend_count": 3794,
+      "verified": 1,
+      "account_age_days": 252
+    },
+    "propagation_stats": {
+      "retweet_count": 192,
+      "reply_count": 265,
+      "spread_velocity": 3.6177935915167527
+    }
+  },
+  {
+    "id": "dummy_zh_63005",
+    "text": "【不敢相信】关于经济形势的秘密揭露！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于经济形势的第0条评论。",
+      "这是关于经济形势的第1条评论。",
+      "这是关于经济形势的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 90683,
+      "friend_count": 2003,
+      "verified": 1,
+      "account_age_days": 2749
+    },
+    "propagation_stats": {
+      "retweet_count": 595,
+      "reply_count": 188,
+      "spread_velocity": 4.732604887595247
+    }
+  },
+  {
+    "id": "dummy_zh_30289",
+    "text": "【秘密揭露】关于城市规划的你绝对想不到！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于城市规划的第0条评论。",
+      "这是关于城市规划的第1条评论。",
+      "这是关于城市规划的第2条评论。",
+      "这是关于城市规划的第3条评论。",
+      "这是关于城市规划的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 24900,
+      "friend_count": 2440,
+      "verified": 0,
+      "account_age_days": 269
+    },
+    "propagation_stats": {
+      "retweet_count": 593,
+      "reply_count": 376,
+      "spread_velocity": 5.421952013742742
+    }
+  },
+  {
+    "id": "dummy_zh_72518",
+    "text": "【震惊】关于农业生产的重磅！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于农业生产的第0条评论。",
+      "这是关于农业生产的第1条评论。",
+      "这是关于农业生产的第2条评论。",
+      "这是关于农业生产的第3条评论。",
+      "这是关于农业生产的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 782,
+      "friend_count": 2891,
+      "verified": 1,
+      "account_age_days": 3116
+    },
+    "propagation_stats": {
+      "retweet_count": 399,
+      "reply_count": 436,
+      "spread_velocity": 8.91641541968512
+    }
+  },
+  {
+    "id": "dummy_zh_75909",
+    "text": "据报道近期发布的关于国际关系的报告，出现了新的研究发现。调查显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于国际关系的第0条评论。",
+      "这是关于国际关系的第1条评论。",
+      "这是关于国际关系的第2条评论。",
+      "这是关于国际关系的第3条评论。",
+      "这是关于国际关系的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 69625,
+      "friend_count": 1299,
+      "verified": 0,
+      "account_age_days": 2110
+    },
+    "propagation_stats": {
+      "retweet_count": 82,
+      "reply_count": 435,
+      "spread_velocity": 1.858249609807232
+    }
+  },
+  {
+    "id": "dummy_zh_60328",
+    "text": "【丑闻】关于科学研究的重磅！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于科学研究的第0条评论。",
+      "这是关于科学研究的第1条评论。",
+      "这是关于科学研究的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 64809,
+      "friend_count": 3283,
+      "verified": 0,
+      "account_age_days": 634
+    },
+    "propagation_stats": {
+      "retweet_count": 671,
+      "reply_count": 352,
+      "spread_velocity": 0.055448181380317596
+    }
+  },
+  {
+    "id": "dummy_zh_78937",
+    "text": "【不敢相信】关于国际关系的已被封杀！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于国际关系的第0条评论。",
+      "这是关于国际关系的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 59900,
+      "friend_count": 135,
+      "verified": 0,
+      "account_age_days": 1709
+    },
+    "propagation_stats": {
+      "retweet_count": 891,
+      "reply_count": 335,
+      "spread_velocity": 9.699567940411063
+    }
+  },
+  {
+    "id": "dummy_zh_16734",
+    "text": "证据表明近期发布的关于城市规划的报告，出现了新的研究发现。报告表明过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于城市规划的第0条评论。",
+      "这是关于城市规划的第1条评论。",
+      "这是关于城市规划的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 33102,
+      "friend_count": 3923,
+      "verified": 0,
+      "account_age_days": 3397
+    },
+    "propagation_stats": {
+      "retweet_count": 66,
+      "reply_count": 205,
+      "spread_velocity": 4.91746560291068
+    }
+  },
+  {
+    "id": "dummy_zh_31417",
+    "text": "调查显示近期发布的关于气候变化的报告，出现了新的研究发现。研究指出过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于气候变化的第0条评论。",
+      "这是关于气候变化的第1条评论。",
+      "这是关于气候变化的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 60599,
+      "friend_count": 3118,
+      "verified": 1,
+      "account_age_days": 2651
+    },
+    "propagation_stats": {
+      "retweet_count": 704,
+      "reply_count": 285,
+      "spread_velocity": 2.1961517397026897
+    }
+  },
+  {
+    "id": "dummy_zh_50319",
+    "text": "研究人员发现近期发布的关于教育政策的报告，出现了新的研究发现。据报道过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于教育政策的第0条评论。",
+      "这是关于教育政策的第1条评论。",
+      "这是关于教育政策的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 78003,
+      "friend_count": 4672,
+      "verified": 1,
+      "account_age_days": 1828
+    },
+    "propagation_stats": {
+      "retweet_count": 127,
+      "reply_count": 239,
+      "spread_velocity": 6.886779912120938
+    }
+  },
+  {
+    "id": "dummy_zh_15778",
+    "text": "【丑闻】关于气候变化的你绝对想不到！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于气候变化的第0条评论。",
+      "这是关于气候变化的第1条评论。",
+      "这是关于气候变化的第2条评论。",
+      "这是关于气候变化的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 474,
+      "friend_count": 2742,
+      "verified": 0,
+      "account_age_days": 2639
+    },
+    "propagation_stats": {
+      "retweet_count": 268,
+      "reply_count": 82,
+      "spread_velocity": 7.412309083479308
+    }
+  },
+  {
+    "id": "dummy_zh_51904",
+    "text": "【内幕曝光】关于科技发展的秘密揭露！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于科技发展的第0条评论。",
+      "这是关于科技发展的第1条评论。",
+      "这是关于科技发展的第2条评论。",
+      "这是关于科技发展的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 70808,
+      "friend_count": 670,
+      "verified": 0,
+      "account_age_days": 647
+    },
+    "propagation_stats": {
+      "retweet_count": 236,
+      "reply_count": 196,
+      "spread_velocity": 6.939498122990523
+    }
+  },
+  {
+    "id": "dummy_zh_14278",
+    "text": "证据表明近期发布的关于科学研究的报告，出现了新的研究发现。调查显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于科学研究的第0条评论。",
+      "这是关于科学研究的第1条评论。",
+      "这是关于科学研究的第2条评论。",
+      "这是关于科学研究的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 30350,
+      "friend_count": 2370,
+      "verified": 1,
+      "account_age_days": 2909
+    },
+    "propagation_stats": {
+      "retweet_count": 880,
+      "reply_count": 232,
+      "spread_velocity": 0.7117976015347927
+    }
+  },
+  {
+    "id": "dummy_zh_46421",
+    "text": "研究指出近期发布的关于经济形势的报告，出现了新的研究发现。分析显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于经济形势的第0条评论。",
+      "这是关于经济形势的第1条评论。",
+      "这是关于经济形势的第2条评论。",
+      "这是关于经济形势的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 20389,
+      "friend_count": 1773,
+      "verified": 1,
+      "account_age_days": 448
+    },
+    "propagation_stats": {
+      "retweet_count": 94,
+      "reply_count": 194,
+      "spread_velocity": 0.9671637683346401
+    }
+  },
+  {
+    "id": "dummy_zh_94259",
+    "text": "数据显示近期发布的关于国际关系的报告，出现了新的研究发现。证据表明过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于国际关系的第0条评论。",
+      "这是关于国际关系的第1条评论。",
+      "这是关于国际关系的第2条评论。",
+      "这是关于国际关系的第3条评论。",
+      "这是关于国际关系的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 60152,
+      "friend_count": 1180,
+      "verified": 1,
+      "account_age_days": 601
+    },
+    "propagation_stats": {
+      "retweet_count": 252,
+      "reply_count": 381,
+      "spread_velocity": 5.613681341631508
+    }
+  },
+  {
+    "id": "dummy_zh_51347",
+    "text": "【震惊】关于国际关系的内幕曝光！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于国际关系的第0条评论。",
+      "这是关于国际关系的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 52591,
+      "friend_count": 2203,
+      "verified": 0,
+      "account_age_days": 894
+    },
+    "propagation_stats": {
+      "retweet_count": 935,
+      "reply_count": 482,
+      "spread_velocity": 5.671800514785023
+    }
+  },
+  {
+    "id": "dummy_zh_36772",
+    "text": "专家称近期发布的关于农业生产的报告，出现了新的研究发现。报告表明过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于农业生产的第0条评论。",
+      "这是关于农业生产的第1条评论。",
+      "这是关于农业生产的第2条评论。",
+      "这是关于农业生产的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 87792,
+      "friend_count": 2583,
+      "verified": 0,
+      "account_age_days": 1117
+    },
+    "propagation_stats": {
+      "retweet_count": 405,
+      "reply_count": 67,
+      "spread_velocity": 6.716902229599713
+    }
+  },
+  {
+    "id": "dummy_zh_16590",
+    "text": "研究指出近期发布的关于科学研究的报告，出现了新的研究发现。证据表明过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于科学研究的第0条评论。",
+      "这是关于科学研究的第1条评论。",
+      "这是关于科学研究的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 34109,
+      "friend_count": 3115,
+      "verified": 1,
+      "account_age_days": 896
+    },
+    "propagation_stats": {
+      "retweet_count": 465,
+      "reply_count": 167,
+      "spread_velocity": 3.3750054807387064
+    }
+  },
+  {
+    "id": "dummy_zh_98259",
+    "text": "【你绝对想不到】关于科学研究的已被封杀！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于科学研究的第0条评论。",
+      "这是关于科学研究的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 85659,
+      "friend_count": 816,
+      "verified": 0,
+      "account_age_days": 1679
+    },
+    "propagation_stats": {
+      "retweet_count": 745,
+      "reply_count": 173,
+      "spread_velocity": 8.005925108616989
+    }
+  },
+  {
+    "id": "dummy_zh_13201",
+    "text": "数据显示近期发布的关于科技发展的报告，出现了新的研究发现。调查显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于科技发展的第0条评论。",
+      "这是关于科技发展的第1条评论。",
+      "这是关于科技发展的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 6067,
+      "friend_count": 2015,
+      "verified": 1,
+      "account_age_days": 2533
+    },
+    "propagation_stats": {
+      "retweet_count": 870,
+      "reply_count": 393,
+      "spread_velocity": 0.728282291845691
+    }
+  },
+  {
+    "id": "dummy_zh_54608",
+    "text": "【内幕曝光】关于城市规划的神奇方法！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于城市规划的第0条评论。",
+      "这是关于城市规划的第1条评论。",
+      "这是关于城市规划的第2条评论。",
+      "这是关于城市规划的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 36665,
+      "friend_count": 4893,
+      "verified": 1,
+      "account_age_days": 2306
+    },
+    "propagation_stats": {
+      "retweet_count": 10,
+      "reply_count": 264,
+      "spread_velocity": 9.480625777770312
+    }
+  },
+  {
+    "id": "dummy_zh_49363",
+    "text": "调查显示近期发布的关于国际关系的报告，出现了新的研究发现。报告表明过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于国际关系的第0条评论。",
+      "这是关于国际关系的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 66479,
+      "friend_count": 2543,
+      "verified": 1,
+      "account_age_days": 1366
+    },
+    "propagation_stats": {
+      "retweet_count": 412,
+      "reply_count": 356,
+      "spread_velocity": 2.9565520252594704
+    }
+  },
+  {
+    "id": "dummy_zh_16006",
+    "text": "报告表明近期发布的关于农业生产的报告，出现了新的研究发现。数据显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于农业生产的第0条评论。",
+      "这是关于农业生产的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 86683,
+      "friend_count": 1876,
+      "verified": 1,
+      "account_age_days": 356
+    },
+    "propagation_stats": {
+      "retweet_count": 875,
+      "reply_count": 119,
+      "spread_velocity": 8.664836667552697
+    }
+  },
+  {
+    "id": "dummy_zh_50492",
+    "text": "【丑闻】关于教育政策的不敢相信！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于教育政策的第0条评论。",
+      "这是关于教育政策的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 57789,
+      "friend_count": 283,
+      "verified": 1,
+      "account_age_days": 3029
+    },
+    "propagation_stats": {
+      "retweet_count": 134,
+      "reply_count": 46,
+      "spread_velocity": 9.096278123193267
+    }
+  },
+  {
+    "id": "dummy_zh_30758",
+    "text": "【丑闻】关于经济形势的重磅！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于经济形势的第0条评论。",
+      "这是关于经济形势的第1条评论。",
+      "这是关于经济形势的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 40740,
+      "friend_count": 4522,
+      "verified": 0,
+      "account_age_days": 2292
+    },
+    "propagation_stats": {
+      "retweet_count": 417,
+      "reply_count": 47,
+      "spread_velocity": 2.2470065945578463
+    }
+  },
+  {
+    "id": "dummy_zh_23833",
+    "text": "据报道近期发布的关于国际关系的报告，出现了新的研究发现。分析显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于国际关系的第0条评论。",
+      "这是关于国际关系的第1条评论。",
+      "这是关于国际关系的第2条评论。",
+      "这是关于国际关系的第3条评论。",
+      "这是关于国际关系的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 56832,
+      "friend_count": 2977,
+      "verified": 1,
+      "account_age_days": 2927
+    },
+    "propagation_stats": {
+      "retweet_count": 156,
+      "reply_count": 222,
+      "spread_velocity": 1.7613696108605936
+    }
+  },
+  {
+    "id": "dummy_zh_80292",
+    "text": "数据显示近期发布的关于气候变化的报告，出现了新的研究发现。调查显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于气候变化的第0条评论。",
+      "这是关于气候变化的第1条评论。",
+      "这是关于气候变化的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 58810,
+      "friend_count": 1158,
+      "verified": 1,
+      "account_age_days": 781
+    },
+    "propagation_stats": {
+      "retweet_count": 285,
+      "reply_count": 236,
+      "spread_velocity": 2.498064478821005
+    }
+  },
+  {
+    "id": "dummy_zh_30866",
+    "text": "【丑闻】关于科学研究的内幕曝光！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于科学研究的第0条评论。",
+      "这是关于科学研究的第1条评论。",
+      "这是关于科学研究的第2条评论。",
+      "这是关于科学研究的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 91927,
+      "friend_count": 895,
+      "verified": 1,
+      "account_age_days": 3602
+    },
+    "propagation_stats": {
+      "retweet_count": 39,
+      "reply_count": 439,
+      "spread_velocity": 4.706900210859903
+    }
+  },
+  {
+    "id": "dummy_zh_12671",
+    "text": "据报道近期发布的关于经济形势的报告，出现了新的研究发现。数据显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于经济形势的第0条评论。",
+      "这是关于经济形势的第1条评论。",
+      "这是关于经济形势的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 81449,
+      "friend_count": 1258,
+      "verified": 0,
+      "account_age_days": 547
+    },
+    "propagation_stats": {
+      "retweet_count": 484,
+      "reply_count": 342,
+      "spread_velocity": 1.1438944610930657
+    }
+  },
+  {
+    "id": "dummy_zh_67154",
+    "text": "【内幕曝光】关于农业生产的秘密揭露！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于农业生产的第0条评论。",
+      "这是关于农业生产的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 231,
+      "friend_count": 4269,
+      "verified": 0,
+      "account_age_days": 1521
+    },
+    "propagation_stats": {
+      "retweet_count": 441,
+      "reply_count": 35,
+      "spread_velocity": 9.488744859713144
+    }
+  },
+  {
+    "id": "dummy_zh_96563",
+    "text": "【内幕曝光】关于气候变化的丑闻！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于气候变化的第0条评论。",
+      "这是关于气候变化的第1条评论。",
+      "这是关于气候变化的第2条评论。",
+      "这是关于气候变化的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 10651,
+      "friend_count": 1296,
+      "verified": 0,
+      "account_age_days": 741
+    },
+    "propagation_stats": {
+      "retweet_count": 565,
+      "reply_count": 38,
+      "spread_velocity": 1.5653261544313812
+    }
+  },
+  {
+    "id": "dummy_zh_54942",
+    "text": "官方确认近期发布的关于教育政策的报告，出现了新的研究发现。调查显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于教育政策的第0条评论。",
+      "这是关于教育政策的第1条评论。",
+      "这是关于教育政策的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 26695,
+      "friend_count": 2172,
+      "verified": 1,
+      "account_age_days": 1058
+    },
+    "propagation_stats": {
+      "retweet_count": 927,
+      "reply_count": 464,
+      "spread_velocity": 8.461037132948555
+    }
+  },
+  {
+    "id": "dummy_zh_96951",
+    "text": "【震惊】关于公共交通的他们不想让你知道！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于公共交通的第0条评论。",
+      "这是关于公共交通的第1条评论。",
+      "这是关于公共交通的第2条评论。",
+      "这是关于公共交通的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 13587,
+      "friend_count": 1110,
+      "verified": 1,
+      "account_age_days": 502
+    },
+    "propagation_stats": {
+      "retweet_count": 911,
+      "reply_count": 54,
+      "spread_velocity": 7.4241668398099865
+    }
+  },
+  {
+    "id": "dummy_zh_74042",
+    "text": "【震惊】关于公共交通的重磅！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于公共交通的第0条评论。",
+      "这是关于公共交通的第1条评论。",
+      "这是关于公共交通的第2条评论。",
+      "这是关于公共交通的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 2562,
+      "friend_count": 926,
+      "verified": 1,
+      "account_age_days": 3629
+    },
+    "propagation_stats": {
+      "retweet_count": 851,
+      "reply_count": 413,
+      "spread_velocity": 3.0751412540266143
+    }
+  },
+  {
+    "id": "dummy_zh_67377",
+    "text": "【秘密揭露】关于科学研究的他们不想让你知道！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于科学研究的第0条评论。",
+      "这是关于科学研究的第1条评论。",
+      "这是关于科学研究的第2条评论。",
+      "这是关于科学研究的第3条评论。",
+      "这是关于科学研究的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 10553,
+      "friend_count": 4909,
+      "verified": 0,
+      "account_age_days": 1799
+    },
+    "propagation_stats": {
+      "retweet_count": 752,
+      "reply_count": 165,
+      "spread_velocity": 6.037136409459106
+    }
+  },
+  {
+    "id": "dummy_zh_42406",
+    "text": "证据表明近期发布的关于教育政策的报告，出现了新的研究发现。调查显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于教育政策的第0条评论。",
+      "这是关于教育政策的第1条评论。",
+      "这是关于教育政策的第2条评论。",
+      "这是关于教育政策的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 83589,
+      "friend_count": 2281,
+      "verified": 1,
+      "account_age_days": 2597
+    },
+    "propagation_stats": {
+      "retweet_count": 244,
+      "reply_count": 140,
+      "spread_velocity": 4.398725932649027
+    }
+  },
+  {
+    "id": "dummy_zh_69049",
+    "text": "调查显示近期发布的关于农业生产的报告，出现了新的研究发现。数据显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于农业生产的第0条评论。",
+      "这是关于农业生产的第1条评论。",
+      "这是关于农业生产的第2条评论。",
+      "这是关于农业生产的第3条评论。",
+      "这是关于农业生产的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 58038,
+      "friend_count": 2445,
+      "verified": 1,
+      "account_age_days": 1280
+    },
+    "propagation_stats": {
+      "retweet_count": 582,
+      "reply_count": 317,
+      "spread_velocity": 0.6023030437254084
+    }
+  },
+  {
+    "id": "dummy_zh_68008",
+    "text": "【丑闻】关于城市规划的他们不想让你知道！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于城市规划的第0条评论。",
+      "这是关于城市规划的第1条评论。",
+      "这是关于城市规划的第2条评论。",
+      "这是关于城市规划的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 80311,
+      "friend_count": 4145,
+      "verified": 1,
+      "account_age_days": 3432
+    },
+    "propagation_stats": {
+      "retweet_count": 928,
+      "reply_count": 280,
+      "spread_velocity": 4.459136120767004
+    }
+  },
+  {
+    "id": "dummy_zh_85470",
+    "text": "调查显示近期发布的关于气候变化的报告，出现了新的研究发现。据报道过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于气候变化的第0条评论。",
+      "这是关于气候变化的第1条评论。",
+      "这是关于气候变化的第2条评论。",
+      "这是关于气候变化的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 88791,
+      "friend_count": 3084,
+      "verified": 1,
+      "account_age_days": 2958
+    },
+    "propagation_stats": {
+      "retweet_count": 203,
+      "reply_count": 38,
+      "spread_velocity": 5.920978612498522
+    }
+  },
+  {
+    "id": "dummy_zh_37760",
+    "text": "【秘密揭露】关于教育政策的他们不想让你知道！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于教育政策的第0条评论。",
+      "这是关于教育政策的第1条评论。",
+      "这是关于教育政策的第2条评论。",
+      "这是关于教育政策的第3条评论。",
+      "这是关于教育政策的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 70696,
+      "friend_count": 1657,
+      "verified": 1,
+      "account_age_days": 1664
+    },
+    "propagation_stats": {
+      "retweet_count": 687,
+      "reply_count": 332,
+      "spread_velocity": 3.734205025292938
+    }
+  },
+  {
+    "id": "dummy_zh_48829",
+    "text": "官方确认近期发布的关于农业生产的报告，出现了新的研究发现。研究人员发现过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于农业生产的第0条评论。",
+      "这是关于农业生产的第1条评论。",
+      "这是关于农业生产的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 29826,
+      "friend_count": 2966,
+      "verified": 0,
+      "account_age_days": 1268
+    },
+    "propagation_stats": {
+      "retweet_count": 14,
+      "reply_count": 362,
+      "spread_velocity": 5.341350892676633
+    }
+  },
+  {
+    "id": "dummy_zh_57795",
+    "text": "【医生都恨】关于科学研究的震惊！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于科学研究的第0条评论。",
+      "这是关于科学研究的第1条评论。",
+      "这是关于科学研究的第2条评论。",
+      "这是关于科学研究的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 5239,
+      "friend_count": 2941,
+      "verified": 0,
+      "account_age_days": 2823
+    },
+    "propagation_stats": {
+      "retweet_count": 255,
+      "reply_count": 341,
+      "spread_velocity": 1.0279362167178563
+    }
+  },
+  {
+    "id": "dummy_zh_83563",
+    "text": "【内幕曝光】关于医疗改革的他们不想让你知道！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于医疗改革的第0条评论。",
+      "这是关于医疗改革的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 26072,
+      "friend_count": 4474,
+      "verified": 1,
+      "account_age_days": 932
+    },
+    "propagation_stats": {
+      "retweet_count": 459,
+      "reply_count": 301,
+      "spread_velocity": 2.781907082306627
+    }
+  },
+  {
+    "id": "dummy_zh_98117",
+    "text": "研究人员发现近期发布的关于经济形势的报告，出现了新的研究发现。数据显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于经济形势的第0条评论。",
+      "这是关于经济形势的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 35335,
+      "friend_count": 4730,
+      "verified": 0,
+      "account_age_days": 3155
+    },
+    "propagation_stats": {
+      "retweet_count": 774,
+      "reply_count": 89,
+      "spread_velocity": 4.705008232516335
+    }
+  },
+  {
+    "id": "dummy_zh_94012",
+    "text": "【丑闻】关于经济形势的不敢相信！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于经济形势的第0条评论。",
+      "这是关于经济形势的第1条评论。",
+      "这是关于经济形势的第2条评论。",
+      "这是关于经济形势的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 44597,
+      "friend_count": 923,
+      "verified": 1,
+      "account_age_days": 1810
+    },
+    "propagation_stats": {
+      "retweet_count": 161,
+      "reply_count": 232,
+      "spread_velocity": 0.0324531610172929
+    }
+  },
+  {
+    "id": "dummy_zh_93066",
+    "text": "研究人员发现近期发布的关于医疗改革的报告，出现了新的研究发现。分析显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于医疗改革的第0条评论。",
+      "这是关于医疗改革的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 92270,
+      "friend_count": 833,
+      "verified": 1,
+      "account_age_days": 711
+    },
+    "propagation_stats": {
+      "retweet_count": 710,
+      "reply_count": 153,
+      "spread_velocity": 9.03424062050486
+    }
+  },
+  {
+    "id": "dummy_zh_29555",
+    "text": "【丑闻】关于农业生产的震惊！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于农业生产的第0条评论。",
+      "这是关于农业生产的第1条评论。",
+      "这是关于农业生产的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 73782,
+      "friend_count": 2499,
+      "verified": 0,
+      "account_age_days": 1046
+    },
+    "propagation_stats": {
+      "retweet_count": 121,
+      "reply_count": 285,
+      "spread_velocity": 7.644434453261942
+    }
+  },
+  {
+    "id": "dummy_zh_53369",
+    "text": "研究人员发现近期发布的关于医疗改革的报告，出现了新的研究发现。分析显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于医疗改革的第0条评论。",
+      "这是关于医疗改革的第1条评论。",
+      "这是关于医疗改革的第2条评论。",
+      "这是关于医疗改革的第3条评论。",
+      "这是关于医疗改革的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 71131,
+      "friend_count": 3826,
+      "verified": 1,
+      "account_age_days": 285
+    },
+    "propagation_stats": {
+      "retweet_count": 211,
+      "reply_count": 426,
+      "spread_velocity": 4.201435177734256
+    }
+  },
+  {
+    "id": "dummy_zh_58434",
+    "text": "报告表明近期发布的关于教育政策的报告，出现了新的研究发现。研究人员发现过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于教育政策的第0条评论。",
+      "这是关于教育政策的第1条评论。",
+      "这是关于教育政策的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 37363,
+      "friend_count": 1302,
+      "verified": 1,
+      "account_age_days": 3445
+    },
+    "propagation_stats": {
+      "retweet_count": 556,
+      "reply_count": 360,
+      "spread_velocity": 3.025171429788899
+    }
+  },
+  {
+    "id": "dummy_zh_41850",
+    "text": "专家称近期发布的关于医疗改革的报告，出现了新的研究发现。研究指出过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于医疗改革的第0条评论。",
+      "这是关于医疗改革的第1条评论。",
+      "这是关于医疗改革的第2条评论。",
+      "这是关于医疗改革的第3条评论。",
+      "这是关于医疗改革的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 62003,
+      "friend_count": 3344,
+      "verified": 0,
+      "account_age_days": 416
+    },
+    "propagation_stats": {
+      "retweet_count": 99,
+      "reply_count": 337,
+      "spread_velocity": 4.310511824063775
+    }
+  },
+  {
+    "id": "dummy_zh_57447",
+    "text": "【重磅】关于科技发展的你绝对想不到！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于科技发展的第0条评论。",
+      "这是关于科技发展的第1条评论。",
+      "这是关于科技发展的第2条评论。",
+      "这是关于科技发展的第3条评论。",
+      "这是关于科技发展的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 28756,
+      "friend_count": 1143,
+      "verified": 1,
+      "account_age_days": 402
+    },
+    "propagation_stats": {
+      "retweet_count": 773,
+      "reply_count": 24,
+      "spread_velocity": 8.611029096666659
+    }
+  },
+  {
+    "id": "dummy_zh_84177",
+    "text": "【不敢相信】关于医疗改革的秘密揭露！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于医疗改革的第0条评论。",
+      "这是关于医疗改革的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 5393,
+      "friend_count": 2854,
+      "verified": 1,
+      "account_age_days": 2739
+    },
+    "propagation_stats": {
+      "retweet_count": 379,
+      "reply_count": 35,
+      "spread_velocity": 5.059607896770779
+    }
+  },
+  {
+    "id": "dummy_zh_73699",
+    "text": "数据显示近期发布的关于经济形势的报告，出现了新的研究发现。研究人员发现过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于经济形势的第0条评论。",
+      "这是关于经济形势的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 9081,
+      "friend_count": 4373,
+      "verified": 0,
+      "account_age_days": 555
+    },
+    "propagation_stats": {
+      "retweet_count": 675,
+      "reply_count": 243,
+      "spread_velocity": 9.46848679704991
+    }
+  },
+  {
+    "id": "dummy_zh_77561",
+    "text": "【丑闻】关于教育政策的不敢相信！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于教育政策的第0条评论。",
+      "这是关于教育政策的第1条评论。",
+      "这是关于教育政策的第2条评论。",
+      "这是关于教育政策的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 87022,
+      "friend_count": 2755,
+      "verified": 0,
+      "account_age_days": 3382
+    },
+    "propagation_stats": {
+      "retweet_count": 974,
+      "reply_count": 384,
+      "spread_velocity": 2.3486859852668394
+    }
+  },
+  {
+    "id": "dummy_zh_99065",
+    "text": "【神奇方法】关于科技发展的他们不想让你知道！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于科技发展的第0条评论。",
+      "这是关于科技发展的第1条评论。",
+      "这是关于科技发展的第2条评论。",
+      "这是关于科技发展的第3条评论。",
+      "这是关于科技发展的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 70292,
+      "friend_count": 2722,
+      "verified": 0,
+      "account_age_days": 502
+    },
+    "propagation_stats": {
+      "retweet_count": 898,
+      "reply_count": 496,
+      "spread_velocity": 2.612151963902102
+    }
+  },
+  {
+    "id": "dummy_zh_70931",
+    "text": "【丑闻】关于公共交通的秘密揭露！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于公共交通的第0条评论。",
+      "这是关于公共交通的第1条评论。",
+      "这是关于公共交通的第2条评论。",
+      "这是关于公共交通的第3条评论。",
+      "这是关于公共交通的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 57101,
+      "friend_count": 4863,
+      "verified": 1,
+      "account_age_days": 1350
+    },
+    "propagation_stats": {
+      "retweet_count": 872,
+      "reply_count": 125,
+      "spread_velocity": 8.307310188906033
+    }
+  },
+  {
+    "id": "dummy_zh_24663",
+    "text": "分析显示近期发布的关于公共交通的报告，出现了新的研究发现。专家称过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于公共交通的第0条评论。",
+      "这是关于公共交通的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 9872,
+      "friend_count": 1231,
+      "verified": 0,
+      "account_age_days": 3448
+    },
+    "propagation_stats": {
+      "retweet_count": 378,
+      "reply_count": 298,
+      "spread_velocity": 5.525250967449976
+    }
+  },
+  {
+    "id": "dummy_zh_16630",
+    "text": "【已被封杀】关于气候变化的他们不想让你知道！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于气候变化的第0条评论。",
+      "这是关于气候变化的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 85487,
+      "friend_count": 4438,
+      "verified": 0,
+      "account_age_days": 412
+    },
+    "propagation_stats": {
+      "retweet_count": 948,
+      "reply_count": 385,
+      "spread_velocity": 8.486957344143054
+    }
+  },
+  {
+    "id": "dummy_zh_31299",
+    "text": "分析显示近期发布的关于公共交通的报告，出现了新的研究发现。研究指出过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于公共交通的第0条评论。",
+      "这是关于公共交通的第1条评论。",
+      "这是关于公共交通的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 23216,
+      "friend_count": 3387,
+      "verified": 0,
+      "account_age_days": 764
+    },
+    "propagation_stats": {
+      "retweet_count": 754,
+      "reply_count": 473,
+      "spread_velocity": 3.3218546794642867
+    }
+  },
+  {
+    "id": "dummy_zh_82768",
+    "text": "数据显示近期发布的关于气候变化的报告，出现了新的研究发现。分析显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于气候变化的第0条评论。",
+      "这是关于气候变化的第1条评论。",
+      "这是关于气候变化的第2条评论。",
+      "这是关于气候变化的第3条评论。",
+      "这是关于气候变化的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 99384,
+      "friend_count": 1978,
+      "verified": 1,
+      "account_age_days": 2675
+    },
+    "propagation_stats": {
+      "retweet_count": 728,
+      "reply_count": 251,
+      "spread_velocity": 4.481745495865708
+    }
+  },
+  {
+    "id": "dummy_zh_35105",
+    "text": "【神奇方法】关于医疗改革的不敢相信！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于医疗改革的第0条评论。",
+      "这是关于医疗改革的第1条评论。",
+      "这是关于医疗改革的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 28371,
+      "friend_count": 3976,
+      "verified": 1,
+      "account_age_days": 2997
+    },
+    "propagation_stats": {
+      "retweet_count": 603,
+      "reply_count": 500,
+      "spread_velocity": 7.602078953730826
+    }
+  },
+  {
+    "id": "dummy_zh_77889",
+    "text": "分析显示近期发布的关于气候变化的报告，出现了新的研究发现。数据显示过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于气候变化的第0条评论。",
+      "这是关于气候变化的第1条评论。",
+      "这是关于气候变化的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 60899,
+      "friend_count": 421,
+      "verified": 0,
+      "account_age_days": 3504
+    },
+    "propagation_stats": {
+      "retweet_count": 124,
+      "reply_count": 233,
+      "spread_velocity": 1.3333910555702888
+    }
+  },
+  {
+    "id": "dummy_zh_26551",
+    "text": "【震惊】关于科技发展的丑闻！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于科技发展的第0条评论。",
+      "这是关于科技发展的第1条评论。",
+      "这是关于科技发展的第2条评论。",
+      "这是关于科技发展的第3条评论。"
+    ],
+    "user_features": {
+      "follower_count": 83616,
+      "friend_count": 4031,
+      "verified": 0,
+      "account_age_days": 3604
+    },
+    "propagation_stats": {
+      "retweet_count": 12,
+      "reply_count": 293,
+      "spread_velocity": 2.843393271371494
+    }
+  },
+  {
+    "id": "dummy_zh_39451",
+    "text": "证据表明近期发布的关于公共交通的报告，出现了新的研究发现。研究人员发现过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于公共交通的第0条评论。",
+      "这是关于公共交通的第1条评论。",
+      "这是关于公共交通的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 8402,
+      "friend_count": 2779,
+      "verified": 0,
+      "account_age_days": 2439
+    },
+    "propagation_stats": {
+      "retweet_count": 567,
+      "reply_count": 117,
+      "spread_velocity": 5.88440114410351
+    }
+  },
+  {
+    "id": "dummy_zh_25713",
+    "text": "【不敢相信】关于农业生产的内幕曝光！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于农业生产的第0条评论。",
+      "这是关于农业生产的第1条评论。",
+      "这是关于农业生产的第2条评论。",
+      "这是关于农业生产的第3条评论。",
+      "这是关于农业生产的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 74678,
+      "friend_count": 2026,
+      "verified": 0,
+      "account_age_days": 2566
+    },
+    "propagation_stats": {
+      "retweet_count": 83,
+      "reply_count": 214,
+      "spread_velocity": 6.573731644725225
+    }
+  },
+  {
+    "id": "dummy_zh_38016",
+    "text": "分析显示近期发布的关于教育政策的报告，出现了新的研究发现。证据表明过去一个季度以来，相关情况已发生可量化的变化。",
+    "label": 0,
+    "language": "zh",
+    "comments": [
+      "这是关于教育政策的第0条评论。",
+      "这是关于教育政策的第1条评论。",
+      "这是关于教育政策的第2条评论。",
+      "这是关于教育政策的第3条评论。",
+      "这是关于教育政策的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 52575,
+      "friend_count": 490,
+      "verified": 0,
+      "account_age_days": 1582
+    },
+    "propagation_stats": {
+      "retweet_count": 2,
+      "reply_count": 199,
+      "spread_velocity": 2.6520305817215197
+    }
+  },
+  {
+    "id": "dummy_zh_91560",
+    "text": "【医生都恨】关于科学研究的已被封杀！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于科学研究的第0条评论。",
+      "这是关于科学研究的第1条评论。",
+      "这是关于科学研究的第2条评论。"
+    ],
+    "user_features": {
+      "follower_count": 70018,
+      "friend_count": 230,
+      "verified": 1,
+      "account_age_days": 2454
+    },
+    "propagation_stats": {
+      "retweet_count": 577,
+      "reply_count": 339,
+      "spread_velocity": 0.27102046340312436
+    }
+  },
+  {
+    "id": "dummy_zh_70981",
+    "text": "【已被封杀】关于科技发展的秘密揭露！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于科技发展的第0条评论。",
+      "这是关于科技发展的第1条评论。"
+    ],
+    "user_features": {
+      "follower_count": 37710,
+      "friend_count": 4487,
+      "verified": 0,
+      "account_age_days": 332
+    },
+    "propagation_stats": {
+      "retweet_count": 452,
+      "reply_count": 483,
+      "spread_velocity": 3.455656244430817
+    }
+  },
+  {
+    "id": "dummy_zh_98777",
+    "text": "【内幕曝光】关于教育政策的你绝对想不到！这个发现将彻底改变你的认知，点击查看他们不想让你知道的真相。",
+    "label": 1,
+    "language": "zh",
+    "comments": [
+      "这是关于教育政策的第0条评论。",
+      "这是关于教育政策的第1条评论。",
+      "这是关于教育政策的第2条评论。",
+      "这是关于教育政策的第3条评论。",
+      "这是关于教育政策的第4条评论。"
+    ],
+    "user_features": {
+      "follower_count": 98069,
+      "friend_count": 1435,
+      "verified": 1,
+      "account_age_days": 1693
+    },
+    "propagation_stats": {
+      "retweet_count": 561,
+      "reply_count": 426,
+      "spread_velocity": 0.004059396972875273
+    }
+  }
+]
