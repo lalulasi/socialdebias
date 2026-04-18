@@ -190,18 +190,27 @@ def main():
     print("鲁棒性对比表")
     print("=" * 80)
 
-    # 表头
-    header = f"\n{'测试集':<12} | {'基线 F1':>10} | {'Ours F1':>10} | {'基线 ASR':>10} | {'Ours ASR':>10}"
+    # 表头（加入 Acc 和 AUC）
+    header = f"\n{'测试集':<12} | {'基线 Acc':>9} | {'基线 F1':>9} | {'基线 AUC':>9} | {'Ours Acc':>9} | {'Ours F1':>9} | {'Ours AUC':>9} | {'基线 ASR':>9} | {'Ours ASR':>9}"
     print(header)
     print("-" * len(header))
 
-    # 干净集（ASR=0，因为没攻击）
-    print(
-        f"{'干净 Clean':<12} | {baseline_results['clean']['f1']:>10.4f} | {sd_results['clean']['f1']:>10.4f} | {'N/A':>10} | {'N/A':>10}")
+    def fmt_row(name, baseline, ours, baseline_asr=None, ours_asr=None):
+        asr_b = f"{baseline_asr:>9.4f}" if baseline_asr is not None else f"{'N/A':>9}"
+        asr_o = f"{ours_asr:>9.4f}" if ours_asr is not None else f"{'N/A':>9}"
+        return (f"{name:<12} | "
+                f"{baseline['accuracy']:>9.4f} | {baseline['f1']:>9.4f} | {baseline['auc']:>9.4f} | "
+                f"{ours['accuracy']:>9.4f} | {ours['f1']:>9.4f} | {ours['auc']:>9.4f} | "
+                f"{asr_b} | {asr_o}")
+
+    # 干净集
+    print(fmt_row('干净 Clean', baseline_results['clean'], sd_results['clean']))
 
     # 各对抗变体
     baseline_avg_f1_drop = 0
     sd_avg_f1_drop = 0
+    baseline_avg_auc_drop = 0
+    sd_avg_auc_drop = 0
     baseline_avg_asr = 0
     sd_avg_asr = 0
 
@@ -211,29 +220,37 @@ def main():
 
         baseline_drop = baseline_results["clean"]["f1"] - baseline_results[v]["f1"]
         sd_drop = sd_results["clean"]["f1"] - sd_results[v]["f1"]
+        baseline_auc_drop = baseline_results["clean"]["auc"] - baseline_results[v]["auc"]
+        sd_auc_drop = sd_results["clean"]["auc"] - sd_results[v]["auc"]
 
-        print(
-            f"{'对抗 ' + v:<12} | {baseline_results[v]['f1']:>10.4f} | {sd_results[v]['f1']:>10.4f} | {baseline_asr:>10.4f} | {sd_asr:>10.4f}")
+        print(fmt_row(f'对抗 {v}', baseline_results[v], sd_results[v], baseline_asr, sd_asr))
 
         baseline_avg_f1_drop += baseline_drop
         sd_avg_f1_drop += sd_drop
+        baseline_avg_auc_drop += baseline_auc_drop
+        sd_avg_auc_drop += sd_auc_drop
         baseline_avg_asr += baseline_asr
         sd_avg_asr += sd_asr
 
     n_variants = len(variants)
     print("-" * len(header))
-    print(f"{'平均 F1 降幅':<12} | {baseline_avg_f1_drop / n_variants:>10.4f} | {sd_avg_f1_drop / n_variants:>10.4f} |")
-    print(
-        f"{'平均 ASR':<12} | {'':<10} | {'':<10} | {baseline_avg_asr / n_variants:>10.4f} | {sd_avg_asr / n_variants:>10.4f}")
+    print(f"{'平均 F1 降幅':<12} | {'':<9} | {baseline_avg_f1_drop / n_variants:>9.4f} | {'':<9} | "
+          f"{'':<9} | {sd_avg_f1_drop / n_variants:>9.4f} | {'':<9} | {'':<9} | {'':<9}")
+    print(f"{'平均 AUC 降幅':<12}| {'':<9} | {'':<9} | {baseline_avg_auc_drop / n_variants:>9.4f} | "
+          f"{'':<9} | {'':<9} | {sd_avg_auc_drop / n_variants:>9.4f} | {'':<9} | {'':<9}")
+    print(f"{'平均 ASR':<12} | {'':<9} | {'':<9} | {'':<9} | "
+          f"{'':<9} | {'':<9} | {'':<9} | {baseline_avg_asr / n_variants:>9.4f} | {sd_avg_asr / n_variants:>9.4f}")
 
     # 鲁棒性改善
     print("\n" + "=" * 80)
     print("鲁棒性改善")
     print("=" * 80)
     f1_drop_improvement = baseline_avg_f1_drop / n_variants - sd_avg_f1_drop / n_variants
+    auc_drop_improvement = baseline_avg_auc_drop / n_variants - sd_avg_auc_drop / n_variants
     asr_improvement = baseline_avg_asr / n_variants - sd_avg_asr / n_variants
-    print(f"平均 F1 下降减少: {f1_drop_improvement * 100:+.2f} 百分点 (越大越好)")
-    print(f"平均 ASR 降低:   {asr_improvement * 100:+.2f} 百分点 (越大越好)")
+    print(f"平均 F1 下降减少:  {f1_drop_improvement * 100:+.2f} 百分点 (越大越好)")
+    print(f"平均 AUC 下降减少: {auc_drop_improvement * 100:+.2f} 百分点 (越大越好)")
+    print(f"平均 ASR 降低:    {asr_improvement * 100:+.2f} 百分点 (越大越好)")
 
     if f1_drop_improvement > 0:
         print(f"\n✅ SocialDebias 比基线更鲁棒（F1 下降减少 {f1_drop_improvement * 100:.2f}pp）")
