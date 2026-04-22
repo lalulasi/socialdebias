@@ -1,0 +1,57 @@
+nohup: ignoring input
+========================================
+消融 B1 开始: Tue Apr 21 21:18:07 CST 2026
+配置: epochs=5, λ_bias=0.3
+========================================
+
+[1/12] politifact_full_seed42
+  开始: Tue Apr 21 21:18:07 CST 2026
+  [✓] 成功 Tue Apr 21 21:19:15 CST 2026
+
+[2/12] politifact_full_seed2024
+  开始: Tue Apr 21 21:19:15 CST 2026
+  [✓] 成功 Tue Apr 21 21:20:29 CST 2026
+
+[3/12] politifact_full_seed3407
+  开始: Tue Apr 21 21:20:29 CST 2026
+  [✓] 成功 Tue Apr 21 21:21:39 CST 2026
+
+[4/12] politifact_no_grl_seed42
+  开始: Tue Apr 21 21:21:39 CST 2026
+  [✓] 成功 Tue Apr 21 21:22:51 CST 2026
+
+[5/12] politifact_no_grl_seed2024
+  开始: Tue Apr 21 21:22:51 CST 2026
+  [✓] 成功 Tue Apr 21 21:24:04 CST 2026
+
+[6/12] politifact_no_grl_seed3407
+  开始: Tue Apr 21 21:24:04 CST 2026
+  [✓] 成功 Tue Apr 21 21:25:22 CST 2026
+
+[7/12] politifact_no_consist_seed42
+  开始: Tue Apr 21 21:25:22 CST 2026
+  [✓] 成功 Tue Apr 21 21:26:31 CST 2026
+
+[8/12] politifact_no_consist_seed2024
+  开始: Tue Apr 21 21:26:31 CST 2026
+  [✓] 成功 Tue Apr 21 21:27:45 CST 2026
+
+[9/12] politifact_no_consist_seed3407
+  开始: Tue Apr 21 21:27:45 CST 2026
+  [✓] 成功 Tue Apr 21 21:28:56 CST 2026
+
+[10/12] politifact_no_both_seed42
+  开始: Tue Apr 21 21:28:56 CST 2026
+  [✓] 成功 Tue Apr 21 21:30:03 CST 2026
+
+[11/12] politifact_no_both_seed2024
+  开始: Tue Apr 21 21:30:03 CST 2026
+  [✓] 成功 Tue Apr 21 21:31:20 CST 2026
+
+[12/12] politifact_no_both_seed3407
+  开始: Tue Apr 21 21:31:20 CST 2026
+  [✓] 成功 Tue Apr 21 21:32:40 CST 2026
+
+========================================
+消融 B1 完成: Tue Apr 21 21:32:40 CST 2026
+========================================

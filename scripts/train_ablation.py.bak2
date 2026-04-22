@@ -109,10 +109,6 @@ def main():
     parser.add_argument("--bert_name", type=str, default="bert-base-uncased")
     parser.add_argument("--language", type=str, default="en")
     parser.add_argument("--output_dir", type=str, default="results/ablation")
-    parser.add_argument("--override_lambda_bias", type=float, default=None,
-                    help="覆盖 variant 默认的 λ_bias（None 则使用 LAMBDA_MAP 的值）")
-    parser.add_argument("--override_lambda_consist", type=float, default=None,
-                    help="覆盖 variant 默认的 λ_consist")
     args = parser.parse_args()
 
     # λ 组合
@@ -123,13 +119,8 @@ def main():
         "no_both":    {"lambda_fact": 1.0, "lambda_bias": 0.0, "lambda_consist": 0.0},
     }
     lambdas = LAMBDA_MAP[args.variant]
-    lambdas = dict(LAMBDA_MAP[args.variant])  # 避免原地修改
-    if args.override_lambda_bias is not None and lambdas["lambda_bias"] > 0:
-        # 只对非零项覆盖（不破坏 no_grl/no_both 的 0 值）
-        lambdas["lambda_bias"] = args.override_lambda_bias
-    if args.override_lambda_consist is not None and lambdas["lambda_consist"] > 0:
-        lambdas["lambda_consist"] = args.override_lambda_consist
-    print(f"[Ablation] 最终 λ = {lambdas}")
+    print(f"[Ablation] dataset={args.dataset} variant={args.variant} seed={args.seed}")
+    print(f"           λ = {lambdas}")
 
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)

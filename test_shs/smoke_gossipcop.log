@@ -1,0 +1,30 @@
+/root/miniconda3/lib/python3.12/site-packages/transformers/utils/generic.py:441: UserWarning: torch.utils._pytree._register_pytree_node is deprecated. Please use torch.utils._pytree.register_pytree_node instead.
+  _torch_pytree._register_pytree_node(
+/root/miniconda3/lib/python3.12/site-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+/root/miniconda3/lib/python3.12/site-packages/transformers/utils/generic.py:309: UserWarning: torch.utils._pytree._register_pytree_node is deprecated. Please use torch.utils._pytree.register_pytree_node instead.
+  _torch_pytree._register_pytree_node(
+/root/miniconda3/lib/python3.12/site-packages/transformers/utils/generic.py:309: UserWarning: torch.utils._pytree._register_pytree_node is deprecated. Please use torch.utils._pytree.register_pytree_node instead.
+  _torch_pytree._register_pytree_node(
+/root/miniconda3/lib/python3.12/site-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+[Ablation] 最终 λ = {'lambda_fact': 1.0, 'lambda_bias': 0.5, 'lambda_consist': 0.3}
+📂 加载 gossipcop 训练集: data/sheepdog/news_articles/gossipcop_train.pkl
+📂 加载 gossipcop 测试集: data/sheepdog/news_articles/gossipcop_test.pkl
+
+📊 数据集统计: gossipcop
+  Train: 总数=5383, 真=2685, 假=2698, 平均长度=601 词
+  Val  : 总数= 949, 真= 481, 假= 468, 平均长度=589 词
+  Test : 总数=1584, 真= 792, 假= 792, 平均长度=792 词
+[Ablation] train batches=337, val=60, test=99
+[E1] total=1.1786 fact=0.5709 bias=0.9316 consist=0.4729
+       val acc=0.7692 f1=0.7639 auc=0.8828
+       [best!] test acc=0.7342 f1=0.7299
+[E2] total=1.2780 fact=0.5259 bias=1.0871 consist=0.6949
+       val acc=0.7977 f1=0.7965 auc=0.8897
+       [best!] test acc=0.7443 f1=0.7431
+[E3] total=1.1808 fact=0.4709 bias=1.0170 consist=0.6714
+       val acc=0.8030 f1=0.8029 auc=0.8909
+       [best!] test acc=0.7374 f1=0.7372
+
+[Ablation] 结果已保存：results/ablation_gossipcop/ablation_gossipcop_full_seed42.json

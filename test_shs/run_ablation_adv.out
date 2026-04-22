@@ -1,0 +1,45 @@
+nohup: ignoring input
+========================================
+消融对抗集评估开始: Tue Apr 21 21:03:28 CST 2026
+========================================
+总任务数: 12
+
+[1/12] politifact_full_seed42
+  [✓] 成功
+
+[2/12] politifact_full_seed2024
+  [✓] 成功
+
+[3/12] politifact_full_seed3407
+  [✓] 成功
+
+[4/12] politifact_no_grl_seed42
+  [✓] 成功
+
+[5/12] politifact_no_grl_seed2024
+  [✓] 成功
+
+[6/12] politifact_no_grl_seed3407
+  [✓] 成功
+
+[7/12] politifact_no_consist_seed42
+  [✓] 成功
+
+[8/12] politifact_no_consist_seed2024
+  [✓] 成功
+
+[9/12] politifact_no_consist_seed3407
+  [✓] 成功
+
+[10/12] politifact_no_both_seed42
+  [✓] 成功
+
+[11/12] politifact_no_both_seed2024
+  [✓] 成功
+
+[12/12] politifact_no_both_seed3407
+  [✓] 成功
+
+========================================
+消融对抗集评估完成: Tue Apr 21 21:06:34 CST 2026
+========================================
