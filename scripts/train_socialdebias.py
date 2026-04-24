@@ -121,6 +121,16 @@ def train_one_epoch(model, loader, optimizer, device, loss_weights, log_every=5)
 
     return {k: v / n_batches for k, v in running.items()}
 
+# 在主函数开头（模型创建之前）加种子设置块
+import random, numpy as np, torch
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    # 可选：为了完全复现把 CuDNN 设成确定性（训练会变慢 10-20%）
+    # torch.backends.cudnn.deterministic = True
+    # torch.backends.cudnn.benchmark = False
 
 def main():
     parser = argparse.ArgumentParser()
@@ -132,8 +142,9 @@ def main():
     parser.add_argument("--lambda_fact", type=float, default=1.0)
     parser.add_argument("--lambda_bias", type=float, default=1.0)
     parser.add_argument("--lambda_consist", type=float, default=0.5)
+    parser.add_argument("--seed", type=int, default=42, help="随机种子")
     args = parser.parse_args()
-
+    set_seed(args.seed)
     print("=" * 70)
     print(f"SocialDebias 双分支模型训练 [{args.language.upper()}]")
     print("=" * 70)
@@ -194,7 +205,7 @@ def main():
     best_epoch = 0
     save_dir = "./results/models"
     os.makedirs(save_dir, exist_ok=True)
-    save_path = f"{save_dir}/socialdebias_{args.dataset}_{args.language}.pt"
+    save_path = f"{save_dir}/socialdebias_{args.dataset}_{args.language}_seed{args.seed}.pt"
 
     for epoch in range(1, config.num_epochs + 1):
         print(f"\n[Epoch {epoch}/{config.num_epochs}]")

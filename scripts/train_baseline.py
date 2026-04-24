@@ -88,6 +88,16 @@ def train_one_epoch(model, loader, optimizer, criterion, device, log_every=5):
 
     return total_loss / len(loader)
 
+# 在主函数开头（模型创建之前）加种子设置块
+import random, numpy as np, torch
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    # 可选：为了完全复现把 CuDNN 设成确定性（训练会变慢 10-20%）
+    # torch.backends.cudnn.deterministic = True
+    # torch.backends.cudnn.benchmark = False
 
 def main():
     import argparse
@@ -98,8 +108,10 @@ def main():
                         choices=["dev_dummy", "dev_real", "prod"])
     parser.add_argument("--dataset", type=str, default="politifact",
                         choices=["politifact", "gossipcop", "lun"])
+    parser.add_argument("--seed", type=int, default=42, help="随机种子")
     args = parser.parse_args()
 
+    set_seed(args.seed)
     print("=" * 70)
     print(f"SocialDebias - 基线 BERT 训练 [{args.language.upper()}]")
     print("=" * 70)
@@ -142,7 +154,7 @@ def main():
     best_epoch = 0
     save_dir = "./results/models"
     os.makedirs(save_dir, exist_ok=True)
-    save_path = f"{save_dir}/baseline_{args.dataset}_{args.language}.pt"
+    save_path = f"{save_dir}/baseline_{args.dataset}_{args.language}_seed{args.seed}.pt"
 
     for epoch in range(1, config.num_epochs + 1):
         print(f"\n[Epoch {epoch}/{config.num_epochs}]")
@@ -198,7 +210,6 @@ def main():
     )
 
     print("\n✅ 训练流水线跑通！")
-
 
 if __name__ == "__main__":
     main()

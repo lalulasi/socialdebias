@@ -97,6 +97,7 @@ def main():
     parser.add_argument("--language", type=str, default="en")
     parser.add_argument("--variants", type=str, default="A,B,C,D",
                         help="要评估的对抗变体，逗号分隔")
+    parser.add_argument("--seed", type=int, default=42, help="随机种子")
     args = parser.parse_args()
 
     print("=" * 80)
@@ -136,7 +137,7 @@ def main():
     print("【1/2】评估基线 BERT")
     print("=" * 80)
 
-    baseline_ckpt = f"./results/models/baseline_{args.dataset}_{args.language}.pt"
+    baseline_ckpt = f"./results/models/baseline_{args.dataset}_{args.language}_seed{args.seed}.pt"
     if not os.path.exists(baseline_ckpt):
         print(f"⚠️  未找到基线 checkpoint: {baseline_ckpt}")
         print("请先运行 train_baseline.py")
@@ -163,7 +164,7 @@ def main():
     print("【2/2】评估 SocialDebias")
     print("=" * 80)
 
-    sd_ckpt = f"./results/models/socialdebias_{args.dataset}_{args.language}.pt"
+    sd_ckpt = f"./results/models/socialdebias_{args.dataset}_{args.language}_seed{args.seed}.pt"
     if not os.path.exists(sd_ckpt):
         print(f"⚠️  未找到 SocialDebias checkpoint: {sd_ckpt}")
         print("请先运行 train_socialdebias.py")
