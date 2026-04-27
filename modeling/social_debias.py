@@ -30,6 +30,7 @@ class SocialDebiasModel(nn.Module):
             dropout: float = 0.1,
             grl_lambda: float = 1.0,
             use_frozen_bert: bool = True,  # 是否用冻结 BERT 作为语义锚
+            surface_feat_dim: int = 0,  # ★ 新增：表层特征维度，0=不使用
     ):
         super().__init__()
 
@@ -56,14 +57,16 @@ class SocialDebiasModel(nn.Module):
 
         # 偏置分支：h → GRL → 偏置特征 → 真假分类（会被 GRL 反向）
         self.grl = GradientReversalLayer(lambda_=grl_lambda)
+        self.surface_feat_dim = surface_feat_dim
+        bias_input_dim = bert_hidden + surface_feat_dim
         self.bias_projector = nn.Sequential(
-            nn.Linear(bert_hidden, hidden_dim),
+            nn.Linear(bias_input_dim, hidden_dim),
             nn.ReLU(),
             nn.Dropout(dropout),
         )
         self.bias_classifier = nn.Linear(hidden_dim, num_classes)
 
-    def forward(self, input_ids, attention_mask):
+    def forward(self, input_ids, attention_mask, surface_feat=None):
         """
         前向传播，返回多个输出供训练时计算不同的损失。
 
@@ -85,7 +88,14 @@ class SocialDebiasModel(nn.Module):
         fact_logits = self.fact_classifier(fact_repr)
 
         # 偏置分支（经过 GRL）
-        bias_input = self.grl(shared)
+        bias_input = self.grl(shared)  # [B, bert_hidden]
+
+        # ★ 如果有表层特征，拼接到偏置输入
+        if surface_feat is not None and self.surface_feat_dim > 0:
+            # 对 surface_feat 也通过 GRL（表层特征也是要被反转的偏置信息）
+            surface_grl = self.grl(surface_feat)  # [B, 17]
+            bias_input = torch.cat([bias_input, surface_grl], dim=-1)  # [B, bert_hidden + 17]
+
         bias_repr = self.bias_projector(bias_input)
         bias_logits = self.bias_classifier(bias_repr)
 

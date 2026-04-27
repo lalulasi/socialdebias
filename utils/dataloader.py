@@ -173,3 +173,86 @@ def create_dataloaders_auto(
         test_loader = DataLoader(test_set, batch_size=config.batch_size, shuffle=False, num_workers=0)
 
         return train_loader, val_loader, test_loader
+
+
+class SurfaceAugmentedDataset(Dataset):
+    """
+    在 FakeNewsDataset 基础上，预计算并标准化 17 维表层特征。
+
+    用法:
+        from utils.surface_features import SurfaceFeatureExtractor
+
+        extractor = SurfaceFeatureExtractor()
+        train_set = SurfaceAugmentedDataset(
+            train_data, tokenizer, max_length=512,
+            surface_extractor=extractor,
+        )
+        # train_set 的 mean/std 会自动 fit
+
+        val_set = SurfaceAugmentedDataset(
+            val_data, tokenizer, max_length=512,
+            surface_extractor=extractor,
+            normalizer=(train_set.feat_mean, train_set.feat_std),  # 复用训练集的归一化
+        )
+    """
+
+    def __init__(
+            self,
+            data: list,
+            tokenizer,
+            max_length: int = 512,
+            surface_extractor=None,
+            normalizer: tuple = None,  # (mean, std) 训练集 fit 完后传给 val/test
+    ):
+        from tqdm import tqdm
+        import numpy as np
+
+        self.data = data
+        self.tokenizer = tokenizer
+        self.max_length = max_length
+
+        # 预计算所有样本的 17 维特征
+        if surface_extractor is None:
+            self.surface_features = None
+            self.feat_mean = None
+            self.feat_std = None
+        else:
+            print(f"[SurfaceAug] 预计算 {len(data)} 条样本的表层特征...")
+            feats = []
+            for s in tqdm(data, desc="提取表层特征"):
+                feats.append(surface_extractor.extract(s["text"]))
+            feats = np.stack(feats, axis=0).astype(np.float32)  # [N, 17]
+
+            if normalizer is None:
+                # 训练集：fit normalizer
+                self.feat_mean = feats.mean(axis=0)
+                self.feat_std = feats.std(axis=0) + 1e-6
+                print(f"[SurfaceAug] 训练集归一化: mean={self.feat_mean.shape}, std={self.feat_std.shape}")
+            else:
+                # 验证 / 测试集：复用训练集的 normalizer
+                self.feat_mean, self.feat_std = normalizer
+
+            self.surface_features = (feats - self.feat_mean) / self.feat_std
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        sample = self.data[idx]
+        encoded = self.tokenizer(
+            sample["text"],
+            max_length=self.max_length,
+            padding="max_length",
+            truncation=True,
+            return_tensors="pt",
+        )
+        item = {
+            "input_ids": encoded["input_ids"].squeeze(0),
+            "attention_mask": encoded["attention_mask"].squeeze(0),
+            "label": torch.tensor(sample["label"], dtype=torch.long),
+        }
+        if self.surface_features is not None:
+            item["surface_feat"] = torch.tensor(
+                self.surface_features[idx], dtype=torch.float32
+            )
+        return item
