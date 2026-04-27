@@ -1,0 +1,25 @@
+[Contrastive] device=cuda, seed=42
+[Contrastive] λ_fact=1.0, λ_bias=0.5, λ_consist=0.3, λ_contrast=0.3, τ=0.07
+[ContrastiveDataset] 加载完成
+  原数据: 1000 条
+  对抗数据: 1539 条
+  最终样本: 847 条
+  跳过（无对抗）: 153 条
+  每条样本平均对抗版本数: 1.82
+📂 加载 gossipcop 训练集: data/sheepdog/news_articles/gossipcop_train.pkl
+📂 加载 gossipcop 测试集: data/sheepdog/news_articles/gossipcop_test.pkl
+
+📊 数据集统计: gossipcop
+  Train: 总数=5383, 真=2685, 假=2698, 平均长度=601 词
+  Val  : 总数= 949, 真= 481, 假= 468, 平均长度=589 词
+  Test : 总数=1584, 真= 792, 假= 792, 平均长度=792 词
+[Contrastive] train batches=212, val=238, test=396
+[E1] 32s | total=1.1618 fact=0.6215 bias=0.7920 consist=0.3162 contrast=0.1646
+        val acc=0.7661 f1=0.7644 auc=0.8514
+        ⭐ 新最佳！test acc=0.6919 f1=0.6908
+
+[Contrastive] 训练完成
+  ckpt: ./results/models/socialdebias_gossipcop_en_seed42_smoke_gc.pt
+  history: ./results/models/socialdebias_gossipcop_en_seed42_smoke_gc_history.json
+  best val F1: 0.7644
+  best test: acc=0.6919 f1=0.6908

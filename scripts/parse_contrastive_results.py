@@ -7,7 +7,7 @@ from collections import defaultdict
 
 import numpy as np
 
-RESULT_DIR = Path("results/contrastive_adv")
+RESULT_DIR = Path("results/contrastive_adv_gc")
 
 
 def main():

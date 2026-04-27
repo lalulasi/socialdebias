@@ -92,9 +92,6 @@ def main():
                         help="InfoNCE 温度系数")
     parser.add_argument("--adv_pkl", required=True,
                         help="Qwen 对抗数据 pkl 路径")
-    # 在 --adv_pkl 那一行下面加：
-    parser.add_argument("--orig_pkl", default=None,
-                        help="原数据 pkl 路径（默认 data/sheepdog/news_articles/{dataset}_train.pkl）")
     parser.add_argument("--styles", nargs="+", default=None,
                         help="要使用的风格列表（默认全部）")
     
@@ -117,8 +114,7 @@ def main():
 
     # ==== 数据 ====
     # train: 用对比学习版（读 Qwen 对抗数据）
-    #orig_pkl = f"data/sheepdog/news_articles/{args.dataset}_train.pkl"
-    orig_pkl = args.orig_pkl or f"data/sheepdog/news_articles/{args.dataset}_train.pkl"
+    orig_pkl = f"data/sheepdog/news_articles/{args.dataset}_train.pkl"
     train_set = ContrastiveFakeNewsDataset.from_pkl(
         original_pkl_path=orig_pkl,
         adversarial_pkl_path=args.adv_pkl,
