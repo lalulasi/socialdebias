@@ -1,0 +1,25 @@
+nohup: ignoring input
+=== LIAR baseline seed=42 Wed Apr 29 10:12:10 CST 2026 ===
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed42_liar_baseline.pt
+          best val F1: 0.6397, best test F1: 0.6333407274822669
+=== LIAR baseline seed=2024 Wed Apr 29 10:19:59 CST 2026 ===
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed2024_liar_baseline.pt
+          best val F1: 0.6426, best test F1: 0.6258761364519387
+=== LIAR baseline seed=3407 Wed Apr 29 10:27:52 CST 2026 ===
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed3407_liar_baseline.pt
+          best val F1: 0.6356, best test F1: 0.6319630803087927
+=== LIAR + speaker seed=42 Wed Apr 29 10:35:43 CST 2026 ===
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed42_liar_speaker.pt
+          best val F1: 0.6467, best test F1: 0.6312668149834437
+=== LIAR + speaker seed=2024 Wed Apr 29 10:43:38 CST 2026 ===
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed2024_liar_speaker.pt
+          best val F1: 0.6446, best test F1: 0.621196919023006
+=== LIAR + speaker seed=3407 Wed Apr 29 10:51:38 CST 2026 ===
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed3407_liar_speaker.pt
+          best val F1: 0.6371, best test F1: 0.6320570941014412

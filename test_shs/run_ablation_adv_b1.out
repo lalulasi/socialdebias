@@ -1,0 +1,27 @@
+nohup: ignoring input
+B1 对抗评估开始: Tue Apr 21 21:39:15 CST 2026
+[1/12] politifact_full_seed42
+  [OK]
+[2/12] politifact_full_seed2024
+  [OK]
+[3/12] politifact_full_seed3407
+  [OK]
+[4/12] politifact_no_grl_seed42
+  [OK]
+[5/12] politifact_no_grl_seed2024
+  [OK]
+[6/12] politifact_no_grl_seed3407
+  [OK]
+[7/12] politifact_no_consist_seed42
+  [OK]
+[8/12] politifact_no_consist_seed2024
+  [OK]
+[9/12] politifact_no_consist_seed3407
+  [OK]
+[10/12] politifact_no_both_seed42
+  [OK]
+[11/12] politifact_no_both_seed2024
+  [OK]
+[12/12] politifact_no_both_seed3407
+  [OK]
+B1 对抗评估完成: Tue Apr 21 21:42:36 CST 2026

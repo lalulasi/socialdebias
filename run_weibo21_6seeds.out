@@ -1,0 +1,27 @@
+nohup: ignoring input
+===== Weibo21 BERT baseline =====
+--- seed=42 Wed Apr 29 20:13:35 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_weibo21_zh_seed42_bert.pt
+          best val F1: 0.9176, best test F1: 0.8973692872652697
+--- seed=2024 Wed Apr 29 20:18:51 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_weibo21_zh_seed2024_bert.pt
+          best val F1: 0.9234, best test F1: 0.9167285537053196
+--- seed=3407 Wed Apr 29 20:24:10 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_weibo21_zh_seed3407_bert.pt
+          best val F1: 0.9165, best test F1: 0.9053555744010662
+===== Weibo21 SD =====
+--- seed=42 Wed Apr 29 20:29:48 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_weibo21_zh_seed42_sd.pt
+          best val F1: 0.9161, best test F1: 0.9047907763857945
+--- seed=2024 Wed Apr 29 20:35:30 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_weibo21_zh_seed2024_sd.pt
+          best val F1: 0.9061, best test F1: 0.8964566118469739
+--- seed=3407 Wed Apr 29 20:41:16 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_weibo21_zh_seed3407_sd.pt
+          best val F1: 0.8936, best test F1: 0.8865357757640715

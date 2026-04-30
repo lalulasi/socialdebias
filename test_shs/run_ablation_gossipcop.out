@@ -1,0 +1,63 @@
+nohup: ignoring input
+========================================
+GossipCop 消融实验开始: Wed Apr 22 06:38:37 CST 2026
+数据集: gossipcop
+变体: full no_grl no_consist no_both
+种子: 42 2024 3407
+训练: 3 epochs, batch=16
+λ: 使用 LAMBDA_MAP 默认 (full=0.5/0.3, no_grl=0/0.3, no_consist=0.5/0, no_both=0/0)
+输出: results/ablation_gossipcop
+========================================
+
+[1/12] gossipcop_full_seed42
+  开始: Wed Apr 22 06:38:37 CST 2026
+  [✓] 成功 Wed Apr 22 06:46:21 CST 2026  用时 464s
+
+[2/12] gossipcop_full_seed2024
+  开始: Wed Apr 22 06:46:21 CST 2026
+  [✓] 成功 Wed Apr 22 06:53:33 CST 2026  用时 432s
+
+[3/12] gossipcop_full_seed3407
+  开始: Wed Apr 22 06:53:33 CST 2026
+  [✓] 成功 Wed Apr 22 07:00:50 CST 2026  用时 437s
+
+[4/12] gossipcop_no_grl_seed42
+  开始: Wed Apr 22 07:00:50 CST 2026
+  [✓] 成功 Wed Apr 22 07:08:01 CST 2026  用时 431s
+
+[5/12] gossipcop_no_grl_seed2024
+  开始: Wed Apr 22 07:08:01 CST 2026
+  [✓] 成功 Wed Apr 22 07:15:11 CST 2026  用时 430s
+
+[6/12] gossipcop_no_grl_seed3407
+  开始: Wed Apr 22 07:15:11 CST 2026
+  [✓] 成功 Wed Apr 22 07:22:52 CST 2026  用时 461s
+
+[7/12] gossipcop_no_consist_seed42
+  开始: Wed Apr 22 07:22:52 CST 2026
+  [✓] 成功 Wed Apr 22 07:30:35 CST 2026  用时 463s
+
+[8/12] gossipcop_no_consist_seed2024
+  开始: Wed Apr 22 07:30:35 CST 2026
+  [✓] 成功 Wed Apr 22 07:37:48 CST 2026  用时 433s
+
+[9/12] gossipcop_no_consist_seed3407
+  开始: Wed Apr 22 07:37:48 CST 2026
+  [✓] 成功 Wed Apr 22 07:45:30 CST 2026  用时 462s
+
+[10/12] gossipcop_no_both_seed42
+  开始: Wed Apr 22 07:45:30 CST 2026
+  [✓] 成功 Wed Apr 22 07:52:40 CST 2026  用时 430s
+
+[11/12] gossipcop_no_both_seed2024
+  开始: Wed Apr 22 07:52:40 CST 2026
+  [✓] 成功 Wed Apr 22 07:59:51 CST 2026  用时 431s
+
+[12/12] gossipcop_no_both_seed3407
+  开始: Wed Apr 22 07:59:51 CST 2026
+  [✓] 成功 Wed Apr 22 08:07:02 CST 2026  用时 431s
+
+========================================
+GossipCop 消融完成: Wed Apr 22 08:07:02 CST 2026
+结果目录: results/ablation_gossipcop
+========================================

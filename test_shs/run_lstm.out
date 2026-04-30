@@ -1,0 +1,32 @@
+nohup: ignoring input
+========================================
+LSTM 批量实验开始: Tue Apr 21 16:25:40 CST 2026
+========================================
+
+[1/6] LSTM politifact_seed42
+  开始: Tue Apr 21 16:25:40 CST 2026
+  [✓] 成功 Tue Apr 21 16:25:49 CST 2026
+
+[2/6] LSTM gossipcop_seed42
+  开始: Tue Apr 21 16:25:49 CST 2026
+  [✓] 成功 Tue Apr 21 16:27:12 CST 2026
+
+[3/6] LSTM politifact_seed2024
+  开始: Tue Apr 21 16:27:12 CST 2026
+  [✓] 成功 Tue Apr 21 16:27:22 CST 2026
+
+[4/6] LSTM gossipcop_seed2024
+  开始: Tue Apr 21 16:27:22 CST 2026
+  [✓] 成功 Tue Apr 21 16:28:45 CST 2026
+
+[5/6] LSTM politifact_seed3407
+  开始: Tue Apr 21 16:28:45 CST 2026
+  [✓] 成功 Tue Apr 21 16:28:54 CST 2026
+
+[6/6] LSTM gossipcop_seed3407
+  开始: Tue Apr 21 16:28:54 CST 2026
+  [✓] 成功 Tue Apr 21 16:30:18 CST 2026
+
+========================================
+LSTM 全部完成: Tue Apr 21 16:30:18 CST 2026
+========================================

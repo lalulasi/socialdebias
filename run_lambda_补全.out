@@ -1,0 +1,33 @@
+nohup: ignoring input
+--- λ_bias=0.0 seed=2024 Thu Apr 30 09:59:37 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed2024_lbias0.0_seed2024.pt
+          best val F1: 0.9440, best test F1: 0.8425
+--- λ_bias=0.0 seed=3407 Thu Apr 30 10:00:44 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed3407_lbias0.0_seed3407.pt
+          best val F1: 0.8703, best test F1: 0.9222126188418324
+--- λ_bias=0.3 seed=2024 Thu Apr 30 10:02:00 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed2024_lbias0.3_seed2024.pt
+          best val F1: 0.9440, best test F1: 0.8425
+--- λ_bias=0.3 seed=3407 Thu Apr 30 10:03:07 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed3407_lbias0.3_seed3407.pt
+          best val F1: 0.8887, best test F1: 0.9333333333333333
+--- λ_bias=0.5 seed=2024 Thu Apr 30 10:04:22 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed2024_lbias0.5_seed2024.pt
+          best val F1: 0.9440, best test F1: 0.8540965207631874
+--- λ_bias=0.5 seed=3407 Thu Apr 30 10:05:28 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed3407_lbias0.5_seed3407.pt
+          best val F1: 0.8889, best test F1: 0.8773993808049536
+--- λ_bias=0.8 seed=2024 Thu Apr 30 10:06:43 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed2024_lbias0.8_seed2024.pt
+          best val F1: 0.9255, best test F1: 0.8660714285714286
+--- λ_bias=0.8 seed=3407 Thu Apr 30 10:08:06 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed3407_lbias0.8_seed3407.pt
+          best val F1: 0.8700, best test F1: 0.9111111111111111

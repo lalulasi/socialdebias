@@ -1,0 +1,26 @@
+nohup: ignoring input
+===== PolitiFact λ_bias 扫描 =====
+--- λ_bias=0.0 Thu Apr 30 09:43:27 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed42_lbias0.0.pt
+          best val F1: 0.8510, best test F1: 0.8660714285714286
+--- λ_bias=0.1 Thu Apr 30 09:44:45 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed42_lbias0.1.pt
+          best val F1: 0.8510, best test F1: 0.7950404858299596
+--- λ_bias=0.2 Thu Apr 30 09:45:58 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed42_lbias0.2.pt
+          best val F1: 0.8319, best test F1: 0.7828571428571429
+--- λ_bias=0.3 Thu Apr 30 09:47:16 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed42_lbias0.3.pt
+          best val F1: 0.8333, best test F1: 0.899888765294772
+--- λ_bias=0.5 Thu Apr 30 09:48:24 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed42_lbias0.5.pt
+          best val F1: 0.8333, best test F1: 0.899888765294772
+--- λ_bias=0.8 Thu Apr 30 09:49:30 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_politifact_en_seed42_lbias0.8.pt
+          best val F1: 0.8333, best test F1: 0.8886689757545769

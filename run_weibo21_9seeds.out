@@ -1,0 +1,27 @@
+nohup: ignoring input
+===== Weibo21 BERT baseline =====
+--- seed=42 Wed Apr 29 20:04:35 CST 2026 ---
+                                     [--orig_pkl ORIG_PKL] [--adv_pkl ADV_PKL] [--save_dir SAVE_DIR]
+                                     [--save_suffix SAVE_SUFFIX]
+train_socialdebias_surface.py: error: unrecognized arguments: --use_weibo21
+--- seed=2024 Wed Apr 29 20:04:38 CST 2026 ---
+                                     [--orig_pkl ORIG_PKL] [--adv_pkl ADV_PKL] [--save_dir SAVE_DIR]
+                                     [--save_suffix SAVE_SUFFIX]
+train_socialdebias_surface.py: error: unrecognized arguments: --use_weibo21
+--- seed=3407 Wed Apr 29 20:04:42 CST 2026 ---
+                                     [--orig_pkl ORIG_PKL] [--adv_pkl ADV_PKL] [--save_dir SAVE_DIR]
+                                     [--save_suffix SAVE_SUFFIX]
+train_socialdebias_surface.py: error: unrecognized arguments: --use_weibo21
+===== Weibo21 SD =====
+--- seed=42 Wed Apr 29 20:04:45 CST 2026 ---
+                                     [--orig_pkl ORIG_PKL] [--adv_pkl ADV_PKL] [--save_dir SAVE_DIR]
+                                     [--save_suffix SAVE_SUFFIX]
+train_socialdebias_surface.py: error: unrecognized arguments: --use_weibo21
+--- seed=2024 Wed Apr 29 20:04:49 CST 2026 ---
+                                     [--orig_pkl ORIG_PKL] [--adv_pkl ADV_PKL] [--save_dir SAVE_DIR]
+                                     [--save_suffix SAVE_SUFFIX]
+train_socialdebias_surface.py: error: unrecognized arguments: --use_weibo21
+--- seed=3407 Wed Apr 29 20:04:52 CST 2026 ---
+                                     [--orig_pkl ORIG_PKL] [--adv_pkl ADV_PKL] [--save_dir SAVE_DIR]
+                                     [--save_suffix SAVE_SUFFIX]
+train_socialdebias_surface.py: error: unrecognized arguments: --use_weibo21

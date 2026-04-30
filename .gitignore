@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# 虚拟环境
+venv/
+socialvenv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# 数据和模型（太大不传 Git）
+data/raw/
+data/processed/
+*.pkl
+*.pt
+*.bin
+*.safetensors
+results/
+logs/
+checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Mac 系统文件
+.DS_Store
+
+# 但保留这些
+!data/dummy/
+!data/.gitkeep
+data/sheepdog/
+data/
+models/
+*.pt
+*.pth
+*.csv
+*.json
+data/
+*.zip

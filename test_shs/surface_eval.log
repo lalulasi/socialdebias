@@ -1,0 +1,39 @@
+对抗评估开始: Mon Apr 27 23:44:46 CST 2026
+
+[1/12] politifact_seed42_surface
+  [✓]
+
+[2/12] politifact_seed2024_surface
+  [✓]
+
+[3/12] politifact_seed3407_surface
+  [✓]
+
+[4/12] gossipcop_seed42_surface
+  [✓]
+
+[5/12] gossipcop_seed2024_surface
+  [✓]
+
+[6/12] gossipcop_seed3407_surface
+  [✓]
+
+[7/12] politifact_seed42_surface_contrast
+  [✓]
+
+[8/12] politifact_seed2024_surface_contrast
+  [✓]
+
+[9/12] politifact_seed3407_surface_contrast
+  [✓]
+
+[10/12] gossipcop_seed42_surface_contrast
+  [✓]
+
+[11/12] gossipcop_seed2024_surface_contrast
+  [✓]
+
+[12/12] gossipcop_seed3407_surface_contrast
+  [✓]
+
+评估完成: Tue Apr 28 00:17:48 CST 2026

@@ -1,0 +1,14 @@
+nohup: ignoring input
+===== Weibo21 SD + 8维门控 + 自适应 λ_scale=0.1 =====
+--- seed=42 Wed Apr 29 21:14:36 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_weibo21_zh_seed42_sd_surface_adaptive.pt
+          best val F1: 0.9165, best test F1: 0.9103187308032693
+--- seed=2024 Wed Apr 29 21:20:22 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_weibo21_zh_seed2024_sd_surface_adaptive.pt
+          best val F1: 0.9227, best test F1: 0.913849817202885
+--- seed=3407 Wed Apr 29 21:26:36 CST 2026 ---
+
+[Surface] 完成。ckpt: ./results/models/socialdebias_weibo21_zh_seed3407_sd_surface_adaptive.pt
+          best val F1: 0.9150, best test F1: 0.9032597806401637

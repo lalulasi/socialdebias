@@ -1,0 +1,26 @@
+nohup: ignoring input
+========================================
+SD + Surface + InfoNCE 实验开始: Mon Apr 27 15:33:26 CST 2026
+========================================
+
+[1/6] politifact_seed42_surface_contrast
+  [✓] 成功 用时 98s
+
+[2/6] politifact_seed2024_surface_contrast
+  [✓] 成功 用时 93s
+
+[3/6] politifact_seed3407_surface_contrast
+  [✓] 成功 用时 95s
+
+[4/6] gossipcop_seed42_surface_contrast
+  [✓] 成功 用时 820s
+
+[5/6] gossipcop_seed2024_surface_contrast
+  [✓] 成功 用时 819s
+
+[6/6] gossipcop_seed3407_surface_contrast
+  [✓] 成功 用时 822s
+
+========================================
+完成: Mon Apr 27 16:19:13 CST 2026
+========================================

@@ -1,0 +1,32 @@
+nohup: ignoring input
+========================================
+SD + 17 维表层特征实验开始: Mon Apr 27 11:50:40 CST 2026
+========================================
+
+[1/6] politifact_seed42_surface
+  开始: Mon Apr 27 11:50:40 CST 2026
+  [✓] 成功 用时 61s
+
+[2/6] politifact_seed2024_surface
+  开始: Mon Apr 27 11:51:41 CST 2026
+  [✓] 成功 用时 60s
+
+[3/6] politifact_seed3407_surface
+  开始: Mon Apr 27 11:52:41 CST 2026
+  [✓] 成功 用时 59s
+
+[4/6] gossipcop_seed42_surface
+  开始: Mon Apr 27 11:53:40 CST 2026
+  [✓] 成功 用时 746s
+
+[5/6] gossipcop_seed2024_surface
+  开始: Mon Apr 27 12:06:06 CST 2026
+  [✓] 成功 用时 741s
+
+[6/6] gossipcop_seed3407_surface
+  开始: Mon Apr 27 12:18:27 CST 2026
+  [✓] 成功 用时 736s
+
+========================================
+完成: Mon Apr 27 12:30:43 CST 2026
+========================================

@@ -1,0 +1,19 @@
+nohup: ignoring input
+=== CHECKED Baseline (无评论) ===
+--- seed=42 ---
+
+[CHECKED] 完成。ckpt: ./results/models/socialdebias_zh_seed42_checked_baseline.pt
+          best test: {'epoch': 2, 'acc': 0.9936507936507937, 'f1': 0.9881132075471698, 'f1_fake': 0.98, 'auc': 1.0}
+--- seed=2024 ---
+
+[CHECKED] 完成。ckpt: ./results/models/socialdebias_zh_seed2024_checked_baseline.pt
+          best test: {'epoch': 3, 'acc': 0.9936507936507937, 'f1': 0.9881132075471698, 'f1_fake': 0.98, 'auc': 0.960858585858586}
+--- seed=3407 ---
+
+[CHECKED] 完成。ckpt: ./results/models/socialdebias_zh_seed3407_checked_baseline.pt
+          best test: {'epoch': 1, 'acc': 0.9968253968253968, 'f1': 0.994104325366374, 'f1_fake': 0.9900990099009901, 'auc': 0.9995543672014261}
+=== CHECKED + 评论编码 ===
+--- seed=42 ---
+
+[CHECKED] 完成。ckpt: ./results/models/socialdebias_zh_seed42_checked_comment.pt
+          best test: {'epoch': 1, 'acc': 0.8380952380952381, 'f1': 0.45595854922279794, 'f1_fake': 0.0, 'auc': nan}
