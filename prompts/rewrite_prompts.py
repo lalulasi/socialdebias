@@ -110,3 +110,45 @@ if __name__ == "__main__":
         print(f"=== {style} ===")
         print(build_prompt(sample, style))
         print()
+
+# ========== 中文版（用于 Weibo21）==========
+
+STYLE_PROMPTS_ZH = {
+    "neutral": {
+        "role": "你是一名专业的新闻编辑，工作于一家中立、客观的新闻机构。",
+        "instruction": "请将以下中文新闻改写为中立、客观、事实性的语气：\n- 删除所有情绪化表达\n- 删除感叹号和过度强调的标点\n- 用客观描述替代带情绪的形容词\n- 保持中立陈述视角\n- 必须保留所有人名、地名、机构名、日期、数字等关键事实",
+    },
+}
+
+
+def build_prompt_zh(original_text, style="neutral", max_chars=2000):
+    """构造中文 prompt，要求 LLM 输出中文。"""
+    if style not in STYLE_PROMPTS_ZH:
+        raise ValueError(f"未知风格: {style}")
+    truncated = original_text[:max_chars]
+    if len(original_text) > max_chars:
+        truncated += " [...]"
+    style_cfg = STYLE_PROMPTS_ZH[style]
+    parts = [
+        style_cfg["role"],
+        "",
+        "【硬约束】",
+        "- 必须保留所有人名、地名、机构名称",
+        "- 必须保留所有日期、时间、数字、金额",
+        "- 必须保留所有引用语句",
+        "- 不得添加原文中没有的信息",
+        "",
+        "【输出要求】",
+        "- 仅输出改写后的中文文本（绝对不要翻译为英文）",
+        "- 长度与原文相近",
+        "- 不要添加解释或注释",
+        "",
+        "【风格指令】",
+        style_cfg["instruction"],
+        "",
+        "【原始新闻】",
+        truncated,
+        "",
+        "【改写后的中文新闻】（用中文输出，禁止英文）：",
+    ]
+    return "\n".join(parts)

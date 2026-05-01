@@ -34,7 +34,7 @@ from transformers import AutoTokenizer
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 
 from modeling.social_debias import SocialDebiasModel
-from modeling.infonce import info_nce_loss
+from modeling.infonce import info_nce_loss, info_nce_loss_weighted
 from utils.surface_features import SurfaceFeatureExtractor
 from utils.dataloader import SurfaceAugmentedDataset
 from utils.real_dataloader import load_dataset
@@ -100,6 +100,8 @@ def main():
     # 对比学习（可选）
     parser.add_argument("--use_contrastive", action="store_true")
     parser.add_argument("--lambda_contrast", type=float, default=0.3)
+    parser.add_argument("--use_soft_labels", action="store_true",
+                        help="使用 NLI p_entail 作为 InfoNCE 软标签权重（意见 14）")
     parser.add_argument("--temperature", type=float, default=0.07)
     parser.add_argument("--orig_pkl", default=None)
     parser.add_argument("--adv_pkl", default=None)
@@ -250,10 +252,20 @@ def main():
                 # 对比学习不传 surface_feat（输入已不同，不做表层）
                 out_orig = model(orig_ids, orig_mask, surface_feat=None)
                 out_adv = model(adv_ids, adv_mask, surface_feat=None)
-                loss_contrast = info_nce_loss(
-                    out_orig["fact_repr"], out_adv["fact_repr"],
-                    temperature=args.temperature,
-                )
+                if args.use_soft_labels and "p_entail" in batch:
+                    weights = batch["p_entail"].to(device)
+                    # α = max(0.5, p_entail)
+                    weights = torch.clamp(weights, min=0.5)
+                    loss_contrast = info_nce_loss_weighted(
+                        out_orig["fact_repr"], out_adv["fact_repr"],
+                        weights=weights,
+                        temperature=args.temperature,
+                    )
+                else:
+                    loss_contrast = info_nce_loss(
+                        out_orig["fact_repr"], out_adv["fact_repr"],
+                        temperature=args.temperature,
+                    )
                 loss = args.lambda_contrast * loss_contrast
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)

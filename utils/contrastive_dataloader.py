@@ -96,9 +96,10 @@ class ContrastiveFakeNewsDataset(Dataset):
         with open(original_pkl_path, "rb") as f:
             orig = pickle.load(f)
 
-        # 加载对抗数据
+        # 加载对抗数据（可能含 p_entail 字段）
         with open(adversarial_pkl_path, "rb") as f:
             adv = pickle.load(f)
+        has_p_entail = "p_entail" in adv
 
         # 按 orig_idx 分组对抗数据
         adv_by_idx = defaultdict(list)
@@ -115,12 +116,22 @@ class ContrastiveFakeNewsDataset(Dataset):
             if require_adv and not adv_versions:
                 n_skipped += 1
                 continue
-            instance.samples.append({
+            # 如果有 p_entail，按 orig_idx 分组取均值（一个原文有多个对抗版本时）
+            p_entail_for_orig = None
+            if has_p_entail:
+                p_entails = [adv["p_entail"][i] for i, oi in enumerate(adv["orig_idx"]) if oi == idx]
+                if p_entails:
+                    p_entail_for_orig = sum(p_entails) / len(p_entails)
+            
+            sample = {
                 "orig_idx": idx,
                 "orig_text": text,
                 "label": int(label),
-                "adv_versions": adv_versions,  # List[str]，可能为空
-            })
+                "adv_versions": adv_versions,
+            }
+            if p_entail_for_orig is not None:
+                sample["p_entail"] = p_entail_for_orig
+            instance.samples.append(sample)
 
         print(f"[ContrastiveDataset] 加载完成")
         print(f"  原数据: {len(orig['news'])} 条")
@@ -162,7 +173,7 @@ class ContrastiveFakeNewsDataset(Dataset):
             return_tensors="pt",
         )
 
-        return {
+        result = {
             "orig_input_ids": orig_enc["input_ids"].squeeze(0),
             "orig_attention_mask": orig_enc["attention_mask"].squeeze(0),
             "adv_input_ids": adv_enc["input_ids"].squeeze(0),
@@ -170,6 +181,12 @@ class ContrastiveFakeNewsDataset(Dataset):
             "label": torch.tensor(s["label"], dtype=torch.long),
             "orig_idx": s["orig_idx"],
         }
+        # 如果有 p_entail，返回作为软标签权重
+        if "p_entail" in s:
+            result["p_entail"] = torch.tensor(s["p_entail"], dtype=torch.float32)
+        else:
+            result["p_entail"] = torch.tensor(1.0, dtype=torch.float32)
+        return result
 
 
 def create_contrastive_dataloaders(

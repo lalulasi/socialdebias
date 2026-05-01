@@ -16,7 +16,7 @@ import requests
 from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from prompts.rewrite_prompts import build_prompt
+from prompts.rewrite_prompts import build_prompt_zh as build_prompt
 
 API_KEY = os.environ.get("DEEPSEEK_API_KEY")
 if not API_KEY:
