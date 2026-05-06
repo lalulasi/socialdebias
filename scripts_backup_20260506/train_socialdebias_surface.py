@@ -28,13 +28,14 @@ import pickle
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 
 from modeling.social_debias import SocialDebiasModel
-from modeling.infonce import info_nce_loss
+from modeling.infonce import info_nce_loss, info_nce_loss_weighted
 from utils.surface_features import SurfaceFeatureExtractor
 from utils.dataloader import SurfaceAugmentedDataset
 from utils.real_dataloader import load_dataset
@@ -90,12 +91,24 @@ def main():
     parser.add_argument("--lambda_consist", type=float, default=0.3)
 
     # 表层特征
+    parser.add_argument("--use_weibo21", action="store_true",
+                        help="使用 Weibo21 中文数据集")
+    parser.add_argument("--use_liar", action="store_true",
+                        help="使用 LIAR 数据集（speaker 特征作为社交代理）")
     parser.add_argument("--surface_feat_dim", type=int, default=17,
                         help="表层特征维度（0 表示禁用）")
 
     # 对比学习（可选）
     parser.add_argument("--use_contrastive", action="store_true")
     parser.add_argument("--lambda_contrast", type=float, default=0.3)
+    parser.add_argument("--use_soft_labels", action="store_true",
+                        help="使用 NLI p_entail 作为 InfoNCE 软标签权重（意见 14）")
+    parser.add_argument("--alpha_floor", type=float, default=0.5,
+                        help="p_entail 权重下限。默认 0.5 保留旧行为；0.0 = 候选 A 去 floor")
+    parser.add_argument("--lambda_fact_soft", type=float, default=0.0,
+                        help="改写样本分类软标签损失权重（意见 14 字面兑现）。默认 0 关闭，>0 启用")
+    parser.add_argument("--soft_label_floor", type=float, default=0.5,
+                        help="分类软标签的 α 下限：α=max(soft_label_floor, p_entail)")
     parser.add_argument("--temperature", type=float, default=0.07)
     parser.add_argument("--orig_pkl", default=None)
     parser.add_argument("--adv_pkl", default=None)
@@ -108,13 +121,24 @@ def main():
     device = get_device()
     print(f"[Surface] device={device}, seed={args.seed}, surface_dim={args.surface_feat_dim}")
 
-    bert_name = "bert-base-uncased"
+    # 根据数据集自动选择中英文 BERT
+    if args.use_weibo21:
+        bert_name = "bert-base-chinese"
+    else:
+        bert_name = "bert-base-uncased"
     tokenizer = AutoTokenizer.from_pretrained(bert_name)
 
     # ==== 加载数据 ====
-    train_data, val_data, test_data = load_dataset(
-        dataset_name=args.dataset, seed=args.seed,
-    )
+    if args.use_weibo21:
+        from utils.weibo21_dataloader import load_weibo21_dataset
+        train_data, val_data, test_data = load_weibo21_dataset()
+    elif args.use_liar:
+        from utils.liar_dataloader import load_liar_dataset
+        train_data, val_data, test_data = load_liar_dataset()
+    else:
+        train_data, val_data, test_data = load_dataset(
+            dataset_name=args.dataset, seed=args.seed,
+        )
 
     # 表层特征提取器
     extractor = None
@@ -128,7 +152,7 @@ def main():
         surface_extractor=extractor,
     )
     # val/test 复用训练集的 normalizer
-    normalizer = (train_set.feat_mean, train_set.feat_std) if extractor else None
+    normalizer = (train_set.feat_mean, train_set.feat_std) if hasattr(train_set, "feat_mean") and train_set.feat_mean is not None else None
     val_set = SurfaceAugmentedDataset(
         val_data, tokenizer, args.max_length,
         surface_extractor=extractor, normalizer=normalizer,
@@ -172,7 +196,11 @@ def main():
     criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
 
     # ==== 训练 ====
-    save_path = (f"{args.save_dir}/socialdebias_{args.dataset}_{args.language}"
+    # Weibo21 用 zh 语言后缀
+    lang = "zh" if args.use_weibo21 else args.language
+    dataset_tag = "weibo21" if args.use_weibo21 else (
+        "liar" if args.use_liar else args.dataset)
+    save_path = (f"{args.save_dir}/socialdebias_{dataset_tag}_{lang}"
                  f"_seed{args.seed}_{args.save_suffix}.pt")
     Path(args.save_dir).mkdir(parents=True, exist_ok=True)
 
@@ -183,7 +211,7 @@ def main():
     for epoch in range(1, args.epochs + 1):
         model.train()
         t0 = time.time()
-        ll = {"total": [], "fact": [], "bias": [], "consist": [], "contrast": []}
+        ll = {"total": [], "fact": [], "bias": [], "consist": [], "contrast": [], "fact_soft": []}
 
         # 主训练循环
         for batch in train_loader:
@@ -231,11 +259,37 @@ def main():
                 # 对比学习不传 surface_feat（输入已不同，不做表层）
                 out_orig = model(orig_ids, orig_mask, surface_feat=None)
                 out_adv = model(adv_ids, adv_mask, surface_feat=None)
-                loss_contrast = info_nce_loss(
-                    out_orig["fact_repr"], out_adv["fact_repr"],
-                    temperature=args.temperature,
-                )
+                if args.use_soft_labels and "p_entail" in batch:
+                    weights = batch["p_entail"].to(device)
+                    # α = max(alpha_floor, p_entail)，默认 floor=0.5（旧行为）；候选 A 传 0.0
+                    weights = torch.clamp(weights, min=args.alpha_floor)
+                    loss_contrast = info_nce_loss_weighted(
+                        out_orig["fact_repr"], out_adv["fact_repr"],
+                        weights=weights,
+                        temperature=args.temperature,
+                    )
+                else:
+                    loss_contrast = info_nce_loss(
+                        out_orig["fact_repr"], out_adv["fact_repr"],
+                        temperature=args.temperature,
+                    )
                 loss = args.lambda_contrast * loss_contrast
+
+                # 意见 14 字面兑现：改写样本的分类软标签损失
+                if args.lambda_fact_soft > 0 and "p_entail" in batch:
+                    labels_adv = batch["label"].to(device)
+                    alpha = torch.clamp(batch["p_entail"].to(device),
+                                        min=args.soft_label_floor)
+                    # y_soft = α·y_hard + (1-α)·0.5
+                    n_classes = out_adv["fact_logits"].size(1)
+                    y_hard = F.one_hot(labels_adv, num_classes=n_classes).float()
+                    y_soft = alpha.unsqueeze(1) * y_hard + \
+                             (1 - alpha.unsqueeze(1)) * (1.0 / n_classes)
+                    log_probs = F.log_softmax(out_adv["fact_logits"], dim=1)
+                    loss_fact_soft = -(y_soft * log_probs).sum(dim=1).mean()
+                    loss = loss + args.lambda_fact_soft * loss_fact_soft
+                    ll["fact_soft"].append(loss_fact_soft.item())
+
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
                 optimizer.step()
@@ -250,9 +304,12 @@ def main():
             **{f"val_{k}": v for k, v in val_m.items()},
         })
 
+        print(f"[DEBUG] ll keys={list(ll.keys())}, fact_soft len={len(ll['fact_soft'])}, "
+              f"fact_soft mean={np.mean(ll['fact_soft']) if ll['fact_soft'] else 'EMPTY'}")
         print(f"[E{epoch}] {epoch_time:.0f}s | total={means['total']:.4f} "
-              f"fact={means['fact']:.4f} bias={means['bias']:.4f} "
-              f"consist={means['consist']:.4f} contrast={means['contrast']:.4f}")
+              f"fact={means['fact']:.4f} fact_soft={means['fact_soft']:.4f} "
+              f"bias={means['bias']:.4f} consist={means['consist']:.4f} "
+              f"contrast={means['contrast']:.4f}")
         print(f"        val acc={val_m['acc']:.4f} f1={val_m['f1']:.4f} auc={val_m['auc']:.4f}")
 
         if val_m["f1"] > best_val_f1:

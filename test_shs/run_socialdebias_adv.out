@@ -1,0 +1,72 @@
+nohup: ignoring input
+--- politifact neutral qwen 09:28:29 ---
+[加载] data/sheepdog/news_articles/politifact_test.pkl
+  全量 90 条
+  [10/90] 0.31/s ETA 4.3min err=0
+  [20/90] 0.35/s ETA 3.3min err=0
+  [30/90] 0.34/s ETA 3.0min err=0
+  [40/90] 0.35/s ETA 2.4min err=0
+  [50/90] 0.36/s ETA 1.8min err=0
+  [60/90] 0.38/s ETA 1.3min err=0
+  [70/90] 0.38/s ETA 0.9min err=0
+  [80/90] 0.39/s ETA 0.4min err=0
+  [90/90] 0.40/s ETA 0.0min err=0
+
+[完成] 用时 3.8 min, 错误 0/90
+--- politifact neutral deepseek 09:32:19 ---
+[加载] data/sheepdog/news_articles/politifact_test.pkl
+  全量 90 条
+  [10/90] 0.18/s ETA 7.2min err=0
+  [20/90] 0.20/s ETA 5.8min err=0
+  [30/90] 0.20/s ETA 5.1min err=0
+  [40/90] 0.20/s ETA 4.2min err=0
+  [50/90] 0.20/s ETA 3.3min err=0
+  [60/90] 0.21/s ETA 2.3min err=0
+  [70/90] 0.22/s ETA 1.5min err=0
+  [80/90] 0.22/s ETA 0.7min err=0
+  [90/90] 0.23/s ETA 0.0min err=0
+
+[完成] 用时 6.6 min, 错误 0/90
+--- politifact objective qwen 09:38:55 ---
+[加载] data/sheepdog/news_articles/politifact_test.pkl
+  全量 90 条
+  [10/90] 0.36/s ETA 3.7min err=0
+  [20/90] 0.37/s ETA 3.2min err=0
+  [30/90] 0.35/s ETA 2.9min err=0
+  [40/90] 0.35/s ETA 2.4min err=0
+  [50/90] 0.35/s ETA 1.9min err=0
+  [60/90] 0.36/s ETA 1.4min err=0
+  [70/90] 0.37/s ETA 0.9min err=0
+  [80/90] 0.38/s ETA 0.4min err=0
+  [90/90] 0.38/s ETA 0.0min err=0
+
+[完成] 用时 3.9 min, 错误 0/90
+--- politifact objective deepseek 09:42:52 ---
+[加载] data/sheepdog/news_articles/politifact_test.pkl
+  全量 90 条
+  [10/90] 0.16/s ETA 8.4min err=0
+  [20/90] 0.18/s ETA 6.4min err=0
+  [30/90] 0.18/s ETA 5.6min err=0
+  [40/90] 0.19/s ETA 4.5min err=0
+  [50/90] 0.19/s ETA 3.5min err=0
+  [60/90] 0.20/s ETA 2.5min err=0
+  [70/90] 0.20/s ETA 1.6min err=0
+  [80/90] 0.21/s ETA 0.8min err=0
+  [90/90] 0.21/s ETA 0.0min err=0
+
+[完成] 用时 7.1 min, 错误 0/90
+--- politifact sensational qwen 09:50:00 ---
+[加载] data/sheepdog/news_articles/politifact_test.pkl
+  全量 90 条
+  [10/90] 0.33/s ETA 4.1min err=0
+  [20/90] 0.32/s ETA 3.6min err=0
+  [30/90] 0.31/s ETA 3.2min err=0
+  [40/90] 0.30/s ETA 2.7min err=0
+  [50/90] 0.31/s ETA 2.2min err=0
+  [60/90] 0.31/s ETA 1.6min err=0
+  [70/90] 0.32/s ETA 1.1min err=0
+  [80/90] 0.31/s ETA 0.5min err=0
+  [90/90] 0.32/s ETA 0.0min err=0
+
+[完成] 用时 4.7 min, 错误 0/90
+--- politifact sensational deepseek 09:54:43 ---
