@@ -1,0 +1,293 @@
+nohup: ignoring input
+Device: cuda
+[加载] SurfaceFeatureExtractor
+待评估 24 个文件
+
+========== 第 1 步：原始测试集基线预测 ==========
+  原始测试集加载完毕：[('politifact', 90), ('gossipcop', 1584), ('weibo21', 1923)]
+
+========== [gossipcop_test_adv_emotionally_triggering_deepseek.pkl] ds=gossipcop tone=emotionally_triggering src=deepseek N=117 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_gossipcop_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_gossipcop_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_gossipcop_en_seed3407_bert.pt
+  SD:       acc=0.7949 f1=0.7914 asr=0.0990
+    DeepSeek [50/117]
+    DeepSeek [100/117]
+    DeepSeek [50/117]
+    DeepSeek [100/117]
+  DeepSeek: acc=0.6410 f1=0.6139 asr=0.3544
+
+========== [gossipcop_test_adv_emotionally_triggering_qwen.pkl] ds=gossipcop tone=emotionally_triggering src=qwen N=88 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_gossipcop_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_gossipcop_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_gossipcop_en_seed3407_bert.pt
+  SD:       acc=0.8295 f1=0.8293 asr=0.0526
+    DeepSeek [50/88]
+    DeepSeek [50/88]
+  DeepSeek: acc=0.6250 f1=0.6138 asr=0.3115
+
+========== [gossipcop_test_adv_neutral_deepseek.pkl] ds=gossipcop tone=neutral src=deepseek N=175 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_gossipcop_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_gossipcop_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_gossipcop_en_seed3407_bert.pt
+  SD:       acc=0.8114 f1=0.8094 asr=0.0486
+    DeepSeek [50/175]
+    DeepSeek [100/175]
+    DeepSeek [150/175]
+    DeepSeek [50/175]
+    DeepSeek [100/175]
+    DeepSeek [150/175]
+  DeepSeek: acc=0.5829 f1=0.5137 asr=0.1327
+
+========== [gossipcop_test_adv_neutral_qwen.pkl] ds=gossipcop tone=neutral src=qwen N=151 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_gossipcop_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_gossipcop_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_gossipcop_en_seed3407_bert.pt
+  SD:       acc=0.7748 f1=0.7747 asr=0.0579
+    DeepSeek [50/151]
+    DeepSeek [100/151]
+    DeepSeek [150/151]
+    DeepSeek [50/151]
+    DeepSeek [100/151]
+    DeepSeek [150/151]
+  DeepSeek: acc=0.5497 f1=0.4917 asr=0.1667
+
+========== [gossipcop_test_adv_objective_deepseek.pkl] ds=gossipcop tone=objective src=deepseek N=173 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_gossipcop_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_gossipcop_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_gossipcop_en_seed3407_bert.pt
+  SD:       acc=0.8150 f1=0.8136 asr=0.0355
+    DeepSeek [50/173]
+    DeepSeek [100/173]
+    DeepSeek [150/173]
+    DeepSeek [50/173]
+    DeepSeek [100/173]
+    DeepSeek [150/173]
+  DeepSeek: acc=0.6069 f1=0.5468 asr=0.1239
+
+========== [gossipcop_test_adv_objective_qwen.pkl] ds=gossipcop tone=objective src=qwen N=138 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_gossipcop_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_gossipcop_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_gossipcop_en_seed3407_bert.pt
+  SD:       acc=0.7681 f1=0.7669 asr=0.0893
+    DeepSeek [50/138]
+    DeepSeek [100/138]
+    DeepSeek [50/138]
+    DeepSeek [100/138]
+  DeepSeek: acc=0.5145 f1=0.4305 asr=0.2326
+
+========== [gossipcop_test_adv_sensational_deepseek.pkl] ds=gossipcop tone=sensational src=deepseek N=151 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_gossipcop_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_gossipcop_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_gossipcop_en_seed3407_bert.pt
+  SD:       acc=0.8278 f1=0.8265 asr=0.0930
+    DeepSeek [50/151]
+    DeepSeek [100/151]
+    DeepSeek [150/151]
+    DeepSeek [50/151]
+    DeepSeek [100/151]
+    DeepSeek [150/151]
+  DeepSeek: acc=0.5828 f1=0.5679 asr=0.3810
+
+========== [gossipcop_test_adv_sensational_qwen.pkl] ds=gossipcop tone=sensational src=qwen N=96 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_gossipcop_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_gossipcop_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_gossipcop_en_seed3407_bert.pt
+  SD:       acc=0.7083 f1=0.7072 asr=0.1818
+    DeepSeek [50/96]
+    DeepSeek [50/96]
+  DeepSeek: acc=0.6042 f1=0.6014 asr=0.3433
+
+========== [politifact_test_adv_emotionally_triggering_deepseek.pkl] ds=politifact tone=emotionally_triggering src=deepseek N=40 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_politifact_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_politifact_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_politifact_en_seed3407_bert.pt
+  SD:       acc=0.8250 f1=0.8157 asr=0.1111
+  DeepSeek: acc=0.7000 f1=0.6238 asr=0.2812
+
+========== [politifact_test_adv_emotionally_triggering_qwen.pkl] ds=politifact tone=emotionally_triggering src=qwen N=46 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_politifact_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_politifact_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_politifact_en_seed3407_bert.pt
+  SD:       acc=0.8478 f1=0.8460 asr=0.0952
+  DeepSeek: acc=0.6087 f1=0.5965 asr=0.3611
+
+========== [politifact_test_adv_neutral_deepseek.pkl] ds=politifact tone=neutral src=deepseek N=77 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_politifact_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_politifact_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_politifact_en_seed3407_bert.pt
+  SD:       acc=0.8182 f1=0.8167 asr=0.0896
+    DeepSeek [50/77]
+    DeepSeek [50/77]
+  DeepSeek: acc=0.6364 f1=0.5935 asr=0.1897
+
+========== [politifact_test_adv_neutral_qwen.pkl] ds=politifact tone=neutral src=qwen N=67 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_politifact_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_politifact_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_politifact_en_seed3407_bert.pt
+  SD:       acc=0.8358 f1=0.8345 asr=0.0678
+    DeepSeek [50/67]
+    DeepSeek [50/67]
+  DeepSeek: acc=0.6567 f1=0.6231 asr=0.1600
+
+========== [politifact_test_adv_objective_deepseek.pkl] ds=politifact tone=objective src=deepseek N=76 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_politifact_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_politifact_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_politifact_en_seed3407_bert.pt
+  SD:       acc=0.8421 f1=0.8420 asr=0.0746
+    DeepSeek [50/76]
+    DeepSeek [50/76]
+  DeepSeek: acc=0.6447 f1=0.6016 asr=0.1754
+
+========== [politifact_test_adv_objective_qwen.pkl] ds=politifact tone=objective src=qwen N=64 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_politifact_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_politifact_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_politifact_en_seed3407_bert.pt
+  SD:       acc=0.8438 f1=0.8431 asr=0.0714
+    DeepSeek [50/64]
+    DeepSeek [50/64]
+  DeepSeek: acc=0.6562 f1=0.6333 asr=0.1667
+
+========== [politifact_test_adv_sensational_deepseek.pkl] ds=politifact tone=sensational src=deepseek N=64 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_politifact_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_politifact_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_politifact_en_seed3407_bert.pt
+  SD:       acc=0.6562 f1=0.5749 asr=0.3393
+    DeepSeek [50/64]
+    DeepSeek [50/64]
+  DeepSeek: acc=0.6250 f1=0.5636 asr=0.3654
+
+========== [politifact_test_adv_sensational_qwen.pkl] ds=politifact tone=sensational src=qwen N=55 ==========
+  [skip] BERT seed=42 ckpt 不存在: socialdebias_politifact_en_seed42_bert.pt
+  [skip] BERT seed=2024 ckpt 不存在: socialdebias_politifact_en_seed2024_bert.pt
+  [skip] BERT seed=3407 ckpt 不存在: socialdebias_politifact_en_seed3407_bert.pt
+  SD:       acc=0.8364 f1=0.8328 asr=0.1600
+    DeepSeek [50/55]
+    DeepSeek [50/55]
+  DeepSeek: acc=0.6000 f1=0.5577 asr=0.3913
+
+========== [weibo21_test_adv_emotionally_triggering_deepseek.pkl] ds=weibo21 tone=emotionally_triggering src=deepseek N=167 ==========
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  BERT:     acc=0.7126 f1=0.7125 asr=0.1795
+  SD:       acc=0.7665 f1=0.7631 asr=0.1883
+    DeepSeek [50/167]
+    DeepSeek [100/167]
+    DeepSeek [150/167]
+    DeepSeek [50/167]
+    DeepSeek [100/167]
+    DeepSeek [150/167]
+  DeepSeek: acc=0.6108 f1=0.5845 asr=0.2049
+
+========== [weibo21_test_adv_emotionally_triggering_qwen.pkl] ds=weibo21 tone=emotionally_triggering src=qwen N=136 ==========
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  BERT:     acc=0.3382 f1=0.3131 asr=0.4103
+  SD:       acc=0.7059 f1=0.7006 asr=0.2460
+    DeepSeek [50/136]
+    DeepSeek [100/136]
+    DeepSeek [50/136]
+    DeepSeek [100/136]
+  DeepSeek: acc=0.5221 f1=0.4690 asr=0.2812
+
+========== [weibo21_test_adv_neutral_deepseek.pkl] ds=weibo21 tone=neutral src=deepseek N=146 ==========
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  BERT:     acc=0.3836 f1=0.3017 asr=0.0702
+  SD:       acc=0.7603 f1=0.7457 asr=0.1880
+    DeepSeek [50/146]
+    DeepSeek [100/146]
+    DeepSeek [50/146]
+    DeepSeek [100/146]
+  DeepSeek: acc=0.7055 f1=0.7023 asr=0.1200
+
+========== [weibo21_test_adv_neutral_qwen.pkl] ds=weibo21 tone=neutral src=qwen N=120 ==========
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  BERT:     acc=0.6083 f1=0.5906 asr=0.2553
+  SD:       acc=0.7333 f1=0.7070 asr=0.2389
+    DeepSeek [50/120]
+    DeepSeek [100/120]
+    DeepSeek [50/120]
+    DeepSeek [100/120]
+  DeepSeek: acc=0.7833 f1=0.7811 asr=0.1136
+
+========== [weibo21_test_adv_objective_deepseek.pkl] ds=weibo21 tone=objective src=deepseek N=132 ==========
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  BERT:     acc=0.7424 f1=0.7364 asr=0.1897
+  SD:       acc=0.7424 f1=0.7241 asr=0.2295
+    DeepSeek [50/132]
+    DeepSeek [100/132]
+    DeepSeek [50/132]
+    DeepSeek [100/132]
+  DeepSeek: acc=0.7652 f1=0.7602 asr=0.1474
+
+========== [weibo21_test_adv_objective_qwen.pkl] ds=weibo21 tone=objective src=qwen N=105 ==========
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  BERT:     acc=0.6095 f1=0.4202 asr=0.2267
+  SD:       acc=0.7333 f1=0.6733 asr=0.2424
+    DeepSeek [50/105]
+    DeepSeek [100/105]
+    DeepSeek [50/105]
+    DeepSeek [100/105]
+  DeepSeek: acc=0.8000 f1=0.7869 asr=0.1429
+
+========== [weibo21_test_adv_sensational_deepseek.pkl] ds=weibo21 tone=sensational src=deepseek N=147 ==========
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  BERT:     acc=0.5578 f1=0.3581 asr=0.0000
+  SD:       acc=0.5986 f1=0.5630 asr=0.3696
+    DeepSeek [50/147]
+    DeepSeek [100/147]
+    DeepSeek [50/147]
+    DeepSeek [100/147]
+  DeepSeek: acc=0.5442 f1=0.4898 asr=0.2710
+
+========== [weibo21_test_adv_sensational_qwen.pkl] ds=weibo21 tone=sensational src=qwen N=127 ==========
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at bert-base-chinese and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+  BERT:     acc=0.5276 f1=0.4367 asr=0.3367
+  SD:       acc=0.6457 f1=0.6147 asr=0.3077
+    DeepSeek [50/127]
+    DeepSeek [100/127]
+    DeepSeek [50/127]
+    DeepSeek [100/127]
+  DeepSeek: acc=0.5433 f1=0.4708 asr=0.2947
+
+========== 完成 ==========
+结果 CSV: results/socialdebias_adv_eval.csv
+总行数: 56

@@ -70,3 +70,495 @@ nohup: ignoring input
 
 [完成] 用时 4.7 min, 错误 0/90
 --- politifact sensational deepseek 09:54:43 ---
+[加载] data/sheepdog/news_articles/politifact_test.pkl
+  全量 90 条
+  [10/90] 0.16/s ETA 8.2min err=0
+  [20/90] 0.16/s ETA 7.3min err=0
+  [30/90] 0.16/s ETA 6.1min err=0
+  [40/90] 0.16/s ETA 5.1min err=0
+  [50/90] 0.16/s ETA 4.1min err=0
+  [60/90] 0.16/s ETA 3.1min err=0
+  [70/90] 0.16/s ETA 2.1min err=0
+  [80/90] 0.16/s ETA 1.0min err=0
+  [90/90] 0.16/s ETA 0.0min err=0
+
+[完成] 用时 9.4 min, 错误 0/90
+--- politifact emotionally_triggering qwen 10:04:10 ---
+[加载] data/sheepdog/news_articles/politifact_test.pkl
+  全量 90 条
+  [10/90] 0.35/s ETA 3.9min err=0
+  [20/90] 0.35/s ETA 3.4min err=0
+  [30/90] 0.32/s ETA 3.2min err=0
+  [40/90] 0.30/s ETA 2.7min err=0
+  [50/90] 0.29/s ETA 2.3min err=0
+  [60/90] 0.30/s ETA 1.7min err=0
+  [70/90] 0.30/s ETA 1.1min err=0
+  [80/90] 0.29/s ETA 0.6min err=0
+  [90/90] 0.30/s ETA 0.0min err=0
+
+[完成] 用时 5.1 min, 错误 0/90
+--- politifact emotionally_triggering deepseek 10:09:14 ---
+[加载] data/sheepdog/news_articles/politifact_test.pkl
+  全量 90 条
+  [10/90] 0.15/s ETA 8.7min err=0
+  [20/90] 0.14/s ETA 8.2min err=0
+  [30/90] 0.14/s ETA 7.1min err=0
+  [40/90] 0.14/s ETA 5.9min err=0
+  [50/90] 0.14/s ETA 4.7min err=0
+  [60/90] 0.14/s ETA 3.6min err=0
+  [70/90] 0.14/s ETA 2.4min err=0
+  [80/90] 0.14/s ETA 1.2min err=0
+  [90/90] 0.14/s ETA 0.0min err=0
+
+[完成] 用时 11.0 min, 错误 0/90
+--- gossipcop neutral qwen 10:20:17 ---
+[加载] data/sheepdog/news_articles/gossipcop_test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.45/s ETA 7.0min err=0
+  [20/200] 0.48/s ETA 6.2min err=0
+  [30/200] 0.48/s ETA 6.0min err=0
+  [40/200] 0.46/s ETA 5.8min err=0
+  [50/200] 0.45/s ETA 5.5min err=0
+  [60/200] 0.45/s ETA 5.2min err=0
+  [70/200] 0.45/s ETA 4.8min err=0
+  [80/200] 0.45/s ETA 4.5min err=0
+  [90/200] 0.45/s ETA 4.1min err=0
+  [100/200] 0.45/s ETA 3.7min err=0
+  [110/200] 0.44/s ETA 3.4min err=0
+  [120/200] 0.44/s ETA 3.0min err=0
+  [130/200] 0.44/s ETA 2.6min err=0
+  [140/200] 0.43/s ETA 2.3min err=0
+  [150/200] 0.44/s ETA 1.9min err=0
+  [160/200] 0.44/s ETA 1.5min err=0
+  [170/200] 0.44/s ETA 1.1min err=0
+  [180/200] 0.44/s ETA 0.8min err=0
+  [190/200] 0.44/s ETA 0.4min err=0
+  [200/200] 0.44/s ETA 0.0min err=0
+
+[完成] 用时 7.6 min, 错误 0/200
+--- gossipcop neutral deepseek 10:27:56 ---
+[加载] data/sheepdog/news_articles/gossipcop_test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.18/s ETA 17.5min err=0
+  [20/200] 0.20/s ETA 15.1min err=0
+  [30/200] 0.20/s ETA 14.1min err=0
+  [40/200] 0.20/s ETA 13.4min err=0
+  [50/200] 0.19/s ETA 13.0min err=0
+  [60/200] 0.19/s ETA 12.1min err=0
+  [70/200] 0.19/s ETA 11.4min err=0
+  [80/200] 0.19/s ETA 10.5min err=0
+  [90/200] 0.19/s ETA 9.6min err=0
+  [100/200] 0.19/s ETA 8.7min err=0
+  [110/200] 0.19/s ETA 7.9min err=0
+  [120/200] 0.19/s ETA 7.0min err=0
+  [130/200] 0.19/s ETA 6.1min err=0
+  [140/200] 0.19/s ETA 5.3min err=0
+  [150/200] 0.19/s ETA 4.4min err=0
+  [160/200] 0.19/s ETA 3.5min err=0
+  [170/200] 0.19/s ETA 2.6min err=0
+  [180/200] 0.19/s ETA 1.8min err=0
+  [190/200] 0.19/s ETA 0.9min err=0
+  [200/200] 0.19/s ETA 0.0min err=0
+
+[完成] 用时 17.6 min, 错误 0/200
+--- gossipcop objective qwen 10:45:35 ---
+[加载] data/sheepdog/news_articles/gossipcop_test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.39/s ETA 8.1min err=0
+  [20/200] 0.37/s ETA 8.1min err=0
+  [30/200] 0.37/s ETA 7.6min err=0
+  [40/200] 0.37/s ETA 7.1min err=0
+  [50/200] 0.38/s ETA 6.6min err=0
+  [60/200] 0.39/s ETA 6.0min err=0
+  [70/200] 0.39/s ETA 5.6min err=0
+  [80/200] 0.39/s ETA 5.1min err=0
+  [90/200] 0.39/s ETA 4.7min err=0
+  [100/200] 0.39/s ETA 4.3min err=0
+  [110/200] 0.38/s ETA 3.9min err=0
+  [120/200] 0.38/s ETA 3.5min err=0
+  [130/200] 0.38/s ETA 3.1min err=0
+  [140/200] 0.37/s ETA 2.7min err=0
+  [150/200] 0.37/s ETA 2.3min err=0
+  [160/200] 0.36/s ETA 1.8min err=0
+  [170/200] 0.36/s ETA 1.4min err=0
+  [180/200] 0.36/s ETA 0.9min err=0
+  [190/200] 0.36/s ETA 0.5min err=0
+  [200/200] 0.36/s ETA 0.0min err=0
+
+[完成] 用时 9.3 min, 错误 0/200
+--- gossipcop objective deepseek 10:54:56 ---
+[加载] data/sheepdog/news_articles/gossipcop_test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.20/s ETA 16.1min err=0
+  [NET ERR] ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+  [20/200] 0.17/s ETA 17.4min err=0
+  [30/200] 0.18/s ETA 15.7min err=0
+  [40/200] 0.18/s ETA 15.0min err=0
+  [50/200] 0.18/s ETA 14.0min err=0
+  [60/200] 0.18/s ETA 12.9min err=0
+  [70/200] 0.18/s ETA 12.0min err=0
+  [80/200] 0.18/s ETA 11.0min err=0
+  [90/200] 0.18/s ETA 9.9min err=0
+  [100/200] 0.19/s ETA 9.0min err=0
+  [110/200] 0.18/s ETA 8.2min err=0
+  [120/200] 0.18/s ETA 7.2min err=0
+  [130/200] 0.19/s ETA 6.3min err=0
+  [140/200] 0.18/s ETA 5.5min err=0
+  [150/200] 0.18/s ETA 4.5min err=0
+  [160/200] 0.18/s ETA 3.6min err=0
+  [170/200] 0.18/s ETA 2.7min err=0
+  [180/200] 0.18/s ETA 1.8min err=0
+  [190/200] 0.19/s ETA 0.9min err=0
+  [200/200] 0.18/s ETA 0.0min err=0
+
+[完成] 用时 18.1 min, 错误 0/200
+--- gossipcop sensational qwen 11:13:03 ---
+[加载] data/sheepdog/news_articles/gossipcop_test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.24/s ETA 13.1min err=0
+  [20/200] 0.27/s ETA 11.2min err=0
+  [30/200] 0.28/s ETA 10.2min err=0
+  [40/200] 0.28/s ETA 9.6min err=0
+  [50/200] 0.29/s ETA 8.8min err=0
+  [60/200] 0.28/s ETA 8.2min err=0
+  [70/200] 0.29/s ETA 7.6min err=0
+  [80/200] 0.29/s ETA 6.8min err=0
+  [90/200] 0.29/s ETA 6.2min err=0
+  [100/200] 0.30/s ETA 5.6min err=0
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [110/200] 0.29/s ETA 5.2min err=0
+  [120/200] 0.29/s ETA 4.5min err=0
+  [130/200] 0.29/s ETA 4.0min err=0
+  [140/200] 0.29/s ETA 3.4min err=0
+  [150/200] 0.30/s ETA 2.8min err=0
+  [160/200] 0.29/s ETA 2.3min err=0
+  [170/200] 0.29/s ETA 1.7min err=0
+  [180/200] 0.29/s ETA 1.1min err=0
+  [190/200] 0.29/s ETA 0.6min err=0
+  [200/200] 0.29/s ETA 0.0min err=0
+
+[完成] 用时 11.3 min, 错误 0/200
+--- gossipcop sensational deepseek 11:24:24 ---
+[加载] data/sheepdog/news_articles/gossipcop_test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.14/s ETA 22.1min err=0
+  [20/200] 0.14/s ETA 21.2min err=0
+  [30/200] 0.14/s ETA 19.8min err=0
+  [40/200] 0.14/s ETA 18.5min err=0
+  [50/200] 0.15/s ETA 17.1min err=0
+  [60/200] 0.15/s ETA 16.1min err=0
+  [70/200] 0.15/s ETA 14.9min err=0
+  [80/200] 0.15/s ETA 13.7min err=0
+  [90/200] 0.15/s ETA 12.6min err=0
+  [100/200] 0.14/s ETA 11.5min err=0
+  [110/200] 0.14/s ETA 10.4min err=0
+  [120/200] 0.14/s ETA 9.2min err=0
+  [130/200] 0.14/s ETA 8.1min err=0
+  [140/200] 0.14/s ETA 7.0min err=0
+  [150/200] 0.14/s ETA 5.8min err=0
+  [160/200] 0.14/s ETA 4.6min err=0
+  [NET ERR] HTTPSConnectionPool(host='api.deepseek.com', port=443): Read timed out.
+  [NET ERR] HTTPSConnectionPool(host='api.deepseek.com', port=443): Read timed out.
+  [NET ERR] HTTPSConnectionPool(host='api.deepseek.com', port=443): Read timed out.
+  [NET ERR] HTTPSConnectionPool(host='api.deepseek.com', port=443): Read timed out.
+  [NET ERR] HTTPSConnectionPool(host='api.deepseek.com', port=443): Read timed out.
+  [170/200] 0.08/s ETA 6.5min err=1
+  [180/200] 0.08/s ETA 4.2min err=1
+  [190/200] 0.08/s ETA 2.1min err=1
+  [200/200] 0.08/s ETA 0.0min err=1
+
+[完成] 用时 40.8 min, 错误 1/200
+--- gossipcop emotionally_triggering qwen 12:05:15 ---
+[加载] data/sheepdog/news_articles/gossipcop_test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.25/s ETA 12.4min err=0
+  [20/200] 0.27/s ETA 11.0min err=0
+  [30/200] 0.28/s ETA 10.0min err=0
+  [40/200] 0.28/s ETA 9.5min err=0
+  [50/200] 0.27/s ETA 9.1min err=0
+  [60/200] 0.27/s ETA 8.6min err=0
+  [70/200] 0.26/s ETA 8.2min err=0
+  [80/200] 0.27/s ETA 7.5min err=0
+  [90/200] 0.27/s ETA 6.9min err=0
+  [100/200] 0.27/s ETA 6.3min err=0
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [110/200] 0.26/s ETA 5.7min err=0
+  [120/200] 0.27/s ETA 5.0min err=0
+  [130/200] 0.27/s ETA 4.4min err=0
+  [140/200] 0.26/s ETA 3.8min err=0
+  [150/200] 0.26/s ETA 3.2min err=0
+  [160/200] 0.26/s ETA 2.6min err=0
+  [170/200] 0.25/s ETA 2.0min err=0
+  [180/200] 0.25/s ETA 1.3min err=0
+  [190/200] 0.24/s ETA 0.7min err=0
+  [200/200] 0.24/s ETA 0.0min err=0
+
+[完成] 用时 14.0 min, 错误 0/200
+--- gossipcop emotionally_triggering deepseek 12:19:16 ---
+[加载] data/sheepdog/news_articles/gossipcop_test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.15/s ETA 20.9min err=0
+  [20/200] 0.15/s ETA 20.2min err=0
+  [30/200] 0.15/s ETA 18.8min err=0
+  [40/200] 0.15/s ETA 17.9min err=0
+  [50/200] 0.15/s ETA 17.0min err=0
+  [60/200] 0.15/s ETA 15.8min err=0
+  [70/200] 0.15/s ETA 14.8min err=0
+  [80/200] 0.15/s ETA 13.5min err=0
+  [90/200] 0.15/s ETA 12.3min err=0
+  [100/200] 0.15/s ETA 11.2min err=0
+  [110/200] 0.15/s ETA 10.1min err=0
+  [120/200] 0.15/s ETA 9.0min err=0
+  [130/200] 0.15/s ETA 7.8min err=0
+  [140/200] 0.15/s ETA 6.8min err=0
+  [150/200] 0.15/s ETA 5.6min err=0
+  [160/200] 0.15/s ETA 4.5min err=0
+  [170/200] 0.15/s ETA 3.4min err=0
+  [180/200] 0.15/s ETA 2.2min err=0
+  [190/200] 0.15/s ETA 1.1min err=0
+  [200/200] 0.15/s ETA 0.0min err=0
+
+[完成] 用时 22.6 min, 错误 0/200
+--- weibo21 neutral qwen 12:41:55 ---
+[加载] data/weibo21_repo/data/test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.46/s ETA 6.9min err=0
+  [20/200] 0.42/s ETA 7.1min err=0
+  [30/200] 0.44/s ETA 6.5min err=0
+  [40/200] 0.43/s ETA 6.2min err=0
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [50/200] 0.42/s ETA 6.0min err=0
+  [60/200] 0.42/s ETA 5.6min err=0
+  [70/200] 0.41/s ETA 5.3min err=0
+  [80/200] 0.41/s ETA 4.9min err=0
+  [90/200] 0.41/s ETA 4.4min err=0
+  [100/200] 0.42/s ETA 4.0min err=0
+  [110/200] 0.42/s ETA 3.5min err=0
+  [120/200] 0.42/s ETA 3.2min err=0
+  [130/200] 0.43/s ETA 2.7min err=0
+  [140/200] 0.42/s ETA 2.4min err=0
+  [150/200] 0.42/s ETA 2.0min err=0
+  [160/200] 0.42/s ETA 1.6min err=0
+  [170/200] 0.42/s ETA 1.2min err=0
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [180/200] 0.42/s ETA 0.8min err=0
+  [190/200] 0.42/s ETA 0.4min err=0
+  [200/200] 0.42/s ETA 0.0min err=0
+
+[完成] 用时 7.9 min, 错误 0/200
+--- weibo21 neutral deepseek 12:49:49 ---
+[加载] data/weibo21_repo/data/test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.62/s ETA 5.1min err=0
+  [20/200] 0.66/s ETA 4.6min err=0
+  [30/200] 0.69/s ETA 4.1min err=0
+  [40/200] 0.68/s ETA 3.9min err=0
+  [50/200] 0.68/s ETA 3.7min err=0
+  [60/200] 0.67/s ETA 3.5min err=0
+  [70/200] 0.66/s ETA 3.3min err=0
+  [80/200] 0.66/s ETA 3.0min err=0
+  [90/200] 0.66/s ETA 2.8min err=0
+  [100/200] 0.67/s ETA 2.5min err=0
+  [110/200] 0.68/s ETA 2.2min err=0
+  [120/200] 0.68/s ETA 2.0min err=0
+  [130/200] 0.68/s ETA 1.7min err=0
+  [140/200] 0.69/s ETA 1.5min err=0
+  [150/200] 0.68/s ETA 1.2min err=0
+  [160/200] 0.68/s ETA 1.0min err=0
+  [170/200] 0.68/s ETA 0.7min err=0
+  [180/200] 0.68/s ETA 0.5min err=0
+  [190/200] 0.68/s ETA 0.2min err=0
+  [200/200] 0.69/s ETA 0.0min err=0
+
+[完成] 用时 4.8 min, 错误 0/200
+--- weibo21 objective qwen 12:54:41 ---
+[加载] data/weibo21_repo/data/test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.36/s ETA 8.9min err=0
+  [20/200] 0.33/s ETA 9.0min err=0
+  [30/200] 0.37/s ETA 7.7min err=0
+  [40/200] 0.37/s ETA 7.2min err=0
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [50/200] 0.35/s ETA 7.2min err=1
+  [60/200] 0.35/s ETA 6.6min err=1
+  [70/200] 0.35/s ETA 6.2min err=1
+  [80/200] 0.35/s ETA 5.7min err=1
+  [90/200] 0.36/s ETA 5.1min err=1
+  [100/200] 0.36/s ETA 4.6min err=1
+  [110/200] 0.36/s ETA 4.1min err=1
+  [120/200] 0.36/s ETA 3.7min err=1
+  [130/200] 0.36/s ETA 3.2min err=1
+  [140/200] 0.37/s ETA 2.7min err=1
+  [150/200] 0.37/s ETA 2.3min err=1
+  [160/200] 0.37/s ETA 1.8min err=1
+  [170/200] 0.37/s ETA 1.4min err=1
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [180/200] 0.37/s ETA 0.9min err=1
+  [190/200] 0.37/s ETA 0.5min err=1
+  [200/200] 0.37/s ETA 0.0min err=1
+
+[完成] 用时 9.1 min, 错误 1/200
+--- weibo21 objective deepseek 13:03:44 ---
+[加载] data/weibo21_repo/data/test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.61/s ETA 5.2min err=0
+  [20/200] 0.62/s ETA 4.8min err=0
+  [30/200] 0.63/s ETA 4.5min err=0
+  [40/200] 0.62/s ETA 4.3min err=0
+  [50/200] 0.62/s ETA 4.0min err=0
+  [60/200] 0.62/s ETA 3.8min err=0
+  [70/200] 0.61/s ETA 3.5min err=0
+  [80/200] 0.61/s ETA 3.3min err=0
+  [90/200] 0.61/s ETA 3.0min err=0
+  [100/200] 0.61/s ETA 2.7min err=0
+  [110/200] 0.62/s ETA 2.4min err=0
+  [120/200] 0.62/s ETA 2.1min err=0
+  [130/200] 0.63/s ETA 1.9min err=0
+  [140/200] 0.62/s ETA 1.6min err=0
+  [150/200] 0.62/s ETA 1.3min err=0
+  [160/200] 0.62/s ETA 1.1min err=0
+  [170/200] 0.62/s ETA 0.8min err=0
+  [180/200] 0.62/s ETA 0.5min err=0
+  [190/200] 0.62/s ETA 0.3min err=0
+  [200/200] 0.63/s ETA 0.0min err=0
+
+[完成] 用时 5.3 min, 错误 0/200
+--- weibo21 sensational qwen 13:09:04 ---
+[加载] data/weibo21_repo/data/test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.32/s ETA 9.8min err=0
+  [20/200] 0.30/s ETA 10.1min err=0
+  [30/200] 0.31/s ETA 9.1min err=0
+  [40/200] 0.31/s ETA 8.5min err=0
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [50/200] 0.31/s ETA 8.2min err=0
+  [60/200] 0.30/s ETA 7.7min err=0
+  [70/200] 0.30/s ETA 7.2min err=0
+  [80/200] 0.30/s ETA 6.7min err=0
+  [90/200] 0.30/s ETA 6.0min err=0
+  [100/200] 0.30/s ETA 5.5min err=0
+  [110/200] 0.31/s ETA 4.9min err=0
+  [120/200] 0.30/s ETA 4.4min err=0
+  [130/200] 0.31/s ETA 3.8min err=0
+  [140/200] 0.31/s ETA 3.3min err=0
+  [150/200] 0.30/s ETA 2.7min err=0
+  [160/200] 0.30/s ETA 2.2min err=0
+  [170/200] 0.31/s ETA 1.6min err=0
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [180/200] 0.30/s ETA 1.1min err=0
+  [190/200] 0.31/s ETA 0.5min err=0
+  [200/200] 0.31/s ETA 0.0min err=0
+
+[完成] 用时 10.8 min, 错误 0/200
+--- weibo21 sensational deepseek 13:19:54 ---
+[加载] data/weibo21_repo/data/test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.52/s ETA 6.1min err=0
+  [20/200] 0.47/s ETA 6.4min err=0
+  [30/200] 0.47/s ETA 6.0min err=0
+  [40/200] 0.47/s ETA 5.7min err=0
+  [50/200] 0.46/s ETA 5.4min err=0
+  [60/200] 0.46/s ETA 5.1min err=0
+  [70/200] 0.45/s ETA 4.8min err=0
+  [80/200] 0.45/s ETA 4.4min err=0
+  [90/200] 0.46/s ETA 4.0min err=0
+  [100/200] 0.46/s ETA 3.6min err=0
+  [110/200] 0.46/s ETA 3.2min err=0
+  [120/200] 0.47/s ETA 2.9min err=0
+  [130/200] 0.47/s ETA 2.5min err=0
+  [140/200] 0.48/s ETA 2.1min err=0
+  [150/200] 0.48/s ETA 1.7min err=0
+  [160/200] 0.48/s ETA 1.4min err=0
+  [170/200] 0.48/s ETA 1.0min err=0
+  [180/200] 0.48/s ETA 0.7min err=0
+  [190/200] 0.48/s ETA 0.3min err=0
+  [200/200] 0.49/s ETA 0.0min err=0
+
+[完成] 用时 6.9 min, 错误 0/200
+--- weibo21 emotionally_triggering qwen 13:26:45 ---
+[加载] data/weibo21_repo/data/test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.26/s ETA 12.1min err=0
+  [20/200] 0.25/s ETA 11.8min err=0
+  [30/200] 0.26/s ETA 10.9min err=0
+  [40/200] 0.26/s ETA 10.2min err=0
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [50/200] 0.25/s ETA 10.2min err=1
+  [60/200] 0.24/s ETA 9.6min err=1
+  [70/200] 0.24/s ETA 8.9min err=1
+  [80/200] 0.24/s ETA 8.2min err=1
+  [90/200] 0.25/s ETA 7.4min err=1
+  [100/200] 0.25/s ETA 6.7min err=1
+  [110/200] 0.25/s ETA 6.0min err=1
+  [120/200] 0.25/s ETA 5.4min err=1
+  [130/200] 0.25/s ETA 4.7min err=1
+  [140/200] 0.25/s ETA 4.0min err=1
+  [150/200] 0.25/s ETA 3.4min err=1
+  [160/200] 0.25/s ETA 2.7min err=1
+  [170/200] 0.25/s ETA 2.0min err=1
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [API ERR 400] {"error":{"message":"<400> InternalError.Algo.DataInspectionFailed: Input text data may contain inappropriate content.","type":"data_inspection_failed","param":null,"code":"data_inspection_failed"},"i
+  [180/200] 0.24/s ETA 1.4min err=2
+  [190/200] 0.24/s ETA 0.7min err=2
+  [200/200] 0.24/s ETA 0.0min err=2
+
+[完成] 用时 13.6 min, 错误 2/200
+--- weibo21 emotionally_triggering deepseek 13:40:23 ---
+[加载] data/weibo21_repo/data/test.pkl
+  采样 200/400 条 (seed=42)
+  [10/200] 0.43/s ETA 7.4min err=0
+  [20/200] 0.39/s ETA 7.7min err=0
+  [30/200] 0.40/s ETA 7.2min err=0
+  [40/200] 0.38/s ETA 6.9min err=0
+  [50/200] 0.38/s ETA 6.6min err=0
+  [60/200] 0.38/s ETA 6.2min err=0
+  [70/200] 0.37/s ETA 5.8min err=0
+  [80/200] 0.38/s ETA 5.3min err=0
+  [90/200] 0.38/s ETA 4.8min err=0
+  [100/200] 0.39/s ETA 4.3min err=0
+  [110/200] 0.38/s ETA 3.9min err=0
+  [120/200] 0.38/s ETA 3.5min err=0
+  [130/200] 0.38/s ETA 3.0min err=0
+  [140/200] 0.38/s ETA 2.6min err=0
+  [150/200] 0.39/s ETA 2.2min err=0
+  [160/200] 0.38/s ETA 1.7min err=0
+  [170/200] 0.38/s ETA 1.3min err=0
+  [180/200] 0.38/s ETA 0.9min err=0
+  [190/200] 0.38/s ETA 0.4min err=0
+  [200/200] 0.39/s ETA 0.0min err=0
+
+[完成] 用时 8.6 min, 错误 0/200
+===== 全部完成 =====
+total 8783
+drwxr-xr-x  2 root root   4096 May  6 13:40 .
+drwxr-xr-x 10 root root   4096 May  6 10:01 ..
+-rw-r--r--  1 root root 780187 May  6 12:41 gossipcop_test_adv_emotionally_triggering_deepseek.pkl
+-rw-r--r--  1 root root 675244 May  6 12:19 gossipcop_test_adv_emotionally_triggering_qwen.pkl
+-rw-r--r--  1 root root 644873 May  6 10:45 gossipcop_test_adv_neutral_deepseek.pkl
+-rw-r--r--  1 root root 614373 May  6 10:27 gossipcop_test_adv_neutral_qwen.pkl
+-rw-r--r--  1 root root 675660 May  6 11:13 gossipcop_test_adv_objective_deepseek.pkl
+-rw-r--r--  1 root root 634637 May  6 10:54 gossipcop_test_adv_objective_qwen.pkl
+-rw-r--r--  1 root root 715831 May  6 12:05 gossipcop_test_adv_sensational_deepseek.pkl
+-rw-r--r--  1 root root 630426 May  6 11:24 gossipcop_test_adv_sensational_qwen.pkl
+-rw-r--r--  1 root root 328088 May  6 10:20 politifact_test_adv_emotionally_triggering_deepseek.pkl
+-rw-r--r--  1 root root 294291 May  6 10:09 politifact_test_adv_emotionally_triggering_qwen.pkl
+-rw-r--r--  1 root root 288542 May  6 09:38 politifact_test_adv_neutral_deepseek.pkl
+-rw-r--r--  1 root root 273024 May  6 09:32 politifact_test_adv_neutral_qwen.pkl
+-rw-r--r--  1 root root 298465 May  6 09:50 politifact_test_adv_objective_deepseek.pkl
+-rw-r--r--  1 root root 282603 May  6 09:42 politifact_test_adv_objective_qwen.pkl
+-rw-r--r--  1 root root 309045 May  6 10:04 politifact_test_adv_sensational_deepseek.pkl
+-rw-r--r--  1 root root 279012 May  6 09:54 politifact_test_adv_sensational_qwen.pkl
+-rw-r--r--  1 root root 193089 May  6 13:49 weibo21_test_adv_emotionally_triggering_deepseek.pkl
+-rw-r--r--  1 root root 197477 May  6 13:40 weibo21_test_adv_emotionally_triggering_qwen.pkl
+-rw-r--r--  1 root root 129796 May  6 12:54 weibo21_test_adv_neutral_deepseek.pkl
+-rw-r--r--  1 root root 126631 May  6 12:49 weibo21_test_adv_neutral_qwen.pkl
+-rw-r--r--  1 root root 137668 May  6 13:09 weibo21_test_adv_objective_deepseek.pkl
+-rw-r--r--  1 root root 147790 May  6 13:03 weibo21_test_adv_objective_qwen.pkl
+-rw-r--r--  1 root root 157406 May  6 13:26 weibo21_test_adv_sensational_deepseek.pkl
+-rw-r--r--  1 root root 166192 May  6 13:19 weibo21_test_adv_sensational_qwen.pkl

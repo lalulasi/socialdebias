@@ -1,0 +1,210 @@
+nohup: ignoring input
+Building prefix dict from the default dictionary ...
+Loading model from cache /tmp/jieba.cache
+Loading model cost 0.772 seconds.
+Prefix dict has been built successfully.
+Device: cuda
+待过滤 24 个文件
+
+[加载] spaCy en_core_web_sm
+[加载] jieba
+[加载] BERT (en): bert-base-uncased
+[加载] BERT (zh): bert-base-chinese
+[加载] NLI: MoritzLaurer/mDeBERTa-v3-base-mnli-xnli
+
+[1/24] 处理: gossipcop_test_adv_emotionally_triggering_deepseek.pkl
+
+[gossipcop_test_adv_emotionally_triggering_deepseek.pkl] 输入 200 条 (lang=en)
+  [50/200] pass=23 fail_ent=27 fail_sem=0 fail_nli=0 fail_err=0
+  [150/200] pass=84 fail_ent=63 fail_sem=0 fail_nli=3 fail_err=0
+  [200/200] pass=117 fail_ent=80 fail_sem=0 fail_nli=3 fail_err=0
+  → 保留 117/200 (58.5%) | 失败: entity=80 semantic=0 nli=3 error=0
+
+[2/24] 处理: gossipcop_test_adv_emotionally_triggering_qwen.pkl
+
+[gossipcop_test_adv_emotionally_triggering_qwen.pkl] 输入 200 条 (lang=en)
+  [150/200] pass=66 fail_ent=84 fail_sem=0 fail_nli=0 fail_err=0
+  [200/200] pass=88 fail_ent=111 fail_sem=0 fail_nli=1 fail_err=0
+  → 保留 88/200 (44.0%) | 失败: entity=111 semantic=0 nli=1 error=0
+
+[3/24] 处理: gossipcop_test_adv_neutral_deepseek.pkl
+
+[gossipcop_test_adv_neutral_deepseek.pkl] 输入 200 条 (lang=en)
+  [50/200] pass=45 fail_ent=5 fail_sem=0 fail_nli=0 fail_err=0
+  [100/200] pass=88 fail_ent=12 fail_sem=0 fail_nli=0 fail_err=0
+  [150/200] pass=132 fail_ent=18 fail_sem=0 fail_nli=0 fail_err=0
+  → 保留 175/200 (87.5%) | 失败: entity=25 semantic=0 nli=0 error=0
+
+[4/24] 处理: gossipcop_test_adv_neutral_qwen.pkl
+
+[gossipcop_test_adv_neutral_qwen.pkl] 输入 200 条 (lang=en)
+  [50/200] pass=33 fail_ent=16 fail_sem=0 fail_nli=1 fail_err=0
+  → 保留 151/200 (75.5%) | 失败: entity=48 semantic=0 nli=1 error=0
+
+[5/24] 处理: gossipcop_test_adv_objective_deepseek.pkl
+
+[gossipcop_test_adv_objective_deepseek.pkl] 输入 200 条 (lang=en)
+  [50/200] pass=42 fail_ent=8 fail_sem=0 fail_nli=0 fail_err=0
+  [100/200] pass=86 fail_ent=14 fail_sem=0 fail_nli=0 fail_err=0
+  [150/200] pass=131 fail_ent=19 fail_sem=0 fail_nli=0 fail_err=0
+  [200/200] pass=173 fail_ent=26 fail_sem=0 fail_nli=1 fail_err=0
+  → 保留 173/200 (86.5%) | 失败: entity=26 semantic=0 nli=1 error=0
+
+[6/24] 处理: gossipcop_test_adv_objective_qwen.pkl
+
+[gossipcop_test_adv_objective_qwen.pkl] 输入 200 条 (lang=en)
+  [50/200] pass=34 fail_ent=16 fail_sem=0 fail_nli=0 fail_err=0
+  [150/200] pass=103 fail_ent=47 fail_sem=0 fail_nli=0 fail_err=0
+  → 保留 138/200 (69.0%) | 失败: entity=62 semantic=0 nli=0 error=0
+
+[7/24] 处理: gossipcop_test_adv_sensational_deepseek.pkl
+
+[gossipcop_test_adv_sensational_deepseek.pkl] 输入 200 条 (lang=en)
+  [50/200] pass=35 fail_ent=15 fail_sem=0 fail_nli=0 fail_err=0
+  [100/200] pass=74 fail_ent=26 fail_sem=0 fail_nli=0 fail_err=0
+  [150/200] pass=111 fail_ent=37 fail_sem=0 fail_nli=2 fail_err=0
+  [200/200] pass=151 fail_ent=46 fail_sem=0 fail_nli=2 fail_err=1
+  → 保留 151/200 (75.5%) | 失败: entity=46 semantic=0 nli=2 error=1
+
+[8/24] 处理: gossipcop_test_adv_sensational_qwen.pkl
+
+[gossipcop_test_adv_sensational_qwen.pkl] 输入 200 条 (lang=en)
+  [50/200] pass=27 fail_ent=23 fail_sem=0 fail_nli=0 fail_err=0
+  [150/200] pass=73 fail_ent=75 fail_sem=0 fail_nli=2 fail_err=0
+  → 保留 96/200 (48.0%) | 失败: entity=101 semantic=0 nli=3 error=0
+
+[9/24] 处理: politifact_test_adv_emotionally_triggering_deepseek.pkl
+
+[politifact_test_adv_emotionally_triggering_deepseek.pkl] 输入 90 条 (lang=en)
+  [50/90] pass=18 fail_ent=30 fail_sem=0 fail_nli=2 fail_err=0
+  → 保留 40/90 (44.4%) | 失败: entity=48 semantic=0 nli=2 error=0
+
+[10/24] 处理: politifact_test_adv_emotionally_triggering_qwen.pkl
+
+[politifact_test_adv_emotionally_triggering_qwen.pkl] 输入 90 条 (lang=en)
+  → 保留 46/90 (51.1%) | 失败: entity=44 semantic=0 nli=0 error=0
+
+[11/24] 处理: politifact_test_adv_neutral_deepseek.pkl
+
+[politifact_test_adv_neutral_deepseek.pkl] 输入 90 条 (lang=en)
+  [50/90] pass=46 fail_ent=3 fail_sem=0 fail_nli=1 fail_err=0
+  → 保留 77/90 (85.6%) | 失败: entity=12 semantic=0 nli=1 error=0
+
+[12/24] 处理: politifact_test_adv_neutral_qwen.pkl
+
+[politifact_test_adv_neutral_qwen.pkl] 输入 90 条 (lang=en)
+  → 保留 67/90 (74.4%) | 失败: entity=23 semantic=0 nli=0 error=0
+
+[13/24] 处理: politifact_test_adv_objective_deepseek.pkl
+
+[politifact_test_adv_objective_deepseek.pkl] 输入 90 条 (lang=en)
+  [50/90] pass=44 fail_ent=6 fail_sem=0 fail_nli=0 fail_err=0
+  → 保留 76/90 (84.4%) | 失败: entity=14 semantic=0 nli=0 error=0
+
+[14/24] 处理: politifact_test_adv_objective_qwen.pkl
+
+[politifact_test_adv_objective_qwen.pkl] 输入 90 条 (lang=en)
+  → 保留 64/90 (71.1%) | 失败: entity=26 semantic=0 nli=0 error=0
+
+[15/24] 处理: politifact_test_adv_sensational_deepseek.pkl
+
+[politifact_test_adv_sensational_deepseek.pkl] 输入 90 条 (lang=en)
+  [50/90] pass=33 fail_ent=16 fail_sem=0 fail_nli=1 fail_err=0
+  → 保留 64/90 (71.1%) | 失败: entity=25 semantic=0 nli=1 error=0
+
+[16/24] 处理: politifact_test_adv_sensational_qwen.pkl
+
+[politifact_test_adv_sensational_qwen.pkl] 输入 90 条 (lang=en)
+  [50/90] pass=32 fail_ent=18 fail_sem=0 fail_nli=0 fail_err=0
+  → 保留 55/90 (61.1%) | 失败: entity=35 semantic=0 nli=0 error=0
+
+[17/24] 处理: weibo21_test_adv_emotionally_triggering_deepseek.pkl
+
+[weibo21_test_adv_emotionally_triggering_deepseek.pkl] 输入 200 条 (lang=zh)
+  [50/200] pass=46 fail_ent=2 fail_sem=0 fail_nli=2 fail_err=0
+  [100/200] pass=85 fail_ent=9 fail_sem=1 fail_nli=5 fail_err=0
+  [150/200] pass=126 fail_ent=15 fail_sem=1 fail_nli=8 fail_err=0
+  [200/200] pass=167 fail_ent=22 fail_sem=1 fail_nli=10 fail_err=0
+  → 保留 167/200 (83.5%) | 失败: entity=22 semantic=1 nli=10 error=0
+
+[18/24] 处理: weibo21_test_adv_emotionally_triggering_qwen.pkl
+
+[weibo21_test_adv_emotionally_triggering_qwen.pkl] 输入 200 条 (lang=zh)
+  [50/200] pass=35 fail_ent=10 fail_sem=0 fail_nli=4 fail_err=1
+  [100/200] pass=72 fail_ent=20 fail_sem=1 fail_nli=6 fail_err=1
+  → 保留 136/200 (68.0%) | 失败: entity=46 semantic=1 nli=15 error=2
+
+[19/24] 处理: weibo21_test_adv_neutral_deepseek.pkl
+
+[weibo21_test_adv_neutral_deepseek.pkl] 输入 200 条 (lang=zh)
+  [50/200] pass=36 fail_ent=14 fail_sem=0 fail_nli=0 fail_err=0
+  [100/200] pass=75 fail_ent=25 fail_sem=0 fail_nli=0 fail_err=0
+  [200/200] pass=146 fail_ent=53 fail_sem=0 fail_nli=1 fail_err=0
+  → 保留 146/200 (73.0%) | 失败: entity=53 semantic=0 nli=1 error=0
+
+[20/24] 处理: weibo21_test_adv_neutral_qwen.pkl
+
+[weibo21_test_adv_neutral_qwen.pkl] 输入 200 条 (lang=zh)
+  [50/200] pass=36 fail_ent=14 fail_sem=0 fail_nli=0 fail_err=0
+  [100/200] pass=67 fail_ent=33 fail_sem=0 fail_nli=0 fail_err=0
+  [200/200] pass=120 fail_ent=80 fail_sem=0 fail_nli=0 fail_err=0
+  → 保留 120/200 (60.0%) | 失败: entity=80 semantic=0 nli=0 error=0
+
+[21/24] 处理: weibo21_test_adv_objective_deepseek.pkl
+
+[weibo21_test_adv_objective_deepseek.pkl] 输入 200 条 (lang=zh)
+  [50/200] pass=37 fail_ent=13 fail_sem=0 fail_nli=0 fail_err=0
+  [100/200] pass=69 fail_ent=29 fail_sem=1 fail_nli=1 fail_err=0
+  [200/200] pass=132 fail_ent=65 fail_sem=1 fail_nli=2 fail_err=0
+  → 保留 132/200 (66.0%) | 失败: entity=65 semantic=1 nli=2 error=0
+
+[22/24] 处理: weibo21_test_adv_objective_qwen.pkl
+
+[weibo21_test_adv_objective_qwen.pkl] 输入 200 条 (lang=zh)
+  [50/200] pass=26 fail_ent=23 fail_sem=0 fail_nli=0 fail_err=1
+  [100/200] pass=56 fail_ent=42 fail_sem=1 fail_nli=0 fail_err=1
+  → 保留 105/200 (52.5%) | 失败: entity=92 semantic=1 nli=1 error=1
+
+[23/24] 处理: weibo21_test_adv_sensational_deepseek.pkl
+
+[weibo21_test_adv_sensational_deepseek.pkl] 输入 200 条 (lang=zh)
+  [50/200] pass=40 fail_ent=5 fail_sem=0 fail_nli=5 fail_err=0
+  [100/200] pass=79 fail_ent=12 fail_sem=1 fail_nli=8 fail_err=0
+  [200/200] pass=147 fail_ent=40 fail_sem=1 fail_nli=12 fail_err=0
+  → 保留 147/200 (73.5%) | 失败: entity=40 semantic=1 nli=12 error=0
+
+[24/24] 处理: weibo21_test_adv_sensational_qwen.pkl
+
+[weibo21_test_adv_sensational_qwen.pkl] 输入 200 条 (lang=zh)
+  [50/200] pass=38 fail_ent=9 fail_sem=0 fail_nli=3 fail_err=0
+  [200/200] pass=127 fail_ent=61 fail_sem=1 fail_nli=11 fail_err=0
+  → 保留 127/200 (63.5%) | 失败: entity=61 semantic=1 nli=11 error=0
+
+===== 汇总 =====
+文件                                                     lang    n_in  n_out   keep%
+gossipcop_test_adv_emotionally_triggering_deepseek.pkl en       200    117   58.5%
+gossipcop_test_adv_emotionally_triggering_qwen.pkl     en       200     88   44.0%
+gossipcop_test_adv_neutral_deepseek.pkl                en       200    175   87.5%
+gossipcop_test_adv_neutral_qwen.pkl                    en       200    151   75.5%
+gossipcop_test_adv_objective_deepseek.pkl              en       200    173   86.5%
+gossipcop_test_adv_objective_qwen.pkl                  en       200    138   69.0%
+gossipcop_test_adv_sensational_deepseek.pkl            en       200    151   75.5%
+gossipcop_test_adv_sensational_qwen.pkl                en       200     96   48.0%
+politifact_test_adv_emotionally_triggering_deepseek.pklen        90     40   44.4%
+politifact_test_adv_emotionally_triggering_qwen.pkl    en        90     46   51.1%
+politifact_test_adv_neutral_deepseek.pkl               en        90     77   85.6%
+politifact_test_adv_neutral_qwen.pkl                   en        90     67   74.4%
+politifact_test_adv_objective_deepseek.pkl             en        90     76   84.4%
+politifact_test_adv_objective_qwen.pkl                 en        90     64   71.1%
+politifact_test_adv_sensational_deepseek.pkl           en        90     64   71.1%
+politifact_test_adv_sensational_qwen.pkl               en        90     55   61.1%
+weibo21_test_adv_emotionally_triggering_deepseek.pkl   zh       200    167   83.5%
+weibo21_test_adv_emotionally_triggering_qwen.pkl       zh       200    136   68.0%
+weibo21_test_adv_neutral_deepseek.pkl                  zh       200    146   73.0%
+weibo21_test_adv_neutral_qwen.pkl                      zh       200    120   60.0%
+weibo21_test_adv_objective_deepseek.pkl                zh       200    132   66.0%
+weibo21_test_adv_objective_qwen.pkl                    zh       200    105   52.5%
+weibo21_test_adv_sensational_deepseek.pkl              zh       200    147   73.5%
+weibo21_test_adv_sensational_qwen.pkl                  zh       200    127   63.5%
+
+报告写入: data/socialdebias_adv/filtered/filter_report.csv

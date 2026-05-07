@@ -53,7 +53,7 @@ def call_qwen(prompt, api_key, region="intl", max_retries=3):
     url = QWEN_URLS[region]
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     payload = {
-        "model": "qwen3.5-35b-a3b",
+        "model": "qwen3.6-plus",
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7,
         "max_tokens": 2048,
@@ -66,10 +66,11 @@ def call_deepseek(prompt, api_key, max_retries=3):
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     payload = {
-        "model": "deepseek-chat",
+        "model": "deepseek-v4-flash",
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7,
         "max_tokens": 2048,
+        "thinking": {"type": "disabled"}
     }
     return _call_with_retry(url, headers, payload, max_retries)
 
