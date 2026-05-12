@@ -189,7 +189,7 @@ def filter_one_file(input_pkl, output_pkl, lang, ent_extractor, sem_encoder, nli
             **{k: v for k, v in data.items() if k != "records"},  # 保留元信息
             "records": out_records,
             "filter_thresholds": {
-                "entity_recall": 0.6, "semantic_sim": 0.65,
+                "entity_recall": threshold, "semantic_sim": 0.65,
                 "nli_exclude": "contradiction",
             },
         }, f)
