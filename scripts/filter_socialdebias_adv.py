@@ -147,7 +147,9 @@ def filter_one_file(input_pkl, output_pkl, lang, ent_extractor, sem_encoder, nli
             orig_ents = extract_entities_zh(orig, ent_extractor)
             rw_ents = extract_entities_zh(rw, ent_extractor)
         recall = entity_recall(orig_ents, rw_ents)
-        if recall < 0.6:
+
+        threshold = 0.7 if lang == "en" else 0.6
+        if recall < threshold:
             stats["fail_entity"] += 1
             continue
 
