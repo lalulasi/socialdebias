@@ -16,6 +16,7 @@ SocialDebias + 17 维表层特征训练脚本（意见 1 + 意见 8 合并实现
 """
 import sys
 from pathlib import Path
+import os
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -115,6 +116,16 @@ def main():
 
     parser.add_argument("--save_dir", default="./results/models")
     parser.add_argument("--save_suffix", default="surface")
+    # === 自适应损失权重缩放（论文 5.5.5）===
+    parser.add_argument("--adaptive_lambda", action="store_true",
+                        help="启用基于训练集规模与 BERT baseline F1 的自适应 λ 缩放")
+    parser.add_argument("--adaptive_size_thresh", type=int, default=1000,
+                        help="train_size 阈值，≥ 此值视为数据充足（触发缩放）")
+    parser.add_argument("--adaptive_f1_thresh", type=float, default=0.85,
+                        help="BERT baseline val F1 阈值，≥ 此值视为基线已强（触发缩放）")
+    parser.add_argument("--adaptive_scale", type=float, default=0.1,
+                        help="触发后 λ_bias 与 λ_consist 的乘数（默认 0.1，即缩小到 1/10）")
+    
     args = parser.parse_args()
 
     set_seed(args.seed)
@@ -207,7 +218,55 @@ def main():
     best_val_f1 = -1.0
     best_test = None
     history = []
+    # ============== 自适应损失权重缩放 ==============
+    # 双信号触发：训练集规模 ≥ adaptive_size_thresh 或 BERT baseline val F1 ≥ adaptive_f1_thresh
+    # 任一条件满足即把 lambda_bias 与 lambda_consist 缩小到 adaptive_scale 倍（默认 0.1）
+    args.adaptive_triggered = False
+    args.adaptive_trigger_reasons = []
+    args.adaptive_orig_lambda_bias = args.lambda_bias
+    args.adaptive_orig_lambda_consist = args.lambda_consist
+    args.adaptive_baseline_val_f1 = None
 
+    if args.adaptive_lambda:
+        train_size = len(train_set)
+        triggered_by_size = train_size >= args.adaptive_size_thresh
+        if triggered_by_size:
+            args.adaptive_trigger_reasons.append(f"train_size={train_size}>={args.adaptive_size_thresh}")
+
+        # 尝试读已存在的 BERT baseline history（双 fallback：baseline_* 或 socialdebias_*_bert）
+        triggered_by_f1 = False
+        candidate_paths = [
+            f"{args.save_dir}/baseline_{dataset_tag}_{lang}_seed{args.seed}_history.json",
+            f"{args.save_dir}/socialdebias_{dataset_tag}_{lang}_seed{args.seed}_bert_history.json",
+        ]
+        for p in candidate_paths:
+            if os.path.exists(p):
+                try:
+                    with open(p, "r", encoding="utf-8") as f:
+                        bert_hist = json.load(f)
+                    val_f1 = bert_hist.get("best_test", {}).get("f1") or bert_hist.get("best_val_f1")
+                    if val_f1 is not None:
+                        args.adaptive_baseline_val_f1 = float(val_f1)
+                        if args.adaptive_baseline_val_f1 >= args.adaptive_f1_thresh:
+                            triggered_by_f1 = True
+                            args.adaptive_trigger_reasons.append(
+                                f"baseline_val_f1={args.adaptive_baseline_val_f1:.4f}>={args.adaptive_f1_thresh}")
+                        break
+                except Exception as e:
+                    print(f"[Adaptive] 读取 BERT history 失败 ({p}): {e}")
+
+        args.adaptive_triggered = triggered_by_size or triggered_by_f1
+
+        if args.adaptive_triggered:
+            args.lambda_bias *= args.adaptive_scale
+            args.lambda_consist *= args.adaptive_scale
+            print(f"[Adaptive] 触发缩放 ({'; '.join(args.adaptive_trigger_reasons)})")
+            print(f"  lambda_bias:    {args.adaptive_orig_lambda_bias} -> {args.lambda_bias}")
+            print(f"  lambda_consist: {args.adaptive_orig_lambda_consist} -> {args.lambda_consist}")
+        else:
+            print(f"[Adaptive] 未触发：train_size={train_size}, "
+                  f"baseline_val_f1={args.adaptive_baseline_val_f1}")
+    # ============== 自适应判定结束 ==============
     for epoch in range(1, args.epochs + 1):
         model.train()
         t0 = time.time()
