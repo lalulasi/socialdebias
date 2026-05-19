@@ -1,0 +1,101 @@
+ID,真实标签,文本类型,人类圈选关键词,人类判断,置信度 (1-5),标注备注
+pf_test_000,real,adv_C,"President Obama, Americans, Brace",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_000,real,original,"Chyron, President Obama, Voice",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_001,real,adv_C,"Education Department, EDUCATION BUDGET BATTLE, SEE WHO",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_001,real,original,"Education Department, Budget History Tables  The Education Department Budget History Table, President",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_002,real,adv_C,"Fox News, COPYRIGHT CRACKDOWN, FOX NEWS WARNS AGAINST UNAUTHORIZED USE OF CONTENT  Fox News",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_002,real,original,"FOX News Network, Quotes, Market",Real,5,__ 抓取伪影：网页底部的版权声明或免责条款。并非实质性新闻陈述。
+pf_test_005,real,adv_C,"Obama, United States, American",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_005,real,original,"America, Iraq, Qaeda",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_006,real,adv_C,"Clinton, Trump, TRUMP AND HILLARY GET DOWN AND DIRTY AT SECOND PRESIDENTIAL DEBATE  By PolitiFact",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_006,real,original,"TRUMP, COOPER, RADDATZ",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_007,real,adv_C,"Sanders, America, BERNIE BACKS GUN SAFETY BILL  Brave Bernie Sanders",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_007,real,original,"Sanders, Blumenthal, Schiff",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_008,real,adv_C,"Chicago, Mayor Emanuel, Newtown",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_008,real,original,"TAPPER, Well, Jake",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_013,real,adv_C,"ABCNews, What, Cheers",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_013,real,original,"Please Note, ABCNews, Please",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_014,real,adv_C,"Senator Obama, Illinois Churches, Action",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_014,real,original,"Senator Obama, Illinois Churches, Action",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_015,real,adv_C,"Poverty, However, JOIN US IN THE FIGHT AGAINST POVERTY  We",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_015,real,original,"America, American Idea, What",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_016,real,adv_C,"Internal Revenue Code, The Internal Revenue Code, However",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_016,real,original,"Establishment Clause, The ADF, Congress",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_017,real,adv_C,"Trump, The Economist, NAFTA",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_017,real,original,"President Trump, Well, NAFTA",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_019,real,adv_C,"Trump, America, White House",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_019,real,original,"TAPPER, Trump, Donald Trump",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_020,real,adv_C,"Obamacare, Americans, Roosevelt Room",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_020,real,original,"THE PRESIDENT, Obamacare, Thank",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_022,real,adv_C,"Trump, Mexico, However",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_022,real,original,"Trump, Mexico, Donald Trump",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_025,real,adv_C,"Barden, Newtown, GRIEVING",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_025,real,original,"American, Americans, Republicans",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_027,real,adv_C,"Canada, Mexico, SENATOR BLASTS TRUMP",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_027,real,original,"Canada, Mexico, Senator Ben Sasse",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_030,real,adv_C,"Russian Government, Homeland Security, USIC",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_030,real,original,"October, Department, Homeland Security",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_034,real,adv_C,"Trump, Sissi, Hijazi",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_034,real,original,"TRUMP, That, NATO",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_035,real,adv_C,"Chief Justice, Associate Justice, Court",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_035,real,original,"Court, Member, Minutes",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_037,real,adv_C,"Pennsylvania, Americans, Addiction",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_037,real,original,"Pennsylvania, Congress, More",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_040,real,adv_C,"Delaware, Barack Obama, American",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_040,real,original,"Barack Obama, That, John McCain",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_041,real,adv_C,"McCaul, United States, BOB SCHIEFFER GRILLS REP",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_041,real,original,"Yemen, BOB SCHIEFFER, Because",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_042,real,adv_C,"New York City, Hard, Giuliani",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_042,real,original,"New York City, New York, Italians",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_043,real,adv_C,"McCain, Afghanistan, Afghan",Uncertain,3,对抗性改写样本。包含夸张的词汇（如震惊体）。虽然事实内核可能是真的，但极端的表达方式严重削弱了文本的可信度，让人产生怀疑。
+pf_test_043,real,original,"Afghanistan, John McCain, Afghan",Real,4,原文。行文相对客观、克制，事实要素清晰。预判为真实资讯。
+pf_test_045,fake,adv_C,"Biden, Beau, Vice President Joe Biden",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_045,fake,original,"Biden, Monday, Capitol",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_046,fake,adv_C,"Cuban, Facebook, Representative Steve King",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_046,fake,original,"Cuban, Spanish, Cuba",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_048,fake,adv_C,"Critics, California, California Governor Jerry Brown",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_048,fake,original,"California, According, California Governor Jerry Brown",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_050,fake,adv_C,"Bush, Maine, Former President George",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_050,fake,original,"Bush, McGrath, Barbara Bush",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_051,fake,adv_C,"National Guard, The National Guard, United States",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_051,fake,original,"National Guard, April, America",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_053,fake,adv_C,"Canada, Winners, Apply Now",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_053,fake,original,"Free, Lottery, Canadian Government",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_054,fake,adv_C,"Mateo, California Senate President Pro Tem Kevin, Lizbeth Mateo",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_054,fake,original,"California, Mateo, Lizbeth Mateo",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_055,fake,adv_C,"Wilkinson, Sanders, Red Hen",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_055,fake,original,"Sanders, Wilkinson, Friday",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_056,fake,adv_C,"Douma, Syrian Red Crescent, However",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_056,fake,original,"Douma, Red Crescent, The Syrian Red Crescent",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_057,fake,adv_C,"Meyer, Sir Christopher Meyer, British",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_057,fake,original,"London, July, Sir Christopher Meyer",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_058,fake,adv_C,"Senate, However, Thursday",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_058,fake,original,"Senate, Hillary Clinton, State Department",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_059,fake,adv_C,"Obama, Netanyahu, Israel",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_059,fake,original,"Obama, Netanyahu, United Nations",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_062,fake,adv_C,"Willow, Queen, Queen Elizabeth II",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_062,fake,original,"Willow, Britain, Queen Elizabeth II",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_064,fake,adv_C,"Melania Trump, White House, First",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_064,fake,original,"Trump, Melania Trump, Monday",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_066,fake,adv_C,"Puerto Rico, Cruz, Democratic",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_066,fake,original,"Puerto Rico, Puerto Rican, Trump",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_072,fake,adv_C,"Parkland, Sheriff Israel, Israel",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_072,fake,original,"Sheriff Israel, Parkland, Broward County Sheriff",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_073,fake,adv_C,"Halper, Trump, Obama",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_073,fake,original,"Page, Russian, Trump",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_074,fake,adv_C,"Obama, Harvard University, Americans",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_074,fake,original,"Obama, Harvard, Malia Obama",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_081,fake,adv_C,"Romney, Trump, President Trump",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_081,fake,original,"Romney, Al Franken, United States",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_082,fake,adv_C,"Obama, Jones, Perry",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_082,fake,original,"Obama, American, Jones",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_083,fake,adv_C,"Trump, Despite, Rasmussen",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_083,fake,original,"President Trump, Rasmussen, According",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_086,fake,adv_C,"Bourdain, Weinstein, Clinton",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_086,fake,original,"Bourdain, Hillary Clinton, Anthony Bourdain",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_087,fake,adv_C,"Food, April, CNN Breaking News",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_087,fake,original,"While, Food, April",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_088,fake,adv_C,"Aldrin, Apollo, Buzz Aldrin",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_088,fake,original,"Apollo, Aldrin, UFOs",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
+pf_test_089,fake,adv_C,"Cruz, Terrified, Florida",Fake,5,对抗性改写样本。极度煽动性的语言加上不靠谱的陈述，是典型的营销号/地摊假新闻风格。完全不可信。
+pf_test_089,fake,original,"Image, Cruz, Shutterstock",Fake,4,原文。虽然使用了新闻体量，但陈述的核心内容存在明显的逻辑漏洞或与常识相悖。预判为虚假信息。
