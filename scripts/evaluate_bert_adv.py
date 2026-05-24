@@ -1,14 +1,10 @@
 """
-评估带表层特征的 ckpt 在对抗集上的鲁棒性。
+evaluate_bert_adv.py — BERT baseline 在 SheepDog adv_A/B/C/D 上的鲁棒性评估
+与 evaluate_surface_adv.py 同口径（paired ASR + sample-level）。
 
-使用:
-    python scripts/evaluate_surface_adv.py \\
-        --dataset politifact --language en --seed 42 \\
-        --save_suffix surface
-        
-    python scripts/evaluate_surface_adv.py \\
-        --dataset politifact --language en --seed 42 \\
-        --save_suffix surface_contrast
+用法:
+    python scripts/evaluate_bert_adv.py \
+        --dataset politifact --seed 42
 """
 import sys
 from pathlib import Path
@@ -26,48 +22,18 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 
-from modeling.social_debias import SocialDebiasModel
-from utils.surface_features import SurfaceFeatureExtractor
 from utils.real_dataloader import load_dataset
 from utils.device import get_device
 
-
-class SurfaceTestDataset(Dataset):
-    """评估用：用训练时的 normalizer 标准化新数据。"""
-    def __init__(self, samples, tokenizer, max_length, extractor, feat_mean, feat_std):
-        from tqdm import tqdm
-        self.samples = samples
-        self.tokenizer = tokenizer
-        self.max_length = max_length
-
-        feats = []
-        for s in tqdm(samples, desc="提取表层特征"):
-            feats.append(extractor.extract(s["text"]))
-        feats = np.stack(feats, axis=0).astype(np.float32)
-        self.surface_features = (feats - feat_mean) / (feat_std + 1e-8)
-
-    def __len__(self):
-        return len(self.samples)
-
-    def __getitem__(self, idx):
-        s = self.samples[idx]
-        encoded = self.tokenizer(
-            s["text"], max_length=self.max_length,
-            padding="max_length", truncation=True, return_tensors="pt",
-        )
-        return {
-            "input_ids": encoded["input_ids"].squeeze(0),
-            "attention_mask": encoded["attention_mask"].squeeze(0),
-            "label": torch.tensor(s["label"], dtype=torch.long),
-            "surface_feat": torch.tensor(self.surface_features[idx], dtype=torch.float32),
-        }
+# 复用训练脚本里的模型 + dataset 定义
+from train_bert_baseline import BertBaselineModel, BertTextDataset
 
 
 def load_adversarial_test(dataset, variant):
     path = f"./data/sheepdog/adversarial_test/{dataset}_test_adv_{variant}.pkl"
     with open(path, "rb") as f:
         data = pickle.load(f)
-    return [{"text": t, "label": int(l), "language": "en"} 
+    return [{"text": t, "label": int(l), "language": "en"}
             for t, l in zip(data["news"], data["labels"])]
 
 
@@ -79,9 +45,7 @@ def evaluate_model(model, loader, device):
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             labels = batch["label"]
-            surface = batch["surface_feat"].to(device)
-            out = model(input_ids, attention_mask, surface_feat=surface)
-            logits = out["fact_logits"]
+            logits = model(input_ids, attention_mask)
             probs = torch.softmax(logits, dim=-1)[:, 1].cpu().numpy()
             preds = logits.argmax(dim=-1).cpu().numpy()
             all_preds.extend(preds); all_labels.extend(labels.numpy()); all_probs.extend(probs)
@@ -98,8 +62,7 @@ def evaluate_model(model, loader, device):
 
 
 def compute_paired_asr(clean_pred, clean_label, adv_pred):
-    """Paired ASR = #(clean 正确 ∩ adv 错误) / #(clean 正确)
-    要求 clean / adv 一一对应（同一样本不同视图）。adv label 与 clean label 同一份。"""
+    """Paired ASR = #(clean 正确 ∩ adv 错误) / #(clean 正确)"""
     clean_correct = (clean_pred == clean_label)
     adv_wrong = (adv_pred != clean_label)
     attacked = clean_correct & adv_wrong
@@ -112,92 +75,66 @@ def compute_paired_asr(clean_pred, clean_label, adv_pred):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", required=True)
-    parser.add_argument("--language", default="en")
+    parser.add_argument("--dataset", required=True, choices=["politifact", "gossipcop"])
     parser.add_argument("--seed", type=int, required=True)
-    parser.add_argument("--save_suffix", required=True,
-                        help="surface 或 surface_contrast")
     parser.add_argument("--variants", default="A,B,C,D")
-    parser.add_argument("--output_dir", default="results/surface_adv")
     parser.add_argument("--batch_size", type=int, default=4)
     parser.add_argument("--max_length", type=int, default=512)
+    parser.add_argument("--output_dir", default="results/bert_adv")
     args = parser.parse_args()
 
     device = get_device()
     bert_name = "bert-base-uncased"
     tokenizer = AutoTokenizer.from_pretrained(bert_name)
 
-    ckpt_path = (f"./results/models/socialdebias_{args.dataset}_{args.language}"
-                 f"_seed{args.seed}_{args.save_suffix}.pt")
+    ckpt_path = f"./results/models/socialdebias_{args.dataset}_en_seed{args.seed}_bert_baseline.pt"
     if not os.path.exists(ckpt_path):
         print(f"[ERROR] ckpt 不存在: {ckpt_path}")
         sys.exit(1)
-    
+
     print("=" * 80)
-    print(f"对抗鲁棒性评估")
+    print(f"BERT baseline 对抗鲁棒性评估: {args.dataset} × seed={args.seed}")
     print(f"  ckpt: {ckpt_path}")
     print("=" * 80)
 
     # 加载 ckpt
     ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
-    surface_dim = ckpt["config"].get("surface_feat_dim", 0)
-    feat_mean = np.array(ckpt["feat_mean"]) if ckpt.get("feat_mean") else None
-    feat_std = np.array(ckpt["feat_std"]) if ckpt.get("feat_std") else None
+    model = BertBaselineModel(model_name=bert_name).to(device)
+    model.load_state_dict(ckpt["model_state_dict"], strict=True)
+    val_f1 = ckpt.get("val_f1", float("nan"))
+    print(f"加载完成 (val_f1={val_f1:.4f})")
 
-    model = SocialDebiasModel(
-        model_name=bert_name, num_classes=2,
-        hidden_dim=384, dropout=0.1, grl_lambda=1.0,
-        use_frozen_bert=True,
-        surface_feat_dim=surface_dim,
-    ).to(device)
-    model.load_state_dict(ckpt["model_state_dict"], strict=False)
-    print(f"加载 ckpt (val_f1={ckpt.get('val_f1', 'N/A'):.4f}, surface_dim={surface_dim})")
-
-    extractor = SurfaceFeatureExtractor() if surface_dim > 0 else None
-
-    # 干净集
+    # 干净集（与 SD 同切分）
     _, _, clean_samples = load_dataset(dataset_name=args.dataset, seed=args.seed)
-    clean_set = SurfaceTestDataset(
-        clean_samples, tokenizer, args.max_length,
-        extractor, feat_mean, feat_std,
-    )
+    clean_set = BertTextDataset(clean_samples, tokenizer, args.max_length)
     clean_loader = DataLoader(clean_set, batch_size=args.batch_size, shuffle=False)
-    
+
     results = OrderedDict()
-    sample_preds = {}    # 缓存 sample-level，用于 paired ASR 计算
+    sample_preds = {}
     clean_m, clean_y_pred, clean_y_true = evaluate_model(model, clean_loader, device)
     results["clean"] = clean_m
     sample_preds["clean"] = {"y_pred": clean_y_pred, "y_true": clean_y_true}
-    print(f"\n干净集: Acc={clean_m['accuracy']:.4f} F1={clean_m['f1']:.4f}")
+    print(f"\n干净集 ({len(clean_samples):>4}): acc={clean_m['accuracy']:.4f}  f1={clean_m['f1']:.4f}  auc={clean_m['auc']:.4f}")
 
     # 4 个对抗变体
     for v in args.variants.split(","):
         v = v.strip()
         adv_samples = load_adversarial_test(args.dataset, v)
-        adv_set = SurfaceTestDataset(
-            adv_samples, tokenizer, args.max_length,
-            extractor, feat_mean, feat_std,
-        )
+        adv_set = BertTextDataset(adv_samples, tokenizer, args.max_length)
         adv_loader = DataLoader(adv_set, batch_size=args.batch_size, shuffle=False)
         adv_m, adv_y_pred, adv_y_true = evaluate_model(model, adv_loader, device)
         results[f"adv_{v}"] = adv_m
         sample_preds[f"adv_{v}"] = {"y_pred": adv_y_pred, "y_true": adv_y_true}
-        print(f"对抗 {v}: Acc={adv_m['accuracy']:.4f} F1={adv_m['f1']:.4f}")
+        print(f"对抗 {v}   ({len(adv_samples):>4}): acc={adv_m['accuracy']:.4f}  f1={adv_m['f1']:.4f}  auc={adv_m['auc']:.4f}")
 
-    # === Paired ASR 计算（与 ENDEF 评估口径一致）===
+    # paired ASR
     asr_per_variant = {}
-    label_warned = False
     for v in args.variants.split(","):
         v = v.strip()
         adv_y_pred = sample_preds[f"adv_{v}"]["y_pred"]
         adv_y_true = sample_preds[f"adv_{v}"]["y_true"]
-        # sanity check：label 序列必须一致才能 paired ASR
         if not np.array_equal(clean_y_true, adv_y_true):
-            if not label_warned:
-                print(f"  ⚠ 警告: adv_{v} label 序列与 clean 不一致！将按 label 序列重排对齐前不可靠")
-                print(f"    clean labels 前 5: {clean_y_true[:5].tolist()}")
-                print(f"    adv_{v} labels 前 5: {adv_y_true[:5].tolist()}")
-                label_warned = True
+            print(f"  ⚠ 警告: adv_{v} label 序列与 clean 不一致，ASR 不可靠")
         asr, attacked_n, base_n = compute_paired_asr(
             sample_preds["clean"]["y_pred"], clean_y_true, adv_y_pred
         )
@@ -206,7 +143,7 @@ def main():
         }
 
     # 汇总
-    adv_f1s = [results[f"adv_{v}"]["f1"] for v in args.variants.split(",")]
+    adv_f1s = [results[f"adv_{v.strip()}"]["f1"] for v in args.variants.split(",")]
     avg_adv_f1 = sum(adv_f1s) / len(adv_f1s)
     f1_drop = clean_m["f1"] - avg_adv_f1
     avg_asr = float(np.mean([asr_per_variant[k]["asr"] for k in asr_per_variant]))
@@ -228,11 +165,11 @@ def main():
 
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / f"surface_adv_{args.dataset}_seed{args.seed}_{args.save_suffix}.json"
+    out_path = out_dir / f"bert_adv_{args.dataset}_seed{args.seed}.json"
     with open(out_path, "w") as f:
         json.dump({
             "ckpt": ckpt_path,
-            "save_suffix": args.save_suffix,
+            "model": "bert_baseline",
             "seed": args.seed,
             "results": results,
         }, f, indent=2, default=str)
