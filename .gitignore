@@ -44,3 +44,7 @@ models/
 *.json
 data/
 *.zip
+
+# 保留 qwen_adv
+!data/qwen_adv/
+!data/qwen_adv/*.pkl
