@@ -1,18 +1,3 @@
-"""
-train_bert_baseline.py — BERT-base 基线训练（与 SocialDebias 同主干 / 同切分 / 同超参）
-
-设计与 SocialDebias 严格对齐，仅去除 surface 分支与所有损失项：
-- 主干: bert-base-uncased，冻结除 encoder.layer.11 外的所有层（同 ENDEF / SD）
-- 数据: utils.real_dataloader.load_dataset(val_ratio=0.15, seed=seed)（同 SD）
-- 超参: lr=2e-5, batch_size=4, epoch=3（同 SD surface）
-- 选模型: 按 val F1 best
-
-ckpt 保存格式与 SD 兼容，但不含 surface_feat / feat_mean / feat_std。
-
-用法:
-    python scripts/train_bert_baseline.py \
-        --dataset politifact --seed 42
-"""
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -37,8 +22,8 @@ from utils.device import get_device
 
 
 class BertBaselineModel(nn.Module):
-    """与 SD 主干完全一致：bert-base-uncased，仅微调 encoder.layer.11；
-    分类头：dropout + Linear(768, 2)。"""
+    """与 SD 主干完全一致：仅微调 encoder.layer.11；分类头：dropout + Linear(hidden, 2)。
+    英文用 bert-base-uncased，中文用 bert-base-chinese。"""
     def __init__(self, model_name="bert-base-uncased", num_classes=2, dropout=0.1):
         super().__init__()
         self.bert = BertModel.from_pretrained(model_name).requires_grad_(False)
@@ -50,7 +35,6 @@ class BertBaselineModel(nn.Module):
 
     def forward(self, input_ids, attention_mask):
         out = self.bert(input_ids, attention_mask=attention_mask)
-        # 用 [CLS] 的 last_hidden_state[:, 0, :]（与 SD 主流路径一致）
         cls = out.last_hidden_state[:, 0, :]
         x = self.dropout(cls)
         return self.classifier(x)
@@ -114,7 +98,10 @@ def set_seed(seed):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", required=True, choices=["politifact", "gossipcop"])
+    # 英文用 --dataset；中文用 --use_weibo21（此时 --dataset 忽略）
+    parser.add_argument("--dataset", default="politifact", choices=["politifact", "gossipcop"])
+    parser.add_argument("--use_weibo21", action="store_true",
+                        help="训练中文 Weibo21（bert-base-chinese），忽略 --dataset")
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--lr", type=float, default=2e-5)
     parser.add_argument("--batch_size", type=int, default=4)
@@ -127,18 +114,32 @@ def main():
 
     set_seed(args.seed)
     device = get_device()
-    bert_name = "bert-base-uncased"
+
+    # ===== 语言 / 主干 / 数据集标签 =====
+    if args.use_weibo21:
+        bert_name = "bert-base-chinese"
+        lang_tag = "zh"
+        dataset_tag = "weibo21"
+    else:
+        bert_name = "bert-base-uncased"
+        lang_tag = "en"
+        dataset_tag = args.dataset
+
     tokenizer = AutoTokenizer.from_pretrained(bert_name)
 
     print("=" * 80)
-    print(f"BERT baseline 训练: {args.dataset} × seed={args.seed}")
+    print(f"BERT baseline 训练: {dataset_tag} × seed={args.seed}  ({bert_name})")
     print(f"  lr={args.lr}  batch={args.batch_size}  epoch={args.epoch}  max_len={args.max_length}")
     print("=" * 80)
 
-    # 数据加载（与 SD 同切分）
-    train_samples, val_samples, test_samples = load_dataset(
-        dataset_name=args.dataset, val_ratio=args.val_ratio, seed=args.seed,
-    )
+    # ===== 数据加载（与 SD 同切分 / 同 loader）=====
+    if args.use_weibo21:
+        from utils.weibo21_dataloader import load_weibo21_dataset
+        train_samples, val_samples, test_samples = load_weibo21_dataset()
+    else:
+        train_samples, val_samples, test_samples = load_dataset(
+            dataset_name=args.dataset, val_ratio=args.val_ratio, seed=args.seed,
+        )
     print(f"数据规模: train={len(train_samples)}  val={len(val_samples)}  test={len(test_samples)}")
 
     train_set = BertTextDataset(train_samples, tokenizer, args.max_length)
@@ -156,7 +157,7 @@ def main():
     # 训练
     Path(args.save_dir).mkdir(parents=True, exist_ok=True)
     Path(args.log_dir).mkdir(parents=True, exist_ok=True)
-    save_path = f"{args.save_dir}/socialdebias_{args.dataset}_en_seed{args.seed}_bert_baseline.pt"
+    save_path = f"{args.save_dir}/socialdebias_{dataset_tag}_{lang_tag}_seed{args.seed}_bert_baseline.pt"
     history = []
     best_val_f1 = -1.0
     best_test_metrics = None
@@ -191,7 +192,7 @@ def main():
                 "model_state_dict": model.state_dict(),
                 "config": {
                     "model_name": bert_name,
-                    "dataset": args.dataset,
+                    "dataset": dataset_tag,
                     "seed": args.seed,
                     "lr": args.lr,
                     "batch_size": args.batch_size,
