@@ -1,0 +1,175 @@
+"""
+解释一致性(X) × 对抗鲁棒性(Y) 逐样本联合提取 —— 四变体批量版
+================================================================
+在 PolitiFact 同一批测试样本上，对 adv_A/B/C/D 四种改写风格，各自产出：
+  X：sd_top_k_overlap / sd_spearman / sd_js_div（原文 vs 该变体的 IG 归因一致性，Captum）
+  Y：p_true_orig / p_true_adv / delta_p / correct_orig / correct_adv（完整 SD 模型置信度）
+
+合并输出 4×n 行（每行带 variant 列），供"一致性 vs Δp"的相关分析（合并 + 分变体）。
+
+优化：原文的归因与置信度只计算一次（原文跨变体不变），仅对每个变体算改写侧。
+说明：X 走文本归因路径（与表 5-8 一致）；Y 走完整模型（含 8 维 surface + 训练标准化）。
+增量保存，Mac MPS 下 Captum 自动切 CPU。约 2 小时（n≈90，IG 调用 ~ n×(1+4)=450 次）。
+
+输出：results/expl_robust_xy_politifact_ALL.csv
+"""
+import argparse
+import csv
+import pickle
+from pathlib import Path
+
+import numpy as np
+import torch
+from transformers import AutoTokenizer
+
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from modeling.social_debias import SocialDebiasModel
+from modeling.attributor import BertAttributor
+from utils.explanation_metrics import compute_all_metrics
+from utils.surface_features import SurfaceFeatureExtractor
+from utils.device import get_device
+
+
+def load_pkl(path):
+    with open(path, "rb") as f:
+        d = pickle.load(f)
+    if isinstance(d, dict):
+        texts = d.get("news") or d.get("rewritten") or d.get("content")
+        labels = d.get("labels") or d.get("label")
+    else:
+        texts = d["news"].tolist() if "news" in d.columns else d["content"].tolist()
+        labels = d["labels"].tolist() if "labels" in d.columns else d["label"].tolist()
+    return list(texts), [int(x) for x in labels]
+
+
+@torch.no_grad()
+def predict_p_true(model, tokenizer, extractor, feat_mean, feat_std,
+                   text, label, device, max_length=512):
+    enc = tokenizer(text, max_length=max_length, padding="max_length",
+                    truncation=True, return_tensors="pt")
+    input_ids = enc["input_ids"].to(device)
+    attention_mask = enc["attention_mask"].to(device)
+    surface = None
+    if extractor is not None:
+        raw = extractor.extract(text)
+        std = (raw - feat_mean) / (feat_std + 1e-8)
+        surface = torch.tensor(std, dtype=torch.float32).unsqueeze(0).to(device)
+    out = model(input_ids, attention_mask, surface_feat=surface)
+    probs = torch.softmax(out["fact_logits"], dim=-1)[0]
+    return float(probs[label].item()), int(out["fact_logits"].argmax(dim=-1).item())
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--orig_pkl", default="data/sheepdog/news_articles/politifact_test.pkl")
+    ap.add_argument("--adv_tpl",  default="data/sheepdog/adversarial_test/politifact_test_adv_{v}.pkl",
+                    help="改写 pkl 路径模板，{v} 替换为变体名")
+    ap.add_argument("--variants", default="A,B,C,D")
+    ap.add_argument("--ckpt",     default="results/models/socialdebias_politifact_en_seed42_surface.pt")
+    ap.add_argument("--output",   default="results/expl_robust_xy_politifact_ALL.csv")
+    ap.add_argument("--target_class", type=int, default=1)
+    ap.add_argument("--top_k", type=int, default=10)
+    ap.add_argument("--n_steps", type=int, default=50)
+    ap.add_argument("--max_length", type=int, default=512)
+    ap.add_argument("--bert_name", default="bert-base-uncased")
+    args = ap.parse_args()
+
+    device = get_device()
+    print(f"设备: {device}")
+    tokenizer = AutoTokenizer.from_pretrained(args.bert_name)
+
+    ckpt = torch.load(args.ckpt, map_location=device, weights_only=False)
+    surface_dim = ckpt["config"].get("surface_feat_dim", 0)
+    feat_mean = np.array(ckpt["feat_mean"]) if ckpt.get("feat_mean") else None
+    feat_std = np.array(ckpt["feat_std"]) if ckpt.get("feat_std") else None
+    model = SocialDebiasModel(
+        model_name=args.bert_name, num_classes=2, hidden_dim=384, dropout=0.1,
+        grl_lambda=1.0, use_frozen_bert=True, surface_feat_dim=surface_dim,
+    ).to(device)
+    model.load_state_dict(ckpt["model_state_dict"], strict=False)
+    model.eval()
+    print(f"加载 ckpt: surface_dim={surface_dim}")
+    extractor = SurfaceFeatureExtractor(dim=surface_dim) if surface_dim > 0 else None
+    attributor = BertAttributor(model, tokenizer, device, n_steps=args.n_steps)
+
+    # ---- 原文侧只算一次 ----
+    orig_texts, orig_labels = load_pkl(args.orig_pkl)
+    n = len(orig_texts)
+    print(f"原文样本数 n={n}，预计算原文归因与置信度 …")
+    orig_attr, orig_p, orig_pred = {}, {}, {}
+    for i in range(n):
+        try:
+            a = attributor.attribute(orig_texts[i][:3000], target_class=args.target_class)
+            orig_attr[i] = (a["tokens"], a["scores"])
+        except Exception as e:
+            print(f"  [原文归因失败 idx={i}] {e}"); orig_attr[i] = None
+        p, pr = predict_p_true(model, tokenizer, extractor, feat_mean, feat_std,
+                               orig_texts[i], orig_labels[i], device, args.max_length)
+        orig_p[i], orig_pred[i] = p, pr
+        if (i + 1) % 20 == 0: print(f"    原文 {i+1}/{n}")
+
+    # ---- 逐变体 ----
+    variants = [v.strip() for v in args.variants.split(",")]
+    rows = []
+    for v in variants:
+        adv_path = args.adv_tpl.format(v=v)
+        adv_texts, _ = load_pkl(adv_path)
+        m = min(n, len(adv_texts))
+        print(f"\n=== 变体 {v}（{adv_path}，{m} 样本）===")
+        for i in range(m):
+            label = orig_labels[i]
+            # X: 一致性
+            if orig_attr[i] is not None:
+                try:
+                    a_adv = attributor.attribute(adv_texts[i][:3000], target_class=args.target_class)
+                    mm = compute_all_metrics(orig_attr[i][0], orig_attr[i][1],
+                                             a_adv["tokens"], a_adv["scores"], k=args.top_k)
+                except Exception as e:
+                    print(f"  [变体{v}归因失败 idx={i}] {e}")
+                    mm = {"top_k_overlap": np.nan, "spearman": np.nan, "js_divergence": np.nan}
+            else:
+                mm = {"top_k_overlap": np.nan, "spearman": np.nan, "js_divergence": np.nan}
+            # Y: Δp
+            p_a, pred_a = predict_p_true(model, tokenizer, extractor, feat_mean, feat_std,
+                                         adv_texts[i], label, device, args.max_length)
+            rows.append({
+                "variant": v, "idx": i, "label": label,
+                "sd_top_k_overlap": mm["top_k_overlap"],
+                "sd_spearman": mm["spearman"], "sd_js_div": mm["js_divergence"],
+                "p_true_orig": orig_p[i], "p_true_adv": p_a,
+                "delta_p": orig_p[i] - p_a,
+                "pred_orig": orig_pred[i], "pred_adv": pred_a,
+                "correct_orig": int(orig_pred[i] == label),
+                "correct_adv": int(pred_a == label),
+            })
+            if (i + 1) % 20 == 0: print(f"    {v} {i+1}/{m}")
+            if len(rows) % 30 == 0 or (v == variants[-1] and i == m - 1):
+                Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+                with open(args.output, "w", encoding="utf-8-sig", newline="") as f:
+                    w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+                    w.writeheader(); w.writerows(rows)
+
+    # ---- 汇总 ----
+    def stat(rs, k):
+        v = [r[k] for r in rs if not (isinstance(r[k], float) and np.isnan(r[k]))]
+        return (np.mean(v), np.std(v)) if v else (float("nan"), float("nan"))
+
+    print("\n" + "=" * 70)
+    print(f"{'变体':<8}{'n':<5}{'top_k':<10}{'spearman':<10}{'Δp均值':<10}{'攻破/干净对':<12}{'ASR'}")
+    for v in variants + ["ALL"]:
+        rs = rows if v == "ALL" else [r for r in rows if r["variant"] == v]
+        tk, _ = stat(rs, "sd_top_k_overlap"); sp, _ = stat(rs, "sd_spearman")
+        dp, _ = stat(rs, "delta_p")
+        clean_ok = sum(1 for r in rs if r["correct_orig"] == 1)
+        flip = sum(1 for r in rs if r["correct_orig"] == 1 and r["correct_adv"] == 0)
+        asr = 100 * flip / max(clean_ok, 1)
+        print(f"{v:<8}{len(rs):<5}{tk:<10.4f}{sp:<10.4f}{dp:<10.4f}{f'{flip}/{clean_ok}':<12}{asr:.1f}%")
+    print("=" * 70)
+    print(f"\n逐样本×变体结果已保存: {args.output}")
+    print("adv_C 那组的 top_k/spearman 应与之前单变体一致（0.1307/0.4689）作为自检。")
+
+
+if __name__ == "__main__":
+    main()
