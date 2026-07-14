@@ -155,7 +155,7 @@ def main():
     extractor = None
     if args.surface_feat_dim > 0:
         print("[Surface] 加载 SurfaceFeatureExtractor...")
-        extractor = SurfaceFeatureExtractor()
+        extractor = SurfaceFeatureExtractor(dim=args.surface_feat_dim)
 
     # 训练集（fit normalizer）
     train_set = SurfaceAugmentedDataset(
