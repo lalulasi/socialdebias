@@ -1,8 +1,6 @@
 """
-DeepSeek API 改写 Weibo21 训练集（用于意见 14 软标签 NLI 实验）
-- 全量 5751 条 × 1 风格（neutral）
-- 并发 10
-- 断点续传
+使用 DeepSeek API 改写 Weibo21 训练集。
+默认生成 neutral 风格文本，并支持断点续传。
 """
 import os
 import sys

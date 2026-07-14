@@ -1,43 +1,23 @@
-"""
-梯度反转层（Gradient Reversal Layer）
-
-核心思想：前向传播时等同于恒等映射，反向传播时将梯度乘以 -λ。
-这样上游模块会收到"反向"梯度，从而学到对下游任务"无用"的表示。
-
-来源：Ganin & Lempitsky (2015), Unsupervised Domain Adaptation by Backpropagation
-"""
+"""梯度反转层：前向保持输入不变，反向将梯度乘以 -lambda。"""
 import torch
 from torch.autograd import Function
 
 
 class GradientReversalFunction(Function):
-    """
-    自定义 autograd Function，实现梯度反转的核心逻辑。
-    继承 torch.autograd.Function 需要实现 forward 和 backward 两个静态方法。
-    """
+    """梯度反转的 autograd 实现。"""
 
     @staticmethod
     def forward(ctx, x, lambda_):
-        # 前向传播：恒等映射，但把 lambda_ 保存下来供反向传播使用
         ctx.lambda_ = lambda_
-        return x.view_as(x)  # 返回 x 的一个视图，保持计算图连接
+        return x.view_as(x)
 
     @staticmethod
     def backward(ctx, grad_output):
-        # 反向传播：梯度取反并乘以 lambda_
-        # 注意这里要返回和 forward 输入数量相同的梯度（x 和 lambda_ 各一个）
-        # lambda_ 不需要梯度，所以返回 None
         return grad_output.neg() * ctx.lambda_, None
 
 
 class GradientReversalLayer(torch.nn.Module):
-    """
-    梯度反转层的 Module 封装，方便嵌入到 nn.Sequential 或 nn.Module 中。
-
-    Args:
-        lambda_: 反转系数，控制对抗强度。通常训练初期取较小值（如 0.1），
-                逐步增大到 1.0。
-    """
+    """梯度反转层的模块封装。"""
 
     def __init__(self, lambda_: float = 1.0):
         super().__init__()
@@ -47,7 +27,7 @@ class GradientReversalLayer(torch.nn.Module):
         return GradientReversalFunction.apply(x, self.lambda_)
 
     def set_lambda(self, lambda_: float):
-        """动态调整反转系数（用于课程学习式训练）"""
+        """更新梯度反转系数。"""
         self.lambda_ = lambda_
 
 
@@ -96,4 +76,4 @@ if __name__ == "__main__":
     print(f"  无 GRL 时 grad sign: {linear1_ref.weight.grad[0, :3].sign().tolist()}")
     print(f"  （应该和上面相反）")
 
-    print("\n✅ GRL 测试完成")
+    print("\nGRL 测试完成")

@@ -2,19 +2,19 @@
 """
 scripts/analyze_human_eval.py
 
-分析人工标注结果，输出意见 17 论文 5.4.x 节所需的指标：
+分析人工标注结果，输出以下指标：
 1. 人类判别准确率（原文 / 对抗文 / 攻击成功率）
 2. 置信度分布
 3. 人类关键词解释一致性（原文 vs 对抗 Jaccard）
 4. （可选）模型 IG 归因 vs 人类标注 Jaccard 对齐
 
 用法：
-    # 仅人类指标
+    # 只计算人工标注指标
     python scripts/analyze_human_eval.py \
         --input results/human_eval/politifact_pre_annotated_task.xlsx \
         --output_dir results/human_eval/
 
-    # 加上模型 IG 对齐（需先跑 run_explanation_metrics.py）
+    # 同时计算模型 IG 与人工关键词的对齐度
     python scripts/analyze_human_eval.py \
         --input results/human_eval/politifact_pre_annotated_task.xlsx \
         --ig_json results/explanation/politifact_surface_seed42.json \
@@ -264,7 +264,7 @@ def format_float(x, digits=4):
 
 def print_report(metrics, alignment_metrics=None):
     print("=" * 60)
-    print("人工评估分析报告（意见 17，PolitiFact × adv_C）")
+    print("人工评估分析报告（PolitiFact × adv_C）")
     print("=" * 60)
     print()
     print("【数据完整性】")

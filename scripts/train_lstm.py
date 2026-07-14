@@ -1,5 +1,5 @@
 """
-LSTM 基线训练脚本（意见 19）。
+LSTM 基线训练脚本。
 用法:
     python scripts/train_lstm.py --dataset politifact --seed 42
     python scripts/train_lstm.py --dataset gossipcop --seed 42 --glove_path ./glove.840B.300d.txt

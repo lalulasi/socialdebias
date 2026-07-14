@@ -1,236 +1,219 @@
-"""
-消融实验（意见 20）：通过 λ 组合控制不同变体
-    full        λ_bias=0.5, λ_consist=0.3
-    no_grl      λ_bias=0.0, λ_consist=0.3   # 关掉偏置分支反传
-    no_consist  λ_bias=0.5, λ_consist=0.0   # 关掉语义一致性
-    no_both     λ_bias=0.0, λ_consist=0.0   # 两个都关（退化为 BERT 基线）
-
-用法:
-    python scripts/train_ablation.py --dataset politifact --variant full --seed 42
-"""
+"""Train SocialDebias ablation variants with the reproduction-guide CLI."""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import argparse
 import json
-from types import SimpleNamespace
+import random
+import time
 
 import numpy as np
 import torch
-from torch.optim import AdamW
-from transformers import BertTokenizer
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
+from torch.optim import AdamW
+from torch.utils.data import DataLoader
+from transformers import AutoTokenizer
 
-from modeling.social_debias import SocialDebiasModel  # 按实际 class 名调整
-from utils.dataloader import create_dataloaders_auto
+from modeling.social_debias import SocialDebiasModel
+from utils.dataloader import SurfaceAugmentedDataset
 from utils.device import get_device
+from utils.real_dataloader import load_dataset
+from utils.surface_features import SurfaceFeatureExtractor
 
 
-# ==================== 损失计算 ====================
-
-def compute_loss(outputs, labels, lambdas, criterion):
-    """
-    按 λ 组合计算总损失。
-    outputs: model forward 返回的 dict
-    lambdas: dict {lambda_fact, lambda_bias, lambda_consist}
-
-    语义一致性约束：shared_repr 与 frozen_repr 的余弦相似度
-    （两个都是 768 维 BERT [CLS]，维度天然对齐）
-    """
-    device = outputs["fact_logits"].device
-
-    # L_fact：主任务损失（必有）
-    loss_fact = criterion(outputs["fact_logits"], labels)
-    total = lambdas["lambda_fact"] * loss_fact
-
-    loss_bias = torch.tensor(0.0, device=device)
-    loss_consist = torch.tensor(0.0, device=device)
-
-    # L_bias：偏置分支损失（通过 GRL 自动反转梯度）
-    if lambdas["lambda_bias"] > 0 and "bias_logits" in outputs:
-        loss_bias = criterion(outputs["bias_logits"], labels)
-        total = total + lambdas["lambda_bias"] * loss_bias
-
-    # L_consist：语义一致性（要求开启 frozen_bert 才有 frozen_repr）
-    if lambdas["lambda_consist"] > 0 and "frozen_repr" in outputs:
-        shared = outputs["shared_repr"]
-        frozen = outputs["frozen_repr"]
-        cos = torch.nn.functional.cosine_similarity(shared, frozen, dim=-1)
-        loss_consist = (1.0 - cos).mean()
-        total = total + lambdas["lambda_consist"] * loss_consist
-
-    return total, {
-        "total": total.item(),
-        "fact": loss_fact.item(),
-        "bias": loss_bias.item() if torch.is_tensor(loss_bias) else 0.0,
-        "consist": loss_consist.item() if torch.is_tensor(loss_consist) else 0.0,
-    }
+VARIANT_LAMBDAS = {
+    "full": (1.0, 0.5, 0.3),
+    "no_grl": (1.0, 0.0, 0.3),
+    "no_consist": (1.0, 0.5, 0.0),
+    "no_both": (1.0, 0.0, 0.0),
+}
 
 
-# ==================== 评估 ====================
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
 
 def evaluate(model, loader, device):
     model.eval()
-    all_preds, all_labels, all_probs = [], [], []
+    preds, probs, labels_all = [], [], []
     with torch.no_grad():
         for batch in loader:
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
-            labels = batch["label"]
-            out = model(input_ids, attention_mask)
+            labels = batch["label"].to(device)
+            surface = batch.get("surface_feat")
+            if surface is not None:
+                surface = surface.to(device)
+
+            out = model(input_ids, attention_mask, surface_feat=surface)
             logits = out["fact_logits"]
-            probs = torch.softmax(logits, dim=-1)[:, 1].cpu().numpy()
-            preds = logits.argmax(dim=-1).cpu().numpy()
-            all_preds.extend(preds)
-            all_labels.extend(labels.numpy())
-            all_probs.extend(probs)
-    acc = accuracy_score(all_labels, all_preds)
-    f1 = f1_score(all_labels, all_preds, average="macro")
+            preds.extend(logits.argmax(dim=-1).cpu().numpy())
+            probs.extend(torch.softmax(logits, dim=-1)[:, 1].cpu().numpy())
+            labels_all.extend(labels.cpu().numpy())
+
     try:
-        auc = roc_auc_score(all_labels, all_probs)
+        auc = roc_auc_score(labels_all, probs)
     except ValueError:
         auc = float("nan")
-    return {"acc": acc, "f1": f1, "auc": auc}
+    return {
+        "acc": accuracy_score(labels_all, preds),
+        "f1": f1_score(labels_all, preds, average="macro"),
+        "auc": auc,
+    }
 
-
-# ==================== 主流程 ====================
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", required=True, choices=["politifact", "gossipcop", "lun"])
-    parser.add_argument("--variant", required=True,
-                        choices=["full", "no_grl", "no_consist", "no_both"])
+    parser.add_argument("--dataset", required=True, choices=["politifact", "gossipcop"])
+    parser.add_argument("--language", default="en")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--lr", type=float, default=2e-5)
     parser.add_argument("--max_length", type=int, default=512)
-    parser.add_argument("--bert_name", type=str, default="bert-base-uncased")
-    parser.add_argument("--language", type=str, default="en")
-    parser.add_argument("--output_dir", type=str, default="results/ablation")
-    parser.add_argument("--override_lambda_bias", type=float, default=None,
-                    help="覆盖 variant 默认的 λ_bias（None 则使用 LAMBDA_MAP 的值）")
-    parser.add_argument("--override_lambda_consist", type=float, default=None,
-                    help="覆盖 variant 默认的 λ_consist")
+    parser.add_argument("--lambda_fact", type=float, default=None)
+    parser.add_argument("--lambda_bias", type=float, default=None)
+    parser.add_argument("--lambda_consist", type=float, default=None)
+    parser.add_argument("--surface_feat_dim", type=int, default=8)
+    parser.add_argument("--orig_pkl", default=None)
+    parser.add_argument("--adv_pkl", default=None)
+    parser.add_argument("--save_dir", default="results/models")
+    parser.add_argument("--save_suffix", default=None)
+    parser.add_argument("--variant", choices=list(VARIANT_LAMBDAS), default=None,
+                        help="旧入口兼容；未显式传 lambda 时用该变体的默认权重")
     args = parser.parse_args()
 
-    # λ 组合
-    LAMBDA_MAP = {
-        "full":       {"lambda_fact": 1.0, "lambda_bias": 0.5, "lambda_consist": 0.3},
-        "no_grl":     {"lambda_fact": 1.0, "lambda_bias": 0.0, "lambda_consist": 0.3},
-        "no_consist": {"lambda_fact": 1.0, "lambda_bias": 0.5, "lambda_consist": 0.0},
-        "no_both":    {"lambda_fact": 1.0, "lambda_bias": 0.0, "lambda_consist": 0.0},
-    }
-    lambdas = LAMBDA_MAP[args.variant]
-    lambdas = dict(LAMBDA_MAP[args.variant])  # 避免原地修改
-    if args.override_lambda_bias is not None and lambdas["lambda_bias"] > 0:
-        # 只对非零项覆盖（不破坏 no_grl/no_both 的 0 值）
-        lambdas["lambda_bias"] = args.override_lambda_bias
-    if args.override_lambda_consist is not None and lambdas["lambda_consist"] > 0:
-        lambdas["lambda_consist"] = args.override_lambda_consist
-    print(f"[Ablation] 最终 λ = {lambdas}")
+    if args.variant and args.lambda_fact is None:
+        args.lambda_fact, args.lambda_bias, args.lambda_consist = VARIANT_LAMBDAS[args.variant]
+    args.lambda_fact = 1.0 if args.lambda_fact is None else args.lambda_fact
+    args.lambda_bias = 0.5 if args.lambda_bias is None else args.lambda_bias
+    args.lambda_consist = 0.3 if args.lambda_consist is None else args.lambda_consist
+    if args.save_suffix is None:
+        args.save_suffix = f"abl_{args.variant or 'custom'}"
 
-    torch.manual_seed(args.seed)
-    np.random.seed(args.seed)
+    set_seed(args.seed)
     device = get_device()
+    bert_name = "bert-base-uncased" if args.language == "en" else "bert-base-chinese"
+    tokenizer = AutoTokenizer.from_pretrained(bert_name)
 
-    # ==== 构造 config（SimpleNamespace 模拟真 config 对象） ====
-    config = SimpleNamespace(
-        use_dummy_data=False,
-        dataset_name=args.dataset,
-        max_train_samples=None,
-        batch_size=args.batch_size,
-        max_length=args.max_length,
-        language=args.language,
+    train_data, val_data, test_data = load_dataset(args.dataset, seed=args.seed)
+    extractor = SurfaceFeatureExtractor(dim=args.surface_feat_dim) if args.surface_feat_dim > 0 else None
+
+    train_set = SurfaceAugmentedDataset(
+        train_data, tokenizer, args.max_length, surface_extractor=extractor
+    )
+    normalizer = (train_set.feat_mean, train_set.feat_std) if extractor else None
+    val_set = SurfaceAugmentedDataset(
+        val_data, tokenizer, args.max_length, surface_extractor=extractor, normalizer=normalizer
+    )
+    test_set = SurfaceAugmentedDataset(
+        test_data, tokenizer, args.max_length, surface_extractor=extractor, normalizer=normalizer
     )
 
-    # ==== Tokenizer + DataLoader ====
-    tokenizer = BertTokenizer.from_pretrained(args.bert_name)
-    train_loader, val_loader, test_loader = create_dataloaders_auto(
-        config, tokenizer, seed=args.seed
-    )
-    print(f"[Ablation] train batches={len(train_loader)}, val={len(val_loader)}, test={len(test_loader)}")
+    train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=0)
+    val_loader = DataLoader(val_set, batch_size=args.batch_size, shuffle=False, num_workers=0)
+    test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=0)
 
-    # ==== 模型 ====
-    # 注意：即使 lambda_consist=0，仍然保持 use_frozen_bert=True，
-    # 这样结构一致，只是不用 frozen_repr 算损失而已
-    # （如果你的 SocialDebiasModel 构造函数签名不同，按实际改）
     model = SocialDebiasModel(
-        model_name=args.bert_name,  # 参数名改成 model_name
+        model_name=bert_name,
         num_classes=2,
         hidden_dim=384,
         dropout=0.1,
         grl_lambda=1.0,
         use_frozen_bert=True,
+        surface_feat_dim=args.surface_feat_dim,
     ).to(device)
 
     optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
     criterion = torch.nn.CrossEntropyLoss(label_smoothing=0.1)
-
-    # ==== 训练 ====
-    out_dir = Path(args.output_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    ckpt_path = out_dir / f"ablation_{args.dataset}_{args.variant}_seed{args.seed}.pt"
+    Path(args.save_dir).mkdir(parents=True, exist_ok=True)
+    ckpt_path = Path(args.save_dir) / (
+        f"socialdebias_{args.dataset}_{args.language}_seed{args.seed}_{args.save_suffix}.pt"
+    )
 
     best_val_f1 = -1.0
-    best_test_metrics = None
+    best_test = None
     history = []
+    print(f"[Ablation] dataset={args.dataset} seed={args.seed} suffix={args.save_suffix}")
+    print(f"[Ablation] lambdas fact={args.lambda_fact} bias={args.lambda_bias} consist={args.lambda_consist}")
 
     for epoch in range(1, args.epochs + 1):
         model.train()
-        batch_losses = []
+        t0 = time.time()
+        losses = {"total": [], "fact": [], "bias": [], "consist": []}
+
         for batch in train_loader:
+            optimizer.zero_grad()
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             labels = batch["label"].to(device)
+            surface = batch.get("surface_feat")
+            if surface is not None:
+                surface = surface.to(device)
 
-            optimizer.zero_grad()
-            outputs = model(input_ids, attention_mask)
-            loss, info = compute_loss(outputs, labels, lambdas, criterion)
+            out = model(input_ids, attention_mask, surface_feat=surface)
+            loss_fact = criterion(out["fact_logits"], labels)
+            loss_bias = criterion(out["bias_logits"], labels) if args.lambda_bias > 0 else torch.tensor(0.0, device=device)
+            if args.lambda_consist > 0 and "frozen_repr" in out:
+                cos = torch.nn.functional.cosine_similarity(out["shared_repr"], out["frozen_repr"], dim=-1)
+                loss_consist = (1.0 - cos).mean()
+            else:
+                loss_consist = torch.tensor(0.0, device=device)
+
+            loss = (
+                args.lambda_fact * loss_fact
+                + args.lambda_bias * loss_bias
+                + args.lambda_consist * loss_consist
+            )
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
-            batch_losses.append(info)
 
-        avg_total = np.mean([x["total"] for x in batch_losses])
-        avg_fact = np.mean([x["fact"] for x in batch_losses])
-        avg_bias = np.mean([x["bias"] for x in batch_losses])
-        avg_consist = np.mean([x["consist"] for x in batch_losses])
+            losses["total"].append(loss.item())
+            losses["fact"].append(loss_fact.item())
+            losses["bias"].append(loss_bias.item())
+            losses["consist"].append(loss_consist.item())
 
         val_m = evaluate(model, val_loader, device)
+        means = {k: float(np.mean(v)) if v else 0.0 for k, v in losses.items()}
         history.append({
             "epoch": epoch,
-            "loss_total": avg_total, "loss_fact": avg_fact,
-            "loss_bias": avg_bias, "loss_consist": avg_consist,
+            "epoch_time": time.time() - t0,
+            **{f"loss_{k}": v for k, v in means.items()},
             **{f"val_{k}": v for k, v in val_m.items()},
         })
-        print(f"[E{epoch}] total={avg_total:.4f} fact={avg_fact:.4f} "
-              f"bias={avg_bias:.4f} consist={avg_consist:.4f}")
+        print(f"[E{epoch}] total={means['total']:.4f} fact={means['fact']:.4f} "
+              f"bias={means['bias']:.4f} consist={means['consist']:.4f}")
         print(f"       val acc={val_m['acc']:.4f} f1={val_m['f1']:.4f} auc={val_m['auc']:.4f}")
 
         if val_m["f1"] > best_val_f1:
             best_val_f1 = val_m["f1"]
-            test_m = evaluate(model, test_loader, device)
-            best_test_metrics = {"epoch": epoch, **test_m}
-            torch.save(model.state_dict(), ckpt_path)
-            print(f"       [best!] test acc={test_m['acc']:.4f} f1={test_m['f1']:.4f}")
+            best_test = {"epoch": epoch, **evaluate(model, test_loader, device)}
+            torch.save({
+                "epoch": epoch,
+                "model_state_dict": model.state_dict(),
+                "val_f1": best_val_f1,
+                "feat_mean": train_set.feat_mean.tolist() if extractor else None,
+                "feat_std": train_set.feat_std.tolist() if extractor else None,
+                "config": vars(args),
+            }, ckpt_path)
+            print(f"       best test acc={best_test['acc']:.4f} f1={best_test['f1']:.4f}")
 
-    # ==== 结果保存 ====
-    result = {
-        "dataset": args.dataset,
-        "variant": args.variant,
-        "lambdas": lambdas,
-        "seed": args.seed,
-        "args": vars(args),
-        "best_val_f1": best_val_f1,
-        "test": best_test_metrics,
-        "history": history,
-    }
-    result_path = out_dir / f"ablation_{args.dataset}_{args.variant}_seed{args.seed}.json"
-    with open(result_path, "w") as f:
-        json.dump(result, f, indent=2, default=str)
-    print(f"\n[Ablation] 结果已保存：{result_path}")
+    hist_path = ckpt_path.with_name(ckpt_path.stem + "_history.json")
+    with open(hist_path, "w", encoding="utf-8") as f:
+        json.dump({
+            "args": vars(args),
+            "best_val_f1": best_val_f1,
+            "best_test": best_test,
+            "history": history,
+        }, f, indent=2, default=str)
+    print(f"\n[Ablation] ckpt: {ckpt_path}")
+    print(f"[Ablation] history: {hist_path}")
 
 
 if __name__ == "__main__":

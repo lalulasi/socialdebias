@@ -1,5 +1,6 @@
 #!/bin/bash
-cd /root/autodl-tmp/socialdebias
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 SEEDS=(42 2024 3407)
 DATASETS=("politifact" "gossipcop")

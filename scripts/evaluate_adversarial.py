@@ -5,7 +5,6 @@
 在干净测试集和 4 个对抗测试集（A/B/C/D）上评估，
 输出对比表。
 
-对应老师意见 18：鲁棒性指标体系（增加 ASR、性能保持率等）
 """
 import sys
 import os
@@ -27,7 +26,6 @@ from utils.dataloader import FakeNewsDataset
 from utils.real_dataloader import load_sheepdog_pkl
 from modeling.bert_classifier import BertClassifier
 from modeling.social_debias import SocialDebiasModel
-from configs.base_config import get_config
 
 
 def load_adversarial_test(dataset: str, variant: str) -> list:
@@ -107,8 +105,10 @@ def main():
     device = get_device()
     print(f"设备: {device}")
 
-    config = get_config(mode="dev_real", language=args.language, dataset=args.dataset)
-    tokenizer = AutoTokenizer.from_pretrained(config.model_name)
+    model_name = "bert-base-chinese" if args.language == "zh" else "bert-base-uncased"
+    max_length = 512
+    batch_size = 16 if args.dataset == "gossipcop" else 4
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     # 加载干净测试集
     print(f"\n加载干净测试集: {args.dataset}")
@@ -126,8 +126,8 @@ def main():
 
     # 构建 DataLoader
     def make_loader(data):
-        ds = FakeNewsDataset(data, tokenizer, config.max_length)
-        return DataLoader(ds, batch_size=config.batch_size, shuffle=False, num_workers=0)
+        ds = FakeNewsDataset(data, tokenizer, max_length)
+        return DataLoader(ds, batch_size=batch_size, shuffle=False, num_workers=0)
 
     clean_loader = make_loader(test_data)
     adv_loaders = {v: make_loader(d) for v, d in adv_datasets.items()}
@@ -139,11 +139,11 @@ def main():
 
     baseline_ckpt = f"./results/models/baseline_{args.dataset}_{args.language}_seed{args.seed}.pt"
     if not os.path.exists(baseline_ckpt):
-        print(f"⚠️  未找到基线 checkpoint: {baseline_ckpt}")
+        print(f"未找到基线 checkpoint: {baseline_ckpt}")
         print("请先运行 train_baseline.py")
         return
 
-    baseline_model = BertClassifier(model_name=config.model_name).to(device)
+    baseline_model = BertClassifier(model_name=model_name).to(device)
     ckpt = torch.load(baseline_ckpt, map_location=device)
     baseline_model.load_state_dict(ckpt["model_state_dict"])
     print(f"加载 baseline checkpoint (val F1={ckpt.get('val_f1', 'N/A'):.4f})")
@@ -166,12 +166,12 @@ def main():
 
     sd_ckpt = f"./results/models/socialdebias_{args.dataset}_{args.language}_seed{args.seed}.pt"
     if not os.path.exists(sd_ckpt):
-        print(f"⚠️  未找到 SocialDebias checkpoint: {sd_ckpt}")
+        print(f"未找到 SocialDebias checkpoint: {sd_ckpt}")
         print("请先运行 train_socialdebias.py")
         return
 
     sd_model = SocialDebiasModel(
-        model_name=config.model_name,
+        model_name=model_name,
         use_frozen_bert=False,  # 推理不需要冻结 BERT，省内存
     ).to(device)
     ckpt = torch.load(sd_ckpt, map_location=device)
@@ -254,9 +254,9 @@ def main():
     print(f"平均 ASR 降低:    {asr_improvement * 100:+.2f} 百分点 (越大越好)")
 
     if f1_drop_improvement > 0:
-        print(f"\n✅ SocialDebias 比基线更鲁棒（F1 下降减少 {f1_drop_improvement * 100:.2f}pp）")
+        print(f"\nSocialDebias 比基线更鲁棒（F1 下降减少 {f1_drop_improvement * 100:.2f}pp）")
     else:
-        print(f"\n⚠️  SocialDebias 在该数据上未显示出鲁棒性优势")
+        print(f"\nSocialDebias 在该数据上未显示出鲁棒性优势")
         print("   可能原因：单次实验随机性 / lambda 参数需要调整 / 训练 epoch 不够")
 
     print("\n评估完成")

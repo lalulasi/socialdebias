@@ -1,9 +1,8 @@
 #!/bin/bash
-# 消融实验在 SheepDog GossipCop 上重做
-# 4 变体 × 3 种子 × 3 epoch，预计 4-6 小时
-# 使用: nohup bash run_ablation_gossipcop.sh > run.out 2>&1 &
+# GossipCop 消融实验：四种设置各跑三个随机种子。
 
-cd /root/autodl-tmp/socialdebias
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 SEEDS=(42 2024 3407)
 VARIANTS=("full" "no_grl" "no_consist" "no_both")
@@ -11,7 +10,6 @@ DATASETS=("gossipcop")
 
 EPOCHS=3
 BATCH_SIZE=16
-# 不加 --override_lambda_bias，使用 LAMBDA_MAP 默认（full 时 bias=0.5，和 exp002 一致）
 OUTPUT_DIR="results/ablation_gossipcop"
 
 LOG_ROOT="${OUTPUT_DIR}/logs"
@@ -22,8 +20,7 @@ echo "GossipCop 消融实验开始: $(date)"
 echo "数据集: ${DATASETS[*]}"
 echo "变体: ${VARIANTS[*]}"
 echo "种子: ${SEEDS[*]}"
-echo "训练: ${EPOCHS} epochs, batch=${BATCH_SIZE}"
-echo "λ: 使用 LAMBDA_MAP 默认 (full=0.5/0.3, no_grl=0/0.3, no_consist=0.5/0, no_both=0/0)"
+echo "训练轮数: ${EPOCHS}，batch size: ${BATCH_SIZE}"
 echo "输出: ${OUTPUT_DIR}"
 echo "========================================"
 
@@ -49,7 +46,8 @@ for DS in "${DATASETS[@]}"; do
         --seed ${SEED} \
         --epochs ${EPOCHS} \
         --batch_size ${BATCH_SIZE} \
-        --output_dir ${OUTPUT_DIR} \
+        --save_dir ${OUTPUT_DIR} \
+        --save_suffix "abl_${VAR}" \
         > "${LOG_FILE}" 2>&1
 
       STATUS=$?
@@ -57,9 +55,9 @@ for DS in "${DATASETS[@]}"; do
       ELAPSED=$((END_TS - START_TS))
 
       if [ ${STATUS} -eq 0 ]; then
-        echo "  [✓] 成功 $(date)  用时 ${ELAPSED}s"
+        echo "  完成 $(date)，用时 ${ELAPSED}s"
       else
-        echo "  [✗] 失败 $(date)  日志: ${LOG_FILE}"
+        echo "  失败 $(date)，日志：${LOG_FILE}"
         tail -5 "${LOG_FILE}" | sed 's/^/    /'
       fi
     done

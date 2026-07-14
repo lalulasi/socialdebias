@@ -1,6 +1,7 @@
 #!/bin/bash
 # GossipCop 对比学习 ckpt 的对抗评估
-cd /root/autodl-tmp/socialdebias
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 SEEDS=(42 2024 3407)
 LAMBDA_CONTRAST=(0.1 0.3 0.5)

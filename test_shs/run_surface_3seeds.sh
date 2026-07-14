@@ -1,10 +1,8 @@
 #!/bin/bash
-# SocialDebias + 17 维表层特征（意见 1 + 意见 8 实现）
-# 6 次训练 × ~5 分钟（PolitiFact）/ 25 分钟（GossipCop）≈ 1.5-2 小时
-#
-# 使用: cd /root/autodl-tmp/socialdebias && bash run_surface_3seeds.sh
+# PolitiFact 的 8 维表层特征三种子实验。
 
-cd /root/autodl-tmp/socialdebias
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 SEEDS=(42 2024 3407)
 DATASETS=("politifact")
@@ -14,7 +12,7 @@ LOG_ROOT="./results/surface_logs"
 mkdir -p "${LOG_ROOT}"
 
 echo "========================================"
-echo "SD + 17 维表层特征实验开始: $(date)"
+echo "SD + 8 维表层特征实验开始: $(date)"
 echo "========================================"
 
 COUNT=0
@@ -49,9 +47,9 @@ for DS in "${DATASETS[@]}"; do
     ELAPSED=$(($(date +%s) - START_TS))
     
     if [ ${STATUS} -eq 0 ]; then
-        echo "  [✓] 成功 用时 ${ELAPSED}s"
+        echo "  完成，用时 ${ELAPSED}s"
     else
-        echo "  [✗] 失败 用时 ${ELAPSED}s 看日志：${LOG_FILE}"
+        echo "  失败，用时 ${ELAPSED}s，日志：${LOG_FILE}"
         tail -10 "${LOG_FILE}" | sed 's/^/    /'
     fi
   done

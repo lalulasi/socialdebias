@@ -1,12 +1,9 @@
 #!/bin/bash
-# ============================================================
-# 17 维表层特征消融（对照 8 维 surface 基础配置）
-# 配方与复现指南 B.1（PolitiFact 最优 surface, 4.85pp）完全一致，
-# 唯一区别：--surface_feat_dim 8 → 17，--save_suffix surface → surface17
-# PolitiFact × 3 seeds，训练 + 对抗评估 + 汇总。极小数据集，很快。
-# ============================================================
+# PolitiFact 的 17 维表层特征消融。
+# 与 8 维配置相比，仅修改表层特征维度和检查点后缀。
 set -e
-cd /root/autodl-tmp/socialdebias      # ← 按你的实际路径改
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 SEEDS=(42 2024 3407)
 DS="politifact"

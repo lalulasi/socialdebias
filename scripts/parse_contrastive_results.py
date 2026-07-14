@@ -47,11 +47,6 @@ def main():
             "n": len(runs),
         })
 
-    # 对比基准 SD（无对比学习）
-    print("\n=== 对比基准（来自主实验，无对比学习）===")
-    print(f"  PolitiFact SD 3 种子: Clean F1=0.8699±0.0263, F1 Drop=8.80±1.32pp")
-    
-    # 保存 CSV
     import csv
     if rows:
         out_csv = RESULT_DIR / "contrastive_summary.csv"
@@ -60,19 +55,6 @@ def main():
             w.writeheader()
             w.writerows(rows)
         print(f"\n汇总 CSV: {out_csv}")
-
-    # 论文写作段
-    print("\n" + "=" * 80)
-    print("论文 5.5.3 节参考段落")
-    print("=" * 80)
-    if rows:
-        # 找最佳 λ
-        best = min(rows, key=lambda r: r["f1_drop_mean"])
-        print(f"\n[politifact]")
-        print(f"在 SocialDebias 基础上引入 InfoNCE 对比学习损失（λ_contrast={best['lambda_contrast']}）后，")
-        print(f"对抗 F1 降幅从基准的 8.80pp 改善至 {best['f1_drop_mean']*100:.2f}pp，")
-        print(f"证明对比学习有效拉近了原文与对抗版本的事实表示。")
-
 
 if __name__ == "__main__":
     main()

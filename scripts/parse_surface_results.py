@@ -1,6 +1,5 @@
 """
-汇总 SD + 表层特征实验结果（含 InfoNCE 变体）。
-对比基准：SD（无表层特征）= 原 train_socialdebias 主实验
+汇总表层特征实验及其 InfoNCE 变体的评测结果。
 """
 import json
 from pathlib import Path
@@ -17,15 +16,11 @@ def main():
     for jf in sorted(RESULT_DIR.glob("surface_adv_*.json")):
         with open(jf) as f:
             d = json.load(f)
-        # 文件名格式: surface_adv_{dataset}_seed{N}_{suffix}.json
-        # 但 d 里也有 dataset / suffix 信息
-        # 从 ckpt 路径解析
+        # 从检查点路径中提取数据集与实验后缀
         ckpt = d.get("ckpt", "")
-        # ckpt: ./results/models/socialdebias_politifact_en_seed42_surface.pt
         parts = Path(ckpt).stem.split("_")  
-        # ['socialdebias', 'politifact', 'en', 'seed42', 'surface']
         dataset = parts[1]
-        suffix = "_".join(parts[4:])  # 处理 surface_contrast
+        suffix = "_".join(parts[4:])
         groups[(dataset, suffix)].append(d)
 
     if not groups:
@@ -33,7 +28,7 @@ def main():
         return
 
     print("\n" + "=" * 110)
-    print("★ 论文 5.5.4 节：表层特征消融对照表（3 种子均值±std）")
+    print("表层特征实验结果（三种子均值和标准差）")
     print("=" * 110)
     print(f"{'Dataset':<12}{'配置':<30}{'Clean F1':<22}{'Avg Adv F1':<22}{'F1 Drop':<22}{'N':<4}")
     print("-" * 110)
@@ -41,8 +36,8 @@ def main():
     rows = []
     suffix_order = ["surface", "surface_contrast"]
     suffix_label = {
-        "surface": "SD + 17维表层",
-        "surface_contrast": "SD + 17维表层 + InfoNCE",
+        "surface": "SD + 8维表层",
+        "surface_contrast": "SD + 8维表层 + InfoNCE",
     }
     
     for ds in ["politifact", "gossipcop"]:
@@ -71,13 +66,6 @@ def main():
                 "n": len(runs),
             })
 
-    # 对比基准
-    print("\n=== 对比基准（来自之前实验）===")
-    print("PolitiFact SD baseline:        Clean F1=0.8699±0.0263, F1 Drop=8.80pp±1.32")
-    print("PolitiFact SD+InfoNCE λ=0.3:   Clean F1=0.8852±0.0210, F1 Drop=6.50pp±0.94")
-    print("GossipCop SD baseline:         Clean F1=0.7974±0.0015, F1 Drop=2.45pp±1.64")
-    
-    # CSV
     import csv
     if rows:
         out_csv = RESULT_DIR / "surface_summary.csv"

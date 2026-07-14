@@ -22,45 +22,42 @@ import json
 import os
 import pickle
 import random
+from pathlib import Path
 
 import numpy as np
-
-# ============ 配置 ============
-SOCIALDEBIAS_ROOT = "/root/autodl-tmp/socialdebias"
-ENDEF_EN_ROOT = "/root/autodl-fs/ENDEF-SIGIR2022/ENDEF_en"
-ENDEF_CH_ROOT = "/root/autodl-fs/ENDEF-SIGIR2022/ENDEF_ch"
 
 EMO_DIM = 38                       # 原始 emo.npy 是 (n, 38)
 PLACEHOLDER_TIME = "2016-01-01 00:00:00"   # 两个 BERT 模型 forward 不读 year，占位无害
 VAL_RATIO = 0.1                    # PolitiFact / GossipCop 从 train 切 val 的比例
 SPLIT_SEED = 42                    # 切 val 的固定种子（保证可复现）
 
-DATASETS = {
-    "politifact": {
-        "lang": "en",
-        "train_pkl": f"{SOCIALDEBIAS_ROOT}/data/sheepdog/news_articles/politifact_train.pkl",
-        "test_pkl":  f"{SOCIALDEBIAS_ROOT}/data/sheepdog/news_articles/politifact_test.pkl",
-        "val_pkl":   None,          # 无 val，从 train 切
-        "out_dir":   f"{ENDEF_EN_ROOT}/data_politifact",
-        "format":    "dict",        # pkl 是 dict {news, labels}
-    },
-    "gossipcop": {
-        "lang": "en",
-        "train_pkl": f"{SOCIALDEBIAS_ROOT}/data/sheepdog/news_articles/gossipcop_train_sampled1000.pkl",
-        "test_pkl":  f"{SOCIALDEBIAS_ROOT}/data/sheepdog/news_articles/gossipcop_test.pkl",
-        "val_pkl":   None,
-        "out_dir":   f"{ENDEF_EN_ROOT}/data_gossipcop",
-        "format":    "dict",
-    },
-    "weibo21": {
-        "lang": "zh",
-        "train_pkl": f"{SOCIALDEBIAS_ROOT}/data/weibo21_repo/data/train.pkl",
-        "val_pkl":   f"{SOCIALDEBIAS_ROOT}/data/weibo21_repo/data/val.pkl",
-        "test_pkl":  f"{SOCIALDEBIAS_ROOT}/data/weibo21_repo/data/test.pkl",
-        "out_dir":   f"{ENDEF_CH_ROOT}/data_weibo21",
-        "format":    "dataframe",   # pkl 是 DataFrame {content, label, category}
-    },
-}
+def build_datasets(socialdebias_root, endef_en_root, endef_ch_root):
+    return {
+        "politifact": {
+            "lang": "en",
+            "train_pkl": socialdebias_root / "data/sheepdog/news_articles/politifact_train.pkl",
+            "test_pkl": socialdebias_root / "data/sheepdog/news_articles/politifact_test.pkl",
+            "val_pkl": None,
+            "out_dir": endef_en_root / "data_politifact",
+            "format": "dict",
+        },
+        "gossipcop": {
+            "lang": "en",
+            "train_pkl": socialdebias_root / "data/sheepdog/news_articles/gossipcop_train.pkl",
+            "test_pkl": socialdebias_root / "data/sheepdog/news_articles/gossipcop_test.pkl",
+            "val_pkl": None,
+            "out_dir": endef_en_root / "data_gossipcop",
+            "format": "dict",
+        },
+        "weibo21": {
+            "lang": "zh",
+            "train_pkl": socialdebias_root / "data/weibo21_repo/data/train.pkl",
+            "val_pkl": socialdebias_root / "data/weibo21_repo/data/val.pkl",
+            "test_pkl": socialdebias_root / "data/weibo21_repo/data/test.pkl",
+            "out_dir": endef_ch_root / "data_weibo21",
+            "format": "dataframe",
+        },
+    }
 
 
 # ============ 数据读取 ============
@@ -192,11 +189,30 @@ def main():
     parser.add_argument("--dataset", default="all",
                         choices=["all", "politifact", "gossipcop", "weibo21"],
                         help="要转换的数据集")
+    parser.add_argument("--socialdebias_root", type=Path,
+                        default=Path(__file__).resolve().parent,
+                        help="SocialDebias 项目根目录")
+    parser.add_argument("--endef_en_root", type=Path,
+                        default=os.environ.get("ENDEF_EN_ROOT"),
+                        help="英文 ENDEF 仓库根目录，也可通过 ENDEF_EN_ROOT 设置")
+    parser.add_argument("--endef_ch_root", type=Path,
+                        default=os.environ.get("ENDEF_CH_ROOT"),
+                        help="中文 ENDEF 仓库根目录，也可通过 ENDEF_CH_ROOT 设置")
     args = parser.parse_args()
 
-    targets = list(DATASETS.keys()) if args.dataset == "all" else [args.dataset]
+    targets = ["politifact", "gossipcop", "weibo21"] if args.dataset == "all" else [args.dataset]
+    if any(name in {"politifact", "gossipcop"} for name in targets) and args.endef_en_root is None:
+        parser.error("英文数据转换需要 --endef_en_root 或 ENDEF_EN_ROOT")
+    if "weibo21" in targets and args.endef_ch_root is None:
+        parser.error("Weibo21 转换需要 --endef_ch_root 或 ENDEF_CH_ROOT")
+
+    datasets = build_datasets(
+        args.socialdebias_root,
+        args.endef_en_root,
+        args.endef_ch_root,
+    )
     for name in targets:
-        process_dataset(name, DATASETS[name])
+        process_dataset(name, datasets[name])
 
     print(f"\n{'='*60}")
     print("全部完成。下一步：把各 data_xxx 目录作为 ENDEF 的 --root_path")

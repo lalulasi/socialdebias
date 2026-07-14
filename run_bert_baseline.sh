@@ -1,11 +1,10 @@
 #!/bin/bash
-# run_bert_baseline.sh — BERT baseline 一键训练 + 评估 + 汇总
-# 在 /root/autodl-tmp/socialdebias/ 根目录运行
-#
-# 总耗时预计：训练 30 分钟 + 评估 20 分钟 ≈ 50-60 分钟
+# BERT 基线的三种子训练、对抗评测与结果汇总。
+# 请按实际部署位置修改下面的项目路径。
 
 set -e
-cd /root/autodl-tmp/socialdebias
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$PROJECT_ROOT"
 
 mkdir -p results/models results/bert_adv results/baseline_logs
 

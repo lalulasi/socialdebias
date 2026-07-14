@@ -1,14 +1,12 @@
 #!/bin/bash
-# 消融实验批量跑：4 变体 × 3 种子 × 1 数据集（politifact）
-# 总共 12 次实验，每次 15-25 分钟，总时长 3-5 小时
-#
-# 使用: cd /root/autodl-tmp/socialdebias && bash run_ablation_3seeds.sh
+# PolitiFact 消融实验：四种设置各跑三个随机种子。
 
-cd /root/autodl-tmp/socialdebias
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 SEEDS=(42 2024 3407)
 VARIANTS=("full" "no_grl" "no_consist" "no_both")
-DATASETS=("politifact")      # 先只跑 politifact（效果最明显）
+DATASETS=("politifact")
 
 LOG_ROOT="./results/ablation/logs"
 mkdir -p "${LOG_ROOT}"
@@ -38,13 +36,15 @@ for DS in "${DATASETS[@]}"; do
         --seed ${SEED} \
         --epochs 3 \
         --batch_size 16 \
+        --save_dir results/ablation \
+        --save_suffix "abl_${VAR}" \
         > "${LOG_FILE}" 2>&1
 
       STATUS=$?
       if [ ${STATUS} -eq 0 ]; then
-        echo "  [✓] 成功 $(date)"
+        echo "  完成 $(date)"
       else
-        echo "  [✗] 失败 $(date)，看日志：${LOG_FILE}"
+        echo "  失败 $(date)，日志：${LOG_FILE}"
       fi
     done
   done

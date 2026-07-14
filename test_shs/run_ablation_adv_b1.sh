@@ -1,6 +1,7 @@
 #!/bin/bash
-# B1 版消融 ckpt 的对抗评估
-cd /root/autodl-tmp/socialdebias
+# 评测 B1 消融模型在对抗集上的表现。
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 SEEDS=(42 2024 3407)
 VARIANTS=("full" "no_grl" "no_consist" "no_both")
@@ -20,27 +21,27 @@ for DS in "${DATASETS[@]}"; do
     for SEED in "${SEEDS[@]}"; do
       COUNT=$((COUNT + 1))
       TAG="${DS}_${VAR}_seed${SEED}"
-      CKPT="${CKPT_DIR}/ablation_${DS}_${VAR}_seed${SEED}.pt"
+      CKPT="${CKPT_DIR}/socialdebias_${DS}_en_seed${SEED}_b1_${VAR}.pt"
       LOG_FILE="${LOG_ROOT}/${TAG}.log"
 
       echo "[${COUNT}/${TOTAL}] ${TAG}"
       if [ ! -f "${CKPT}" ]; then
-        echo "  [x] ckpt 不存在"
+        echo "  检查点不存在"
         continue
       fi
 
       python scripts/evaluate_ablation_adv.py \
         --ckpt "${CKPT}" \
         --dataset "${DS}" \
-        --variant "${VAR}" \
+        --save_suffix "b1_${VAR}" \
         --seed "${SEED}" \
         --output_dir "${OUTPUT_DIR}" \
         > "${LOG_FILE}" 2>&1
 
       if [ $? -eq 0 ]; then
-        echo "  [OK]"
+        echo "  完成"
       else
-        echo "  [FAIL] 日志 ${LOG_FILE}"
+        echo "  失败，日志：${LOG_FILE}"
       fi
     done
   done

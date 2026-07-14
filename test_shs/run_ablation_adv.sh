@@ -1,8 +1,8 @@
 #!/bin/bash
-# 批量评估 12 个消融 ckpt 在对抗集上的鲁棒性
-# 使用: cd /root/autodl-tmp/socialdebias && bash run_ablation_adv.sh
+# 批量评测 PolitiFact 消融模型在对抗集上的表现。
 
-cd /root/autodl-tmp/socialdebias
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 SEEDS=(42 2024 3407)
 VARIANTS=("full" "no_grl" "no_consist" "no_both")
@@ -24,7 +24,7 @@ for DS in "${DATASETS[@]}"; do
     for SEED in "${SEEDS[@]}"; do
       COUNT=$((COUNT + 1))
       TAG="${DS}_${VAR}_seed${SEED}"
-      CKPT="./results/ablation/ablation_${DS}_${VAR}_seed${SEED}.pt"
+      CKPT="./results/ablation/socialdebias_${DS}_en_seed${SEED}_abl_${VAR}.pt"
       LOG_FILE="${LOG_ROOT}/${TAG}.log"
 
       echo ""
@@ -38,15 +38,15 @@ for DS in "${DATASETS[@]}"; do
       python scripts/evaluate_ablation_adv.py \
         --ckpt "${CKPT}" \
         --dataset "${DS}" \
-        --variant "${VAR}" \
+        --save_suffix "abl_${VAR}" \
         --seed "${SEED}" \
         > "${LOG_FILE}" 2>&1
 
       STATUS=$?
       if [ ${STATUS} -eq 0 ]; then
-        echo "  [✓] 成功"
+        echo "  完成"
       else
-        echo "  [✗] 失败，看日志: ${LOG_FILE}"
+        echo "  失败，日志：${LOG_FILE}"
       fi
     done
   done

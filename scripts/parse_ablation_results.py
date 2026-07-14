@@ -157,28 +157,5 @@ def main():
     save_csv(delta_rows, "ablation_delta.csv")
     save_csv(detail_rows, "ablation_detail.csv")
 
-    # ============ 一段文字建议（供论文写作直接抄） ============
-    print("\n" + "=" * 80)
-    print("论文写作参考段（5.5.1 节可直接改写）")
-    print("=" * 80)
-    for dataset in datasets:
-        full_row = next((r for r in summary_rows
-                         if r["dataset"] == dataset and r["variant"] == "full"), None)
-        if not full_row:
-            continue
-        print(f"\n[{dataset}]")
-        print(f"  完整 SocialDebias 达到 F1={full_row['test_f1_mean']:.4f}±{full_row['test_f1_std']:.4f}。")
-        for row in delta_rows:
-            if row["dataset"] != dataset:
-                continue
-            variant_name = VAR_LABEL.get(row["variant"], row["variant"])
-            if row["delta_f1"] < 0:
-                print(f"  去除 {variant_name}：F1 下降 {abs(row['delta_f1'])*100:.2f}pp，"
-                      f"证明该组件贡献 {abs(row['delta_f1'])*100:.2f}pp")
-            else:
-                print(f"  去除 {variant_name}：F1 反而上升 {row['delta_f1']*100:.2f}pp，"
-                      f"需要讨论（可能是小样本波动或该组件在该数据集上不关键）")
-
-
 if __name__ == "__main__":
     main()

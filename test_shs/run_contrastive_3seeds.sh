@@ -1,11 +1,8 @@
 #!/bin/bash
-# 对比学习增强的 SocialDebias 训练 - 3 种子 × 3 个 λ_contrast 值
-# 共 9 次训练，预计 1.5-2 小时
-#
-# 使用:
-#   cd /root/autodl-tmp/socialdebias && nohup bash run_contrastive_3seeds.sh > run_contrastive.out 2>&1 &
+# PolitiFact 对比学习实验：三个随机种子与三组对比损失权重。
 
-cd /root/autodl-tmp/socialdebias
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 SEEDS=(42 2024 3407)
 LAMBDA_CONTRAST=(0.1 0.3 0.5)
@@ -17,7 +14,7 @@ ADV_PKL="data/qwen_adv/politifact_train_adv_filtered_v2.pkl"
 LOG_ROOT="./results/contrastive_logs"
 mkdir -p "${LOG_ROOT}"
 
-# 验证数据存在
+# 训练前确认两份配对数据都在
 if [ ! -f "${ADV_PKL}" ]; then
     echo "ERROR: 对抗数据不存在: ${ADV_PKL}"
     exit 1

@@ -1,17 +1,15 @@
 #!/bin/bash
-# 主实验 3 种子批量
-# BERT 基线 × 2 数据集 × 3 种子 + SocialDebias × 2 数据集 × 3 种子 + 6 次对抗评估
-# λ 配置与 exp001/exp002 完全一致，保证 3 种子结果可和单次 exp 对比
-#
-# 使用: cd /root/autodl-tmp/socialdebias && nohup bash run_main_3seeds.sh > run_main_3seeds.out 2>&1 &
+# 两个英文数据集的三种子主实验。
+# 依次训练 BERT 基线和不使用表层特征的 SocialDebias，并分别完成对抗评测。
 
-cd /root/autodl-tmp/socialdebias
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 SEEDS=(42 2024 3407)
 DATASETS=("politifact" "gossipcop")
 LANGUAGE="en"
 
-# === λ 与 exp001/exp002 对齐 ===
+# SocialDebias 损失权重
 LAMBDA_FACT=1.0
 LAMBDA_BIAS=0.5
 LAMBDA_CONSIST=0.3
@@ -49,36 +47,39 @@ echo "Seeds: ${SEEDS[*]}"
 echo "Datasets: ${DATASETS[*]}"
 echo "========================================"
 
-# === 阶段 1：BERT 基线 × 6 ===
+# 第一阶段：BERT 基线
 echo ""
 echo "=== 阶段 1/3：BERT 基线 (6 次) ==="
 for DS in "${DATASETS[@]}"; do
   for SEED in "${SEEDS[@]}"; do
     TAG="baseline_${DS}_seed${SEED}"
-    CMD="python scripts/train_baseline.py --dataset ${DS} --language ${LANGUAGE} --seed ${SEED}"
+    CMD="python scripts/train_bert_baseline.py --dataset ${DS} --seed ${SEED}"
     run_task "phase1" "${CMD}" "${TAG}" "${LOG_ROOT}/${TAG}.log" "${DS}" "baseline" "${SEED}"
   done
 done
 
-# === 阶段 2：SocialDebias × 6 ===
+# 第二阶段：不使用表层特征的 SocialDebias
 echo ""
 echo "=== 阶段 2/3：SocialDebias (6 次) ==="
 for DS in "${DATASETS[@]}"; do
   for SEED in "${SEEDS[@]}"; do
     TAG="socialdebias_${DS}_seed${SEED}"
-    CMD="python scripts/train_socialdebias.py --dataset ${DS} --language ${LANGUAGE} --seed ${SEED} --lambda_fact ${LAMBDA_FACT} --lambda_bias ${LAMBDA_BIAS} --lambda_consist ${LAMBDA_CONSIST}"
+    CMD="python scripts/train_socialdebias_surface.py --dataset ${DS} --language ${LANGUAGE} --seed ${SEED} --epochs 3 --batch_size 4 --lambda_fact ${LAMBDA_FACT} --lambda_bias ${LAMBDA_BIAS} --lambda_consist ${LAMBDA_CONSIST} --surface_feat_dim 0 --save_suffix main"
     run_task "phase2" "${CMD}" "${TAG}" "${LOG_ROOT}/${TAG}.log" "${DS}" "socialdebias" "${SEED}"
   done
 done
 
-# === 阶段 3：对抗评估 × 6（每次评估 baseline + SD 两个 ckpt）===
+# 第三阶段：分别评测 BERT 基线和 SocialDebias
 echo ""
 echo "=== 阶段 3/3：对抗评估 (6 次) ==="
 for DS in "${DATASETS[@]}"; do
   for SEED in "${SEEDS[@]}"; do
-    TAG="adv_${DS}_seed${SEED}"
-    CMD="python scripts/evaluate_adversarial.py --dataset ${DS} --language ${LANGUAGE} --seed ${SEED}"
-    run_task "phase3" "${CMD}" "${TAG}" "${LOG_ROOT}/${TAG}.log" "${DS}" "adv_eval" "${SEED}"
+    TAG="bert_adv_${DS}_seed${SEED}"
+    CMD="python scripts/evaluate_bert_adv.py --dataset ${DS} --seed ${SEED}"
+    run_task "phase3" "${CMD}" "${TAG}" "${LOG_ROOT}/${TAG}.log" "${DS}" "bert_adv" "${SEED}"
+    TAG="socialdebias_adv_${DS}_seed${SEED}"
+    CMD="python scripts/evaluate_surface_adv.py --dataset ${DS} --seed ${SEED} --save_suffix main"
+    run_task "phase3" "${CMD}" "${TAG}" "${LOG_ROOT}/${TAG}.log" "${DS}" "socialdebias_adv" "${SEED}"
   done
 done
 

@@ -191,7 +191,7 @@ DATA_CARD_TEMPLATE = """# SocialDebias-Adv 数据卡片
 ```bibtex
 @misc{{socialdebias_adv_2026,
   title  = {{SocialDebias-Adv: A Multi-Source LLM Rewriting Adversarial Test Set for Fake News Detection}},
-  author = {{TODO: 作者名}},
+  author = {{作者信息待补充}},
   year   = {{2026}},
   note   = {{Companion dataset to SocialDebias paper.}},
 }}
@@ -218,7 +218,7 @@ python scripts/evaluate_socialdebias_adv.py \\
 
 ## 8. 联系
 
-数据集相关问题: TODO 联系方式
+数据集相关问题：请联系论文作者。
 """
 
 

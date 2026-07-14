@@ -1,9 +1,9 @@
 #!/bin/bash
-# SocialDebias-Adv 完整生成: 3 dataset × 4 tone × 2 source = 24 个 pkl
-# 总调用 ~3920 次 (PolitiFact 90 + GossipCop 200 + Weibo21 200 = 490 条 × 4 tone × 2 source)
+# 生成 SocialDebias-Adv 测试集：三个数据集、四种语气、两个模型来源。
 
 set -e
-cd /root/autodl-tmp/socialdebias
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$PROJECT_ROOT"
 
 if [ -z "$DASHSCOPE_API_KEY" ] || [ -z "$DEEPSEEK_API_KEY" ]; then
     echo "[ERROR] 需要 export DASHSCOPE_API_KEY 和 DEEPSEEK_API_KEY"
@@ -28,21 +28,21 @@ run_one () {
         --output "$OUT" 2>&1 | tee "$LOG"
 }
 
-# PolitiFact 90 全量
+# PolitiFact：全部测试样本
 for TONE in "${TONES[@]}"; do
     for SRC in "${SOURCES[@]}"; do
         run_one politifact "data/sheepdog/news_articles/politifact_test.pkl" en 0 "$TONE" "$SRC"
     done
 done
 
-# GossipCop 200 抽样
+# GossipCop：固定随机种子抽取 200 条
 for TONE in "${TONES[@]}"; do
     for SRC in "${SOURCES[@]}"; do
         run_one gossipcop "data/sheepdog/news_articles/gossipcop_test.pkl" en 200 "$TONE" "$SRC"
     done
 done
 
-# Weibo21 200 抽样
+# Weibo21：固定随机种子抽取 200 条
 for TONE in "${TONES[@]}"; do
     for SRC in "${SOURCES[@]}"; do
         run_one weibo21 "data/weibo21_repo/data/test.pkl" zh 200 "$TONE" "$SRC"

@@ -85,13 +85,29 @@ def evaluate_model(model, loader, device):
             probs = torch.softmax(logits, dim=-1)[:, 1].cpu().numpy()
             preds = logits.argmax(dim=-1).cpu().numpy()
             all_preds.extend(preds); all_labels.extend(labels.numpy()); all_probs.extend(probs)
-    acc = accuracy_score(all_labels, all_preds)
-    f1 = f1_score(all_labels, all_preds, average="macro")
+    y_pred = np.array(all_preds, dtype=np.int64)
+    y_true = np.array(all_labels, dtype=np.int64)
+    acc = accuracy_score(y_true, y_pred)
+    f1 = f1_score(y_true, y_pred, average="macro")
     try:
-        auc = roc_auc_score(all_labels, all_probs)
+        auc = roc_auc_score(y_true, all_probs)
     except ValueError:
         auc = float("nan")
-    return {"accuracy": acc, "f1": f1, "auc": auc}
+    metrics = {"accuracy": acc, "f1": f1, "auc": auc}
+    return metrics, y_pred, y_true
+
+
+def compute_paired_asr(clean_pred, clean_label, adv_pred):
+    """Paired ASR = #(clean 正确 ∩ adv 错误) / #(clean 正确)
+    要求 clean / adv 一一对应（同一样本不同视图）。adv label 与 clean label 同一份。"""
+    clean_correct = (clean_pred == clean_label)
+    adv_wrong = (adv_pred != clean_label)
+    attacked = clean_correct & adv_wrong
+    denom = int(clean_correct.sum())
+    if denom == 0:
+        return float("nan"), 0, 0
+    asr = float(attacked.sum()) / denom
+    return asr, int(attacked.sum()), denom
 
 
 def main():
@@ -148,8 +164,10 @@ def main():
     clean_loader = DataLoader(clean_set, batch_size=args.batch_size, shuffle=False)
     
     results = OrderedDict()
-    clean_m = evaluate_model(model, clean_loader, device)
+    sample_preds = {}    # 缓存 sample-level，用于 paired ASR 计算
+    clean_m, clean_y_pred, clean_y_true = evaluate_model(model, clean_loader, device)
     results["clean"] = clean_m
+    sample_preds["clean"] = {"y_pred": clean_y_pred, "y_true": clean_y_true}
     print(f"\n干净集: Acc={clean_m['accuracy']:.4f} F1={clean_m['f1']:.4f}")
 
     # 4 个对抗变体
@@ -161,23 +179,52 @@ def main():
             extractor, feat_mean, feat_std,
         )
         adv_loader = DataLoader(adv_set, batch_size=args.batch_size, shuffle=False)
-        adv_m = evaluate_model(model, adv_loader, device)
+        adv_m, adv_y_pred, adv_y_true = evaluate_model(model, adv_loader, device)
         results[f"adv_{v}"] = adv_m
+        sample_preds[f"adv_{v}"] = {"y_pred": adv_y_pred, "y_true": adv_y_true}
         print(f"对抗 {v}: Acc={adv_m['accuracy']:.4f} F1={adv_m['f1']:.4f}")
+
+    # === Paired ASR 计算（与 ENDEF 评估口径一致）===
+    asr_per_variant = {}
+    label_warned = False
+    for v in args.variants.split(","):
+        v = v.strip()
+        adv_y_pred = sample_preds[f"adv_{v}"]["y_pred"]
+        adv_y_true = sample_preds[f"adv_{v}"]["y_true"]
+        # sanity check：label 序列必须一致才能 paired ASR
+        if not np.array_equal(clean_y_true, adv_y_true):
+            if not label_warned:
+                print(f"  ⚠ 警告: adv_{v} label 序列与 clean 不一致！将按 label 序列重排对齐前不可靠")
+                print(f"    clean labels 前 5: {clean_y_true[:5].tolist()}")
+                print(f"    adv_{v} labels 前 5: {adv_y_true[:5].tolist()}")
+                label_warned = True
+        asr, attacked_n, base_n = compute_paired_asr(
+            sample_preds["clean"]["y_pred"], clean_y_true, adv_y_pred
+        )
+        asr_per_variant[f"adv_{v}"] = {
+            "asr": asr, "attacked": attacked_n, "clean_correct": base_n,
+        }
 
     # 汇总
     adv_f1s = [results[f"adv_{v}"]["f1"] for v in args.variants.split(",")]
     avg_adv_f1 = sum(adv_f1s) / len(adv_f1s)
     f1_drop = clean_m["f1"] - avg_adv_f1
-    
+    avg_asr = float(np.mean([asr_per_variant[k]["asr"] for k in asr_per_variant]))
+
     results["summary"] = {
         "clean_f1": clean_m["f1"],
         "avg_adv_f1": avg_adv_f1,
         "f1_drop": f1_drop,
+        "asr_per_variant": asr_per_variant,
+        "avg_asr": avg_asr,
     }
-    
+
     print(f"\nAvg Adv F1: {avg_adv_f1:.4f}")
     print(f"F1 Drop: {f1_drop*100:.2f}pp")
+    print("ASR per variant: " +
+          ", ".join([f"{v.strip()}={asr_per_variant[f'adv_{v.strip()}']['asr']*100:.2f}%"
+                     for v in args.variants.split(",")]) +
+          f"   avg={avg_asr*100:.2f}%")
 
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

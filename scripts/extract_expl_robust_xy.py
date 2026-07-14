@@ -1,18 +1,4 @@
-"""
-解释一致性(X) × 对抗鲁棒性(Y) 逐样本联合提取 —— 四变体批量版
-================================================================
-在 PolitiFact 同一批测试样本上，对 adv_A/B/C/D 四种改写风格，各自产出：
-  X：sd_top_k_overlap / sd_spearman / sd_js_div（原文 vs 该变体的 IG 归因一致性，Captum）
-  Y：p_true_orig / p_true_adv / delta_p / correct_orig / correct_adv（完整 SD 模型置信度）
-
-合并输出 4×n 行（每行带 variant 列），供"一致性 vs Δp"的相关分析（合并 + 分变体）。
-
-优化：原文的归因与置信度只计算一次（原文跨变体不变），仅对每个变体算改写侧。
-说明：X 走文本归因路径（与表 5-8 一致）；Y 走完整模型（含 8 维 surface + 训练标准化）。
-增量保存，Mac MPS 下 Captum 自动切 CPU。约 2 小时（n≈90，IG 调用 ~ n×(1+4)=450 次）。
-
-输出：results/expl_robust_xy_politifact_ALL.csv
-"""
+"""逐样本计算归因一致性与对抗改写前后的预测变化。"""
 import argparse
 import csv
 import pickle

@@ -1,7 +1,7 @@
 """
-对比学习增强的 SocialDebias 训练（意见 5 深做版）
+带对比学习损失的 SocialDebias 训练。
 
-在 train_socialdebias.py 基础上加：
+在基础训练流程上增加：
 - 对比学习数据加载器（原文 + Qwen 对抗版本）
 - InfoNCE 损失
 - 总损失 = λ_fact * L_fact + λ_bias * L_bias + λ_consist * L_consist + λ_contrast * L_infonce
@@ -263,7 +263,7 @@ def main():
                     "temperature": args.temperature,
                 },
             }, save_path)
-            print(f"        ⭐ 新最佳！test acc={test_m['acc']:.4f} f1={test_m['f1']:.4f}")
+            print(f"        新最佳：test acc={test_m['acc']:.4f} f1={test_m['f1']:.4f}")
     
     # 保存训练历史 JSON
     import json

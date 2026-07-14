@@ -1,9 +1,9 @@
 """
-多维表层风格特征提取器（意见 8 实现 / 17 维还原版）
+Surface-style feature extractor.
 
 输出维度可选：
-  dim=8  仅情绪 8 维（与原 B 实验版逐位一致，保证旧结果可复现）
-  dim=17 情绪 8 + 句法 5 + 词汇 4（用于 17 维 vs 8 维对照消融）
+  dim=8  情绪特征
+  dim=17 情绪 8 + 句法 5 + 词汇 4
 
 17 维顺序严格对应 FEATURE_NAMES。
 """
@@ -27,16 +27,14 @@ class SurfaceFeatureExtractor:
     EMOTION_ORDER = ["anger", "joy", "fear", "disgust",
                      "sadness", "surprise", "trust", "anticipation"]
 
-    FEATURE_DIM = 17  # 完整维度
+    FEATURE_DIM = 17
 
     def __init__(self, dim=8, spacy_model="en_core_web_sm"):
         assert dim in (8, 17), f"dim 仅支持 8 或 17，收到 {dim}"
         self.dim = dim
         import spacy
-        # 与原实现一致：仅禁用 ner / lemmatizer，保留 tagger / parser / senter
         self.nlp = spacy.load(spacy_model, disable=["ner", "lemmatizer"])
 
-    # ---------- 词汇：音节与 Flesch ----------
     @staticmethod
     def _syllables(word):
         word = word.lower()
@@ -57,7 +55,6 @@ class SurfaceFeatureExtractor:
         n_syl = sum(self._syllables(w) for w in tokens)
         return 206.835 - 1.015 * (n_words / n_sent) - 84.6 * (n_syl / n_words)
 
-    # ---------- 主接口 ----------
     def extract(self, text, max_chars=10000):
         """返回 self.dim 维特征向量。"""
         text = text[:max_chars] if text else ""
@@ -69,7 +66,6 @@ class SurfaceFeatureExtractor:
         n_tok = max(len(tokens), 1)
 
         features = []
-        # ===== 情绪 8 维（与原实现逐位一致：子串匹配 + 每 100 字符命中率）=====
         text_lower = text.lower()
         for emo in self.EMOTION_ORDER:
             words = self.EMOTION_WORDS[emo]
@@ -81,14 +77,12 @@ class SurfaceFeatureExtractor:
             sents = list(doc.sents)
             n_sent = max(len(sents), 1)
             slens = [sum(1 for t in s if t.is_alpha) for s in sents] or [0]
-            # ===== 句法 5 维 =====
             features.append(float(np.mean(slens)))                       # syn_avg_slen
             features.append(float(np.max(slens)))                        # syn_max_slen
             features.append(text.count("?") / max(len(text), 1) * 1000)  # syn_qmark_per1k
             features.append(text.count("!") / max(len(text), 1) * 1000)  # syn_excl_per1k
             n_pass = sum(1 for t in doc if t.dep_ in ("nsubjpass", "auxpass", "csubjpass"))
             features.append(n_pass / n_sent)                             # syn_passive_per_sent
-            # ===== 词汇 4 维 =====
             features.append(len(set(tokens)) / n_tok)                    # lex_ttr
             n_sup = sum(1 for t in doc if t.tag_ in ("JJS", "RBS"))
             features.append(n_sup / n_tok * 100)                         # lex_superlative /100tok

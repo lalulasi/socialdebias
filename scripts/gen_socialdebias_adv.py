@@ -92,7 +92,7 @@ def _call_with_retry(url, headers, payload, max_retries):
     return "ERROR"
 
 
-# ============== 输出清理（strip 兜底） ==============
+# ============== 输出清理 ==============
 
 _PREAMBLE_PATTERNS_EN = [
     r"^(?:sure|certainly|here|okay|ok|alright)[^\n]{0,80}?[:.]\s*",
@@ -106,7 +106,7 @@ _PREAMBLE_PATTERNS_ZH = [
 
 
 def clean_rewritten(text, lang):
-    """清理 LLM 输出常见前缀。即使 prompt 已约束，也作为兜底。"""
+    """移除 LLM 输出中常见的引导语。"""
     if not text or text == "ERROR":
         return text
     t = text.strip()

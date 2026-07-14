@@ -1,12 +1,13 @@
 #!/bin/bash
 # 批量评估表层特征 ckpt 在对抗集上的鲁棒性
-cd /root/autodl-tmp/socialdebias
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 SEEDS=(42 2024 3407)
 DATASETS=("politifact" "gossipcop")
 SUFFIXES=("surface" "surface_contrast")  # 12 个 ckpt
 
-LOG_ROOT="/root/autodl-tmp/socialdebias/results/surface_adv/logs"
+LOG_ROOT="${PROJECT_ROOT}/results/surface_adv/logs"
 mkdir -p "${LOG_ROOT}"
 
 echo "对抗评估开始: $(date)"

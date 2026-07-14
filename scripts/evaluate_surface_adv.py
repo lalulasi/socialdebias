@@ -39,12 +39,15 @@ class SurfaceTestDataset(Dataset):
         self.samples = samples
         self.tokenizer = tokenizer
         self.max_length = max_length
-
-        feats = []
-        for s in tqdm(samples, desc="提取表层特征"):
-            feats.append(extractor.extract(s["text"]))
-        feats = np.stack(feats, axis=0).astype(np.float32)
-        self.surface_features = (feats - feat_mean) / (feat_std + 1e-8)
+        
+        if extractor is None:
+            self.surface_features = np.zeros((len(samples), 0), dtype=np.float32)
+        else:
+            feats = []
+            for s in tqdm(samples, desc="提取表层特征"):
+                feats.append(extractor.extract(s["text"]))
+            feats = np.stack(feats, axis=0).astype(np.float32)
+            self.surface_features = (feats - feat_mean) / (feat_std + 1e-8)
 
     def __len__(self):
         return len(self.samples)
@@ -153,7 +156,7 @@ def main():
     model.load_state_dict(ckpt["model_state_dict"], strict=False)
     print(f"加载 ckpt (val_f1={ckpt.get('val_f1', 'N/A'):.4f}, surface_dim={surface_dim})")
 
-    extractor = SurfaceFeatureExtractor() if surface_dim > 0 else None
+    extractor = SurfaceFeatureExtractor(dim=surface_dim) if surface_dim > 0 else None
 
     # 干净集
     _, _, clean_samples = load_dataset(dataset_name=args.dataset, seed=args.seed)

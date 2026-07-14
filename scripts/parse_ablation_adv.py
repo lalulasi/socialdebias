@@ -1,6 +1,5 @@
 """
-汇总消融对抗集评估结果（4 变体 × 3 种子）。
-关键产出：论文消融表——完整的"Clean F1 vs Adv F1 降幅"对比
+汇总四种消融设置在三个随机种子下的对抗评测结果。
 
 运行: python scripts/parse_ablation_adv.py
 """
@@ -31,7 +30,12 @@ def main():
     for jf in sorted(RESULT_DIR.glob("ablation_adv_*.json")):
         with open(jf) as f:
             d = json.load(f)
-        key = (d["dataset"], d["variant"])
+        variant = d["variant"]
+        for prefix in ("abl_", "b1_"):
+            if variant.startswith(prefix):
+                variant = variant.removeprefix(prefix)
+                break
+        key = (d["dataset"], variant)
         groups[key].append(d)
 
     if not groups:
@@ -40,9 +44,9 @@ def main():
 
     datasets = sorted(set(k[0] for k in groups.keys()))
 
-    # ============ 核心表：论文消融表 ============
+    # 各消融设置的完整指标
     print("\n" + "=" * 120)
-    print("★ 论文消融主表（对抗鲁棒性）★")
+    print("消融实验结果（对抗鲁棒性）")
     print("=" * 120)
     print(f"{'Dataset':<12}{'Variant':<22}"
           f"{'Clean F1':<18}{'Adv A F1':<16}{'Adv B F1':<16}{'Adv C F1':<16}{'Adv D F1':<16}"
@@ -95,9 +99,9 @@ def main():
                 "n": len(runs),
             })
 
-    # ============ 核心论点验证：降幅对比 ============
+    # 与完整模型比较 F1 降幅
     print("\n" + "=" * 80)
-    print("★ 论文核心论点：w/o 某组件后 F1 降幅变化（越大=该组件对鲁棒性贡献越大）")
+    print("移除组件后的 F1 降幅变化")
     print("=" * 80)
     print(f"{'Dataset':<12}{'Variant':<22}{'F1 Drop':<20}{'Δ Drop vs full':<18}")
     print("-" * 80)
@@ -114,10 +118,9 @@ def main():
             drop = row["f1_drop_mean"]
             delta = drop - full_row["f1_drop_mean"]
             label = VAR_LABEL.get(variant, variant)
-            flag = " ★ 基准" if variant == "full" else f" (+{delta*100:.2f}pp)" if delta > 0 else f" ({delta*100:.2f}pp)"
+            flag = "（完整模型）" if variant == "full" else f" (+{delta*100:.2f}pp)" if delta > 0 else f" ({delta*100:.2f}pp)"
             print(f"{dataset:<12}{label:<22}{drop:.4f} ({drop*100:.2f}pp){flag}")
 
-    # ============ 保存 CSV ============
     import csv
     if rows:
         out_csv = RESULT_DIR / "ablation_adv_summary.csv"
@@ -126,33 +129,6 @@ def main():
             w.writeheader()
             w.writerows(rows)
         print(f"\n汇总 CSV 已保存：{out_csv}")
-
-    # ============ 论文写作段 ============
-    print("\n" + "=" * 80)
-    print("论文 5.5.1 节可直接改写的段落（消融讨论）")
-    print("=" * 80)
-    for dataset in datasets:
-        full_row = next((r for r in rows if r["dataset"] == dataset and r["variant"] == "full"), None)
-        if not full_row or full_row["f1_drop_mean"] is None:
-            continue
-        no_both = next((r for r in rows if r["dataset"] == dataset and r["variant"] == "no_both"), None)
-
-        print(f"\n[{dataset}]")
-        print(f"完整 SocialDebias 在 4 个对抗变体上的平均 F1 降幅为 "
-              f"{full_row['f1_drop_mean']*100:.2f}pp（干净集 F1={full_row['clean_f1_mean']:.4f}）。")
-        for variant in ["no_grl", "no_consist", "no_both"]:
-            row = next((r for r in rows if r["dataset"] == dataset and r["variant"] == variant), None)
-            if not row or row["f1_drop_mean"] is None:
-                continue
-            label = VAR_LABEL.get(variant, variant)
-            delta = row["f1_drop_mean"] - full_row["f1_drop_mean"]
-            if delta > 0:
-                print(f"  {label}：F1 降幅扩大到 {row['f1_drop_mean']*100:.2f}pp "
-                      f"（+{delta*100:.2f}pp），证明该组件对鲁棒性的贡献为 {delta*100:.2f}pp")
-            else:
-                print(f"  {label}：F1 降幅为 {row['f1_drop_mean']*100:.2f}pp "
-                      f"（{delta*100:.2f}pp），需要讨论")
-
 
 if __name__ == "__main__":
     main()

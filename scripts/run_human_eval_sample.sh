@@ -1,6 +1,5 @@
 #!/bin/bash
-# 采样 PolitiFact 50 条用于意见 17 人工评估
-# 输出：results/human_eval/politifact_human_eval_template.csv（101 行）
+# 从 PolitiFact 采样 50 条原文和 50 条对抗文本，生成标注表。
 
 set -e
 

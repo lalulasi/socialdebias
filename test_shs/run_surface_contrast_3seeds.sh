@@ -1,8 +1,8 @@
 #!/bin/bash
-# SocialDebias + 17 维表层特征 + InfoNCE 对比学习（论文最终方法）
-# 6 次训练 × ~6-8 分钟（含 InfoNCE）≈ 1-1.5 小时
+# 8 维表层特征与 InfoNCE 对比学习的三种子实验。
 
-cd /root/autodl-tmp/socialdebias
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 SEEDS=(42 2024 3407)
 LANGUAGE="en"
@@ -54,14 +54,14 @@ for SEED in "${SEEDS[@]}"; do
     ELAPSED=$(($(date +%s) - START_TS))
     
     if [ ${STATUS} -eq 0 ]; then
-        echo "  [✓] 成功 用时 ${ELAPSED}s"
+        echo "  完成，用时 ${ELAPSED}s"
     else
-        echo "  [✗] 失败 看日志：${LOG_FILE}"
+        echo "  失败，日志：${LOG_FILE}"
         tail -10 "${LOG_FILE}" | sed 's/^/    /'
     fi
 done
 
-# GossipCop（用采样数据）
+# GossipCop 使用抽样后的训练数据
 DATASET="gossipcop"
 ORIG_PKL="data/sheepdog/news_articles/gossipcop_train_sampled1000.pkl"
 ADV_PKL="data/qwen_adv/gossipcop_train_adv_filtered.pkl"
@@ -98,9 +98,9 @@ for SEED in "${SEEDS[@]}"; do
     ELAPSED=$(($(date +%s) - START_TS))
     
     if [ ${STATUS} -eq 0 ]; then
-        echo "  [✓] 成功 用时 ${ELAPSED}s"
+        echo "  完成，用时 ${ELAPSED}s"
     else
-        echo "  [✗] 失败 看日志：${LOG_FILE}"
+        echo "  失败，日志：${LOG_FILE}"
         tail -10 "${LOG_FILE}" | sed 's/^/    /'
     fi
 done

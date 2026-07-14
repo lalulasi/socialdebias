@@ -1,7 +1,7 @@
 #!/bin/bash
-# 提取 PolitiFact 原文与四种对抗改写的逐样本归因一致性和预测变化。
+# 逐样本提取 PolitiFact 原文与四种对抗改写的归因一致性和预测变化。
 set -e
-PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$PROJECT_ROOT"
 mkdir -p results/logs
 python scripts/extract_expl_robust_xy.py \

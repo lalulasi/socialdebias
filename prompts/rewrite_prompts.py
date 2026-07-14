@@ -1,10 +1,10 @@
 """
-对抗改写提示词模板（意见 12：结构化提示词工程）
+对抗改写提示词模板。
 
 四段式结构：角色设定 + 硬约束 + 风格指令 + 格式要求
 """
 
-# ============== 共享模块 ==============
+# 共享约束
 
 SYSTEM_HARD_CONSTRAINT = """You are a professional editor performing news rewriting. Follow these ABSOLUTE rules:
 
@@ -22,7 +22,7 @@ OUTPUT FORMAT:
 - Length should be approximately the same as the original
 """
 
-# ============== 4 种风格模板（方案 β）==============
+# 四种改写风格
 
 STYLE_PROMPTS = {
     "neutral": {

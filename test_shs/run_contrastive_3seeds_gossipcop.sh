@@ -1,27 +1,22 @@
 #!/bin/bash
-# GossipCop 对比学习实验 - 3 种子 × 3 个 λ_contrast = 9 次
-# 数据：采样 1000 条 × 2 风格 = 1539 条对抗样本
-# 预计时长：每次约 6-10 分钟（GossipCop 5383 训练但只用 847 条做对比），共 ~1.5 小时
-#
-# 使用:
-#   cd /root/autodl-tmp/socialdebias
-#   nohup bash run_contrastive_3seeds_gossipcop.sh > run_contrastive_gc.out 2>&1 &
+# GossipCop 对比学习实验：三个随机种子与三组对比损失权重。
 
-cd /root/autodl-tmp/socialdebias
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 SEEDS=(42 2024 3407)
 LAMBDA_CONTRAST=(0.1 0.3 0.5)
 DATASET="gossipcop"
 LANGUAGE="en"
 
-# ★ 关键：使用采样后的原数据 pkl
-ORIG_PKL="data/sheepdog/news_articles/gossipcop_train_sampled1000.pkl"
-ADV_PKL="data/qwen_adv/gossipcop_train_adv_filtered.pkl"
+# 使用与对抗改写配对的训练集
+ORIG_PKL="data/sheepdog/news_articles/gossipcop_train.pkl"
+ADV_PKL="data/qwen_adv/gossipcop_train_adv_filtered_v2.pkl"
 
 LOG_ROOT="./results/contrastive_logs_gc"
 mkdir -p "${LOG_ROOT}"
 
-# 验证数据存在
+# 训练前确认两份配对数据都在
 if [ ! -f "${ORIG_PKL}" ]; then
     echo "ERROR: 原数据不存在: ${ORIG_PKL}"
     exit 1

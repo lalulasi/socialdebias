@@ -1,6 +1,7 @@
 #!/bin/bash
 # 批量评估对比学习 ckpt 在对抗集上的鲁棒性
-cd /root/autodl-tmp/socialdebias
+PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 SEEDS=(42 2024 3407)
 LAMBDA_CONTRAST=(0.1 0.3 0.5)

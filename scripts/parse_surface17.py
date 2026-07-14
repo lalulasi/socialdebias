@@ -1,14 +1,11 @@
-"""
-对照 PolitiFact 上 8 维(surface) vs 17 维(surface17) 的对抗鲁棒性，输出 CSV。
-读取 evaluate_surface_adv.py 生成的 results/surface_adv/*.json（3 seed 取均值±标准差）。
-"""
+"""汇总 PolitiFact 上 8 维与 17 维表层特征的对抗评测结果。"""
 import json, csv, os
 import numpy as np
 
 RESULT_DIR = "results/surface_adv"
 DATASET = "politifact"
 SEEDS = [42, 2024, 3407]
-# (显示名, save_suffix) —— 8 维用你已有的 surface 结果，17 维用本次新跑的
+# 显示名称与训练时使用的检查点后缀
 CONFIGS = [
     ("8 维（仅情绪, surface）",        "surface"),
     ("17 维（情绪+句法+词汇, surface17）", "surface17"),

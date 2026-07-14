@@ -1,14 +1,4 @@
-"""
-解释一致性量化指标（回应意见 15）
-
-三个互补的指标：
-1. Top-K 重合度：两组归因在最重要的 K 个词上的重合比例
-2. Spearman 秩相关：两组归因的整体排序相关性
-3. Jensen-Shannon 散度：两组归因分布的对称距离
-
-注意：两段文本的分词结果可能不同，需要先做词元对齐。
-对于对齐，我们采用"共同出现的词元"子集做比较。
-"""
+"""Explanation-consistency metrics for paired clean/adversarial texts."""
 import numpy as np
 from scipy.stats import spearmanr
 from scipy.spatial.distance import jensenshannon
@@ -24,15 +14,11 @@ def align_tokens(
     """
     对齐两组词元：取两者共同出现的词元，按 a 的顺序排列。
 
-    这是最简单的对齐策略，适合处理"改写前后有部分词相同"的场景。
-    更复杂的对齐（如词向量匹配）留待后续优化。
-
     Returns:
         common_tokens: 共同词元列表
         aligned_scores_a: a 在这些词元上的分数
         aligned_scores_b: b 在这些词元上的分数
     """
-    # 用 dict 查找 b 中每个词元的分数（若重复出现，取第一次）
     b_dict = {}
     for tok, score in zip(tokens_b, scores_b):
         if tok not in b_dict:
@@ -59,8 +45,6 @@ def top_k_overlap(
         use_abs: bool = True,
 ) -> float:
     """
-    指标 1：Top-K 重合度
-
     取两组归因中最重要的 K 个词元，计算交集占比。
 
     Args:
@@ -85,7 +69,7 @@ def top_k_overlap(
 
     intersection = top_a & top_b
     union = top_a | top_b
-    return len(intersection) / len(union)  # Jaccard 相似度
+    return len(intersection) / len(union)
 
 
 def spearman_correlation(
@@ -95,8 +79,6 @@ def spearman_correlation(
         scores_b: List[float],
 ) -> float:
     """
-    指标 2：Spearman 秩相关
-
     在共同词元上，计算两组归因排序的相关性。
 
     Returns:
@@ -105,7 +87,6 @@ def spearman_correlation(
     _, aligned_a, aligned_b = align_tokens(tokens_a, scores_a, tokens_b, scores_b)
 
     if len(aligned_a) < 3:
-        # 共同词元太少，无法计算可靠的相关性
         return float("nan")
 
     corr, _ = spearmanr(aligned_a, aligned_b)
@@ -121,35 +102,28 @@ def js_divergence(
         scores_b: List[float],
 ) -> float:
     """
-    指标 3：Jensen-Shannon 散度（在归一化归因分布上）
-
     把归因分数通过 softmax 转成概率分布，再算 JS 散度。
     使用绝对值，避免负数无法归一化。
 
     Returns:
         divergence ∈ [0, 1]，0 表示完全一致，1 表示完全不同。
-        注意：这个越小越好，和上面两个指标相反。
     """
     _, aligned_a, aligned_b = align_tokens(tokens_a, scores_a, tokens_b, scores_b)
 
     if len(aligned_a) < 3:
         return float("nan")
 
-    # 取绝对值 + 归一化成概率分布
     p = np.abs(np.array(aligned_a))
     q = np.abs(np.array(aligned_b))
 
-    # 避免全零（退化分布）
     if p.sum() == 0 or q.sum() == 0:
         return 1.0
 
     p = p / p.sum()
     q = q / q.sum()
 
-    # scipy 的 jensenshannon 返回 JS 距离（平方根），我们算 JS 散度（平方）
-    # 且它的底是 e，我们改成底 2 以获得 [0, 1] 区间
     js_dist = jensenshannon(p, q, base=2)
-    return float(js_dist ** 2)  # JS 距离平方 = JS 散度
+    return float(js_dist ** 2)
 
 
 def compute_all_metrics(
@@ -181,12 +155,10 @@ def compute_all_metrics(
 
 
 if __name__ == "__main__":
-    # 构造几个测试案例，验证指标的正确性
     print("=" * 60)
     print("指标正确性测试")
     print("=" * 60)
 
-    # 测试 1：完全相同 → 所有指标应达到最优值
     tokens = ["the", "shocking", "news", "about", "economy"]
     scores_same = [0.1, 0.8, 0.2, 0.05, 0.3]
 
@@ -196,7 +168,6 @@ if __name__ == "__main__":
     print(f"  Spearman:  {m['spearman']:.3f}  (期望 1.0)")
     print(f"  JS 散度:   {m['js_divergence']:.4f}  (期望 ~0)")
 
-    # 测试 2：完全反向
     scores_reversed = [-s for s in scores_same]
     print("\n测试 2: 归因符号完全相反")
     m = compute_all_metrics(tokens, scores_same, tokens, scores_reversed)
@@ -204,7 +175,6 @@ if __name__ == "__main__":
     print(f"  Spearman:  {m['spearman']:.3f}  (期望 -1.0)")
     print(f"  JS 散度:   {m['js_divergence']:.4f}  (期望 ~0，因为|abs|相同)")
 
-    # 测试 3：完全不相关
     scores_random = [0.5, 0.1, -0.3, 0.9, 0.05]
     print("\n测试 3: 归因分数重排")
     m = compute_all_metrics(tokens, scores_same, tokens, scores_random)
@@ -212,4 +182,4 @@ if __name__ == "__main__":
     print(f"  Spearman:  {m['spearman']:.3f}")
     print(f"  JS 散度:   {m['js_divergence']:.4f}")
 
-    print("\n✅ 指标实现正确")
+    print("\n指标实现正确")

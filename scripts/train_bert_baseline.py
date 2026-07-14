@@ -22,8 +22,8 @@ from utils.device import get_device
 
 
 class BertBaselineModel(nn.Module):
-    """与 SD 主干完全一致：仅微调 encoder.layer.11；分类头：dropout + Linear(hidden, 2)。
-    英文用 bert-base-uncased，中文用 bert-base-chinese。"""
+    """仅微调 encoder.layer.11，并使用 dropout 加线性分类头。
+    英文使用 bert-base-uncased，中文使用 bert-base-chinese。"""
     def __init__(self, model_name="bert-base-uncased", num_classes=2, dropout=0.1):
         super().__init__()
         self.bert = BertModel.from_pretrained(model_name).requires_grad_(False)
@@ -105,7 +105,7 @@ def main():
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--lr", type=float, default=2e-5)
     parser.add_argument("--batch_size", type=int, default=4)
-    parser.add_argument("--epoch", type=int, default=3)
+    parser.add_argument("--epoch", "--epochs", dest="epoch", type=int, default=3)
     parser.add_argument("--max_length", type=int, default=512)
     parser.add_argument("--val_ratio", type=float, default=0.15)
     parser.add_argument("--save_dir", default="results/models")
@@ -203,7 +203,7 @@ def main():
                 "val_f1": best_val_f1,
                 "test_metrics_at_best_val": test_m,
             }, save_path)
-            print(f"        ⭐ 新最佳 val f1={best_val_f1:.4f}, ckpt 保存: {save_path}")
+            print(f"        best val f1={best_val_f1:.4f}, ckpt: {save_path}")
 
         history.append({
             "epoch": ep, "train_loss": total_loss / len(train_loader),

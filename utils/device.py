@@ -1,10 +1,5 @@
 """
-设备管理工具：自动选择最优设备，支持 Mac MPS / CUDA / CPU 三端兼容
-
-设计原则：
-1. 自动检测环境，无需手动指定
-2. 提供 fallback 机制，遇到 MPS 不支持的算子时降级到 CPU
-3. 提供环境变量开关，方便强制指定设备做调试
+设备选择与张量迁移工具，支持 CUDA、MPS 和 CPU。
 """
 import os
 import torch
@@ -67,7 +62,7 @@ def safe_to_device(tensor_or_module, device: torch.device, fallback_to_cpu: bool
     安全地把 tensor 或 module 移到目标设备。
     遇到 MPS 不支持的情况时，可选择降级到 CPU。
 
-    这个函数主要是为了应对 M5 上某些算子尚未实现的情况。
+    用于处理 MPS 上尚未实现的算子。
     """
     try:
         return tensor_or_module.to(device)

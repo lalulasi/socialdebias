@@ -1,21 +1,11 @@
-"""
-最简 BERT 分类器：作为后续所有方法的基础类。
-
-设计原则：
-1. 结构尽量简单，让你能完全理解每一行
-2. 后面所有复杂模型（双分支、对比学习、社交融合）都基于这个类扩展
-"""
+"""BERT 二分类器。"""
 import torch
 import torch.nn as nn
 from transformers import AutoModel
 
 
 class BertClassifier(nn.Module):
-    """
-    最基础的 BERT 二分类器。
-
-    架构: BERT → CLS pooling → Dropout → Linear → logits
-    """
+    """使用 CLS 表示和线性分类头输出类别 logits。"""
 
     def __init__(
             self,
@@ -27,7 +17,7 @@ class BertClassifier(nn.Module):
 
         # 加载预训练 BERT
         self.bert = AutoModel.from_pretrained(model_name)
-        hidden_size = self.bert.config.hidden_size  # 768 for bert-base
+        hidden_size = self.bert.config.hidden_size
 
         # 分类头
         self.dropout = nn.Dropout(dropout)
@@ -45,8 +35,7 @@ class BertClassifier(nn.Module):
         # BERT 编码
         outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
 
-        # 取 [CLS] 的隐状态作为整句表示
-        cls_hidden = outputs.last_hidden_state[:, 0, :]  # [batch_size, hidden_size]
+        cls_hidden = outputs.last_hidden_state[:, 0, :]
 
         # 分类
         x = self.dropout(cls_hidden)
@@ -84,4 +73,4 @@ if __name__ == "__main__":
     print(f"输出形状: logits={logits.shape}")
     print(f"输出设备: {logits.device}")
     print(f"输出样例: {logits[0]}")
-    print("\n✅ 模型前向传播成功")
+    print("\n模型前向传播成功")

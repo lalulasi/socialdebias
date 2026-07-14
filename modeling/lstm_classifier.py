@@ -1,6 +1,5 @@
 """
-BiLSTM 文本分类器，作为对比基线（意见 19）。
-呼应开题报告里的"序列模型"承诺。
+BiLSTM 文本分类器，用作序列模型基线。
 """
 import torch
 import torch.nn as nn

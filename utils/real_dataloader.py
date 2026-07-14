@@ -88,10 +88,10 @@ def load_dataset(
     cfg = DATASET_CONFIG[dataset_name]
 
     # 加载训练+测试
-    print(f"📂 加载 {dataset_name} 训练集: {cfg['train']}")
+    print(f"加载 {dataset_name} 训练集: {cfg['train']}")
     train_full = load_sheepdog_pkl(cfg["train"])
 
-    print(f"📂 加载 {dataset_name} 测试集: {cfg['test']}")
+    print(f"加载 {dataset_name} 测试集: {cfg['test']}")
     test = load_sheepdog_pkl(cfg["test"])
 
     # 从训练集切分验证集
@@ -101,10 +101,10 @@ def load_dataset(
     if max_train_samples is not None and len(train) > max_train_samples:
         random.seed(seed)
         train = random.sample(train, max_train_samples)
-        print(f"⚠️  训练集被截断到 {max_train_samples} 条（调试模式）")
+        print(f"训练集截断为 {max_train_samples} 条（调试模式）")
 
     # 打印数据集统计
-    print(f"\n📊 数据集统计: {dataset_name}")
+    print(f"\n数据集统计: {dataset_name}")
     for name, split in [("Train", train), ("Val", val), ("Test", test)]:
         n_real = sum(1 for s in split if s["label"] == 0)
         n_fake = sum(1 for s in split if s["label"] == 1)
@@ -119,16 +119,16 @@ if __name__ == "__main__":
     train, val, test = load_dataset("politifact", max_train_samples=None)
 
     # 看一条样本
-    print("\n📖 样本示例（真新闻）:")
+    print("\n样本示例（真新闻）:")
     real_sample = next(s for s in train if s["label"] == 0)
     print(f"  ID: {real_sample['id']}")
     print(f"  标签: {real_sample['label']} (真)")
     print(f"  文本 (前 300 字符): {real_sample['text'][:300]}")
 
-    print("\n📖 样本示例（假新闻）:")
+    print("\n样本示例（假新闻）:")
     fake_sample = next(s for s in train if s["label"] == 1)
     print(f"  ID: {fake_sample['id']}")
     print(f"  标签: {fake_sample['label']} (假)")
     print(f"  文本 (前 300 字符): {fake_sample['text'][:300]}")
 
-    print("\n✅ 真实数据加载器测试通过")
+    print("\n真实数据加载器测试通过")
