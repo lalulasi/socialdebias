@@ -1,3 +1,4 @@
+import json
 import pickle
 import tempfile
 import unittest
@@ -5,6 +6,7 @@ from pathlib import Path
 
 import torch
 
+from prepare_endef_data import encode_endef_label, repair_chinese_labels
 from modeling.social_debias import infer_bottleneck_dim
 from scripts.compute_nli_p_entail import resolve_nli_label_indices
 from scripts.prepare_nrc_emolex import load_long, load_translation_map, write_long
@@ -23,6 +25,24 @@ class FakeTokenizer:
 
 
 class PaperAlignmentTests(unittest.TestCase):
+    def test_endef_labels_match_language_specific_loaders(self):
+        self.assertEqual(encode_endef_label(0, "en"), 0)
+        self.assertEqual(encode_endef_label(1, "en"), 1)
+        self.assertEqual(encode_endef_label(0, "zh"), "real")
+        self.assertEqual(encode_endef_label(1, "zh"), "fake")
+
+    def test_repair_existing_endef_ch_labels(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for split in ("train", "val", "test"):
+                (root / f"{split}.json").write_text(
+                    json.dumps([{"label": 0}, {"label": 1}]),
+                    encoding="utf-8",
+                )
+            repair_chinese_labels(root)
+            repaired = json.loads((root / "val.json").read_text(encoding="utf-8"))
+        self.assertEqual([row["label"] for row in repaired], ["real", "fake"])
+
     def test_top_k_overlap_uses_intersection_over_k(self):
         tokens_a = ["a", "b", "c", "d"]
         tokens_b = ["a", "b", "x", "y"]

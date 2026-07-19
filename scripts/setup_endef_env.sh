@@ -12,6 +12,19 @@ if [[ ! -d "${ENDEF_ROOT}/ENDEF_en" || ! -d "${ENDEF_ROOT}/ENDEF_ch" ]]; then
   exit 1
 fi
 
+# Upstream grid_search.py creates logs/param but writes the final result to
+# logs/json without creating that directory first.  Initialise all runtime
+# output directories here so a completed training run does not fail at the
+# final JSON write.
+for ENDEF_CODE_DIR in "${ENDEF_ROOT}/ENDEF_en" "${ENDEF_ROOT}/ENDEF_ch"; do
+  mkdir -p \
+    "${ENDEF_CODE_DIR}/logs/json" \
+    "${ENDEF_CODE_DIR}/logs/param" \
+    "${ENDEF_CODE_DIR}/logs/event" \
+    "${ENDEF_CODE_DIR}/param_model" \
+    "${ENDEF_CODE_DIR}/backup_ckpt"
+done
+
 if [[ ! -f "${VENV_DIR}/bin/activate" ]]; then
   "${PYTHON_BOOTSTRAP}" -m venv "${VENV_DIR}"
 fi
