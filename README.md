@@ -36,3 +36,8 @@ pip install -r requirements.txt
 
 修正后重新获取论文数据的正式顺序、命令、验收门禁和论文回填清单见
 `新一轮论文实验执行步骤.md`。正式复现不要直接运行开发期的 `test_shs/`。
+
+实验数据准备可先运行 `python scripts/audit_experiment_data.py` 查看缺项；取得 NRC
+官方研究许可包并用 `scripts/prepare_nrc_emolex.py` 本地转换后，再执行
+`bash prepare_paper_v2_data.sh` 重建三级过滤及 NLI `p_entail` 文件。数据准备脚本不会
+自动调用付费生成 API。

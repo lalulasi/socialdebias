@@ -7,6 +7,7 @@ import torch
 
 from modeling.social_debias import infer_bottleneck_dim
 from scripts.compute_nli_p_entail import resolve_nli_label_indices
+from scripts.prepare_nrc_emolex import load_long, load_translation_map, write_long
 from utils.contrastive_dataloader import ContrastiveFakeNewsDataset
 from utils.explanation_metrics import js_divergence, top_k_overlap
 from utils.surface_features import SurfaceFeatureExtractor
@@ -59,6 +60,30 @@ class PaperAlignmentTests(unittest.TestCase):
             lexicon = SurfaceFeatureExtractor._load_lexicon(path)
         self.assertEqual(lexicon["alarm"], {"fear", "surprise"})
         self.assertNotIn("calm", lexicon)
+
+    def test_nrc_translation_conversion(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            english = root / "english.tsv"
+            translations = root / "translations.csv"
+            chinese = root / "chinese.tsv"
+            english.write_text(
+                "alarm\tfear\t1\nalarm\tjoy\t0\n",
+                encoding="utf-8",
+            )
+            translations.write_text(
+                "English Word,Chinese-Simplified\nalarm,警报\n",
+                encoding="utf-8",
+            )
+            rows = load_long(english)
+            mapping, _, _ = load_translation_map(translations)
+            written = write_long(
+                [(zh, emotion, flag)
+                 for word, emotion, flag in rows
+                 for zh in mapping[word.lower()]],
+                chinese,
+            )
+        self.assertEqual(written, [("警报", "fear", "1")])
 
     def test_p_entail_matches_selected_rewrite(self):
         with tempfile.TemporaryDirectory() as tmp:

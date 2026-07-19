@@ -14,6 +14,7 @@ import argparse
 import json
 import os
 import pickle
+import random
 import sys
 import time
 from pathlib import Path
@@ -128,9 +129,17 @@ def main():
                         help="并发数（Mac M5 推荐 2）")
     parser.add_argument("--limit", type=int, default=None,
                         help="只处理前 N 条（测试用）")
+    parser.add_argument("--sample_size", type=int, default=None,
+                        help="按 --seed 从原数据确定性抽样 N 条；与 --limit 互斥")
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--retry_non_success", action="store_true",
+                        help="断点中 status 非 success 的任务也重新生成")
     parser.add_argument("--save_every", type=int, default=20,
                         help="每 N 条保存一次 checkpoint")
     args = parser.parse_args()
+
+    if args.limit is not None and args.sample_size is not None:
+        parser.error("--limit 与 --sample_size 不能同时使用")
 
     # 验证风格
     for s in args.styles:
@@ -146,10 +155,16 @@ def main():
     news_list = data["news"]
     labels = data["labels"]
     n_total = len(news_list)
-    if args.limit:
-        news_list = news_list[:args.limit]
-        labels = labels[:args.limit]
-    print(f"  总数: {n_total}，本次处理: {len(news_list)}")
+    selected_indices = list(range(n_total))
+    if args.sample_size is not None:
+        if not 0 < args.sample_size <= n_total:
+            parser.error(f"--sample_size 必须在 1..{n_total} 之间")
+        selected_indices = sorted(
+            random.Random(args.seed).sample(selected_indices, args.sample_size)
+        )
+    elif args.limit is not None:
+        selected_indices = selected_indices[:args.limit]
+    print(f"  总数: {n_total}，本次处理: {len(selected_indices)}")
     print(f"  风格: {args.styles}")
     print(f"  并发: {args.num_workers}")
 
@@ -161,10 +176,13 @@ def main():
 
     # 构造任务清单
     tasks = []
-    for idx, (news, label) in enumerate(zip(news_list, labels)):
+    for idx in selected_indices:
+        news, label = news_list[idx], labels[idx]
         for style in args.styles:
             key = f"{idx}_{style}"
-            if key not in results:
+            if (key not in results
+                    or (args.retry_non_success
+                        and results[key].get("status") != "success")):
                 tasks.append((idx, news, label, style))
     print(f"  待处理: {len(tasks)} 条")
     if len(tasks) == 0:
@@ -216,7 +234,12 @@ def main():
     }
     stats = {s: 0 for s in ["success", "error", "too_short", "too_long"]}
 
+    selected_keys = {
+        f"{idx}_{style}" for idx in selected_indices for style in args.styles
+    }
     for key, r in results.items():
+        if key not in selected_keys:
+            continue
         output["news"].append(r["rewritten"])
         output["labels"].append(r["label"])
         output["style"].append(r["style"])

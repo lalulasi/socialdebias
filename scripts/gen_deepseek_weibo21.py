@@ -2,6 +2,7 @@
 使用 DeepSeek API 改写 Weibo21 训练集。
 默认生成 neutral 风格文本，并支持断点续传。
 """
+import argparse
 import os
 import sys
 import time
@@ -47,9 +48,9 @@ def call_deepseek(prompt: str, model: str = "deepseek-v4-flash", timeout: int = 
 
 def rewrite_one(args):
     """单个改写任务（线程池调用）"""
-    idx, text, label, style = args
+    idx, text, label, style, model = args
     prompt = build_prompt(text, style)
-    rewritten = call_deepseek(prompt)
+    rewritten = call_deepseek(prompt, model=model)
     
     status = "success"
     if rewritten.startswith("[ERROR"):
@@ -67,25 +68,40 @@ def rewrite_one(args):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input", default="data/weibo21_repo/data/train.pkl")
+    parser.add_argument("--output", default="data/qwen_adv/weibo21_train_adv_deepseek.pkl")
+    parser.add_argument("--model", default="deepseek-v4-flash")
+    parser.add_argument("--style", default="neutral")
+    parser.add_argument("--num_workers", type=int, default=10)
+    parser.add_argument("--save_every", type=int, default=200)
+    parser.add_argument("--retry_non_success", action="store_true",
+                        help="已有 status 非 success 的记录也重新请求")
+    args = parser.parse_args()
+
     # 加载 Weibo21 训练集
     import pandas as pd
-    with open("data/weibo21_repo/data/train.pkl", "rb") as f:
+    with open(args.input, "rb") as f:
         df = pickle.load(f)
     
     n = len(df)
     print(f"加载 Weibo21 训练集: {n} 条")
 
-    style = "neutral"
-    output_path = Path("data/qwen_adv/weibo21_train_adv_deepseek.pkl")
+    style = args.style
+    output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     # 断点续传：加载已有结果
     if output_path.exists():
         with open(output_path, "rb") as f:
             existing = pickle.load(f)
-        # 已完成的 idx 集合
-        done_idx = set(existing["orig_idx"])
-        print(f"断点续传：已完成 {len(done_idx)} 条")
+        status_by_idx = dict(zip(existing["orig_idx"], existing["status"]))
+        done_idx = {
+            idx for idx, status in status_by_idx.items()
+            if status == "success" or not args.retry_non_success
+        }
+        print(f"断点续传：跳过 {len(done_idx)} 条，"
+              f"重试失败={args.retry_non_success}")
     else:
         existing = {"news": [], "labels": [], "style": [], "orig_idx": [], "status": []}
         done_idx = set()
@@ -95,7 +111,7 @@ def main():
     for i, row in df.iterrows():
         if i in done_idx:
             continue
-        tasks.append((i, row["content"], row["label"], style))
+        tasks.append((i, row["content"], row["label"], style, args.model))
     
     print(f"待处理：{len(tasks)} 条")
     if not tasks:
@@ -105,9 +121,29 @@ def main():
     # 并发改写
     start = time.time()
     results_buffer = []
-    save_every = 200  # 每 200 条保存一次
+    save_every = args.save_every
+
+    def merge_results(items):
+        positions = {idx: pos for pos, idx in enumerate(existing["orig_idx"])}
+        for result in items:
+            idx = result["idx"]
+            values = {
+                "news": result["rewritten"],
+                "labels": result["label"],
+                "style": result["style"],
+                "orig_idx": idx,
+                "status": result["status"],
+            }
+            if idx in positions:
+                pos = positions[idx]
+                for key, value in values.items():
+                    existing[key][pos] = value
+            else:
+                positions[idx] = len(existing["orig_idx"])
+                for key, value in values.items():
+                    existing[key].append(value)
     
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=args.num_workers) as executor:
         futures = [executor.submit(rewrite_one, t) for t in tasks]
         
         with tqdm(total=len(tasks), desc="DeepSeek 改写") as pbar:
@@ -118,23 +154,13 @@ def main():
                 
                 # 定期保存
                 if len(results_buffer) >= save_every:
-                    for r in results_buffer:
-                        existing["news"].append(r["rewritten"])
-                        existing["labels"].append(r["label"])
-                        existing["style"].append(r["style"])
-                        existing["orig_idx"].append(r["idx"])
-                        existing["status"].append(r["status"])
+                    merge_results(results_buffer)
                     with open(output_path, "wb") as f:
                         pickle.dump(existing, f)
                     results_buffer = []
 
     # 最后一次保存
-    for r in results_buffer:
-        existing["news"].append(r["rewritten"])
-        existing["labels"].append(r["label"])
-        existing["style"].append(r["style"])
-        existing["orig_idx"].append(r["idx"])
-        existing["status"].append(r["status"])
+    merge_results(results_buffer)
     with open(output_path, "wb") as f:
         pickle.dump(existing, f)
 

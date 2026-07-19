@@ -8,6 +8,7 @@ accelerate
 sentencepiece
 # 数据处理
 pandas
+openpyxl
 numpy
 scikit-learn
 scipy
