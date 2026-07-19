@@ -10,7 +10,7 @@ if [ -z "$DEEPSEEK_API_KEY" ]; then
     exit 1
 fi
 
-OUT_DIR="results/llm_baseline"
+OUT_DIR="${OUT_DIR:-results/llm_baseline}"
 DEEPSEEK_MODEL="${DEEPSEEK_MODEL:-deepseek-v4-flash}"
 mkdir -p "$OUT_DIR"
 

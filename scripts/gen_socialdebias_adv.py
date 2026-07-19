@@ -49,7 +49,7 @@ QWEN_URLS = {
 }
 
 
-def call_qwen(prompt, api_key, model="qwen3.6-plus", region="intl", max_retries=3):
+def call_qwen(prompt, api_key, model="qwen3.6-plus-2026-04-02", region="intl", max_retries=3):
     url = QWEN_URLS[region]
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     payload = {
@@ -159,7 +159,7 @@ def main():
     parser.add_argument("--source", required=True, choices=["qwen", "deepseek"])
     parser.add_argument("--qwen_region", default="intl", choices=["intl", "cn", "us"],
                         help="Qwen API 节点：intl=新加坡(默认), cn=北京, us=弗吉尼亚")
-    parser.add_argument("--qwen_model", default="qwen3.6-plus")
+    parser.add_argument("--qwen_model", default="qwen3.6-plus-2026-04-02")
     parser.add_argument("--deepseek_model", default="deepseek-v4-flash")
     parser.add_argument("--sample", type=int, default=0, help="0=全量")
     parser.add_argument("--seed", type=int, default=42)

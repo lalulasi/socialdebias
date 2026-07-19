@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from modeling.attributor import BertAttributor
 from modeling.social_debias import SocialDebiasModel, infer_bottleneck_dim
+from scripts.train_bert_baseline import BertBaselineModel
 from utils.explanation_metrics import compute_all_metrics
 
 
@@ -66,6 +67,15 @@ def load_socialdebias(ckpt_path, model_name, device, surface_feat_dim):
     return model.eval()
 
 
+def load_bert_baseline(ckpt_path, model_name, device):
+    checkpoint = torch.load(ckpt_path, map_location=device, weights_only=False)
+    if not isinstance(checkpoint, dict) or "model_state_dict" not in checkpoint:
+        raise ValueError(f"BERT checkpoint format is invalid: {ckpt_path}")
+    model = BertBaselineModel(model_name=model_name).to(device)
+    model.load_state_dict(checkpoint["model_state_dict"], strict=True)
+    return model.eval()
+
+
 def summarize(rows, prefix):
     out = {}
     for key in ("top_k_overlap", "spearman", "js_divergence"):
@@ -78,13 +88,23 @@ def summarize(rows, prefix):
     return out
 
 
+def top_tokens(tokens, scores, k):
+    ranked = sorted(
+        zip(tokens, scores), key=lambda item: abs(float(item[1])), reverse=True
+    )
+    return [token for token, _ in ranked[:k]]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", default="politifact", choices=["politifact"])
     parser.add_argument("--language", default="en")
     parser.add_argument("--variant", default="C")
     parser.add_argument("--ckpt", required=True)
-    parser.add_argument("--baseline_zero", action="store_true")
+    parser.add_argument("--bert_ckpt", default=None,
+                        help="same-seed trained BERT baseline checkpoint")
+    parser.add_argument("--baseline_zero", action="store_true",
+                        help="legacy random-head control; not for paper tables")
     parser.add_argument("--topk", "--top_k", dest="topk", type=int, default=10)
     parser.add_argument("--n_steps", type=int, default=50)
     parser.add_argument("--max_length", type=int, default=512)
@@ -112,9 +132,15 @@ def main():
     sd_attr = BertAttributor(sd_model, tokenizer, device, n_steps=args.n_steps)
 
     bert_attr = None
-    if args.baseline_zero:
+    bert_key = None
+    if args.bert_ckpt:
+        bert_model = load_bert_baseline(args.bert_ckpt, model_name, device)
+        bert_attr = BertAttributor(bert_model, tokenizer, device, n_steps=args.n_steps)
+        bert_key = "bert"
+    elif args.baseline_zero:
         bert_model = BertZeroBaseline(model_name).to(device).eval()
         bert_attr = BertAttributor(bert_model, tokenizer, device, n_steps=args.n_steps)
+        bert_key = "zero_bert"
 
     rows = []
     for i, (clean, adv, label) in enumerate(zip(clean_texts, adv_texts, clean_labels)):
@@ -125,7 +151,14 @@ def main():
         sd_adv = sd_attr.attribute(adv, target_class=label, max_length=args.max_length)
         row = {
             "idx": i,
+            "id": f"pf_test_{i:03d}",
             "label": label,
+            "orig_topk_tokens": top_tokens(
+                sd_clean["tokens"], sd_clean["scores"], args.topk
+            ),
+            "adv_topk_tokens": top_tokens(
+                sd_adv["tokens"], sd_adv["scores"], args.topk
+            ),
             "socialdebias": compute_all_metrics(
                 sd_clean["tokens"], sd_clean["scores"],
                 sd_adv["tokens"], sd_adv["scores"],
@@ -136,7 +169,7 @@ def main():
         if bert_attr is not None:
             b_clean = bert_attr.attribute(clean, target_class=label, max_length=args.max_length)
             b_adv = bert_attr.attribute(adv, target_class=label, max_length=args.max_length)
-            row["zero_bert"] = compute_all_metrics(
+            row[bert_key] = compute_all_metrics(
                 b_clean["tokens"], b_clean["scores"],
                 b_adv["tokens"], b_adv["scores"],
                 k=args.topk,
@@ -154,7 +187,7 @@ def main():
         "rows": rows,
     }
     if bert_attr is not None:
-        result["summary"]["zero_bert"] = summarize(rows, "zero_bert")
+        result["summary"][bert_key] = summarize(rows, bert_key)
 
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
     with open(args.output, "w", encoding="utf-8") as f:

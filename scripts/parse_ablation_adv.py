@@ -10,12 +10,19 @@ from collections import defaultdict
 import numpy as np
 
 import sys; RESULT_DIR = Path(sys.argv[1] if len(sys.argv) > 1 else "results/ablation_adv")
-VAR_ORDER = ["full", "no_grl", "no_consist", "no_both"]
+VAR_ORDER = [
+    "full", "no_grl", "no_infonce", "no_consist", "no_surface",
+    "no_advaug", "no_labelsmooth", "surface17_full",
+]
 VAR_LABEL = {
     "full": "SocialDebias (full)",
     "no_grl": "w/o GRL",
+    "no_infonce": "w/o InfoNCE",
     "no_consist": "w/o Consist",
-    "no_both": "w/o Both (≈BERT)",
+    "no_surface": "w/o Surface",
+    "no_advaug": "w/o AdvAug",
+    "no_labelsmooth": "w/o LabelSmooth",
+    "surface17_full": "17-d Surface (full)",
 }
 
 
@@ -50,7 +57,7 @@ def main():
     print("=" * 120)
     print(f"{'Dataset':<12}{'Variant':<22}"
           f"{'Clean F1':<18}{'Adv A F1':<16}{'Adv B F1':<16}{'Adv C F1':<16}{'Adv D F1':<16}"
-          f"{'Avg Adv F1':<18}{'F1 Drop':<14}")
+          f"{'Avg Adv F1':<18}{'F1 Drop':<14}{'Avg ASR':<14}")
     print("-" * 120)
 
     rows = []
@@ -67,6 +74,7 @@ def main():
             adv_d_f1s = [r["results"].get("adv_D", {}).get("f1") for r in runs]
             avg_adv_f1s = [r["results"].get("summary", {}).get("avg_adv_f1") for r in runs]
             drops = [r["results"].get("summary", {}).get("f1_drop") for r in runs]
+            avg_asrs = [r["results"].get("summary", {}).get("avg_asr") for r in runs]
 
             # 清理 None
             adv_a_f1s = [x for x in adv_a_f1s if x is not None]
@@ -75,6 +83,7 @@ def main():
             adv_d_f1s = [x for x in adv_d_f1s if x is not None]
             avg_adv_f1s = [x for x in avg_adv_f1s if x is not None]
             drops = [x for x in drops if x is not None]
+            avg_asrs = [x for x in avg_asrs if x is not None]
 
             label = VAR_LABEL.get(variant, variant)
             print(f"{dataset:<12}{label:<22}"
@@ -84,7 +93,8 @@ def main():
                   f"{fmt_ms(adv_c_f1s):<16}"
                   f"{fmt_ms(adv_d_f1s):<16}"
                   f"{fmt_ms(avg_adv_f1s):<18}"
-                  f"{fmt_ms(drops):<14}")
+                  f"{fmt_ms(drops):<14}"
+                  f"{fmt_ms(avg_asrs):<14}")
 
             rows.append({
                 "dataset": dataset, "variant": variant,
@@ -96,6 +106,8 @@ def main():
                 "avg_adv_f1_mean": np.mean(avg_adv_f1s) if avg_adv_f1s else None,
                 "f1_drop_mean": np.mean(drops) if drops else None,
                 "f1_drop_std": np.std(drops) if drops else None,
+                "avg_asr_mean": np.mean(avg_asrs) if avg_asrs else None,
+                "avg_asr_std": np.std(avg_asrs) if avg_asrs else None,
                 "n": len(runs),
             })
 

@@ -10,9 +10,9 @@ if [ -z "$DASHSCOPE_API_KEY" ] || [ -z "$DEEPSEEK_API_KEY" ]; then
     exit 1
 fi
 
-OUT_DIR="data/socialdebias_adv"
-LOG_DIR="logs/socialdebias_adv"
-QWEN_MODEL="${QWEN_MODEL:-qwen3.6-plus}"
+OUT_DIR="${SOCIALDEBIAS_ADV_OUT_DIR:-data/socialdebias_adv}"
+LOG_DIR="${SOCIALDEBIAS_ADV_LOG_DIR:-logs/socialdebias_adv}"
+QWEN_MODEL="${QWEN_MODEL:-qwen3.6-plus-2026-04-02}"
 DEEPSEEK_MODEL="${DEEPSEEK_MODEL:-deepseek-v4-flash}"
 QWEN_REGION="${QWEN_REGION:-intl}"
 mkdir -p "$OUT_DIR" "$LOG_DIR"

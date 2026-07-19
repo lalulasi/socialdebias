@@ -59,6 +59,17 @@ def main():
         type=str,
         default="results/human_eval/politifact_human_eval_template.csv",
     )
+    parser.add_argument(
+        "--blind",
+        action="store_true",
+        help="hide gold labels/text types and shuffle rows for blind annotation",
+    )
+    parser.add_argument(
+        "--key_output",
+        type=str,
+        default=None,
+        help="answer-key CSV required with --blind",
+    )
     args = parser.parse_args()
 
     test_data = load_pkl(args.test_pkl)
@@ -90,48 +101,57 @@ def main():
     sampled_fake = rng.sample(fake_idx, n_fake)
     sampled = sorted(sampled_real + sampled_fake)
 
+    records = []
+    for idx in sampled:
+        label_str = "real" if orig_labels[idx] == 0 else "fake"
+        sample_id = f"pf_test_{idx:03d}"
+        records.extend([
+            {
+                "id": sample_id, "label": label_str, "text_type": "original",
+                "text": str(orig_texts[idx]).strip(),
+            },
+            {
+                "id": sample_id, "label": label_str, "text_type": "adv_C",
+                "text": str(adv_texts[idx]).strip(),
+            },
+        ])
+
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
-    with open(args.output, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f, quoting=csv.QUOTE_ALL)
-        writer.writerow(
-            [
-                "id",
-                "label",
-                "text_type",
-                "text",
-                "human_keywords",
-                "human_judgment",
-                "confidence",
-                "notes",
-            ]
-        )
-        for idx in sampled:
-            label_str = "real" if orig_labels[idx] == 0 else "fake"
-            sample_id = f"pf_test_{idx:03d}"
-            writer.writerow(
-                [
-                    sample_id,
-                    label_str,
-                    "original",
-                    str(orig_texts[idx]).strip(),
-                    "",
-                    "",
-                    "",
-                    "",
-                ]
-            )
-            writer.writerow(
-                [
-                    sample_id,
-                    label_str,
-                    "adv_C",
-                    str(adv_texts[idx]).strip(),
-                    "",
-                    "",
-                    "",
-                    "",
-                ]
-            )
+    if args.blind:
+        if not args.key_output:
+            raise ValueError("--blind requires --key_output")
+        rng.shuffle(records)
+        for position, record in enumerate(records, start=1):
+            record["blind_id"] = f"blind_{position:03d}"
+        with open(args.output, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+            writer.writerow([
+                "blind_id", "text", "human_keywords", "human_judgment",
+                "confidence", "notes",
+            ])
+            for record in records:
+                writer.writerow([record["blind_id"], record["text"], "", "", "", ""])
+        Path(args.key_output).parent.mkdir(parents=True, exist_ok=True)
+        with open(args.key_output, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+            writer.writerow(["blind_id", "id", "label", "text_type"])
+            for record in records:
+                writer.writerow([
+                    record["blind_id"], record["id"], record["label"], record["text_type"]
+                ])
+        print(f"Answer key (do not give to annotators): {args.key_output}")
+    else:
+        with open(args.output, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+            writer.writerow([
+                "id", "label", "text_type", "text", "human_keywords",
+                "human_judgment", "confidence", "notes",
+            ])
+            for record in records:
+                writer.writerow([
+                    record["id"], record["label"], record["text_type"],
+                    record["text"], "", "", "", "",
+                ])
 
     print(
         f"Sampled: {len(sampled)} pairs "

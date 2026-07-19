@@ -74,11 +74,19 @@ def jaccard(a, b):
     return len(a & b) / len(a | b)
 
 
-def load_human_eval(path):
+def load_human_eval(path, key_path=None):
     if str(path).endswith((".xlsx", ".xlsm")):
         df = pd.read_excel(path)
     else:
         df = pd.read_csv(path)
+    if key_path:
+        if str(key_path).endswith((".xlsx", ".xlsm")):
+            key = pd.read_excel(key_path)
+        else:
+            key = pd.read_csv(key_path)
+        if "blind_id" not in df.columns or "blind_id" not in key.columns:
+            raise ValueError("Blind task and answer key must both contain blind_id")
+        df = df.merge(key, on="blind_id", how="left", validate="one_to_one")
     required = {"id", "label", "text_type", "human_keywords", "human_judgment"}
     missing = required - set(df.columns)
     if missing:
@@ -201,6 +209,8 @@ def load_ig_topk(path, topk=10):
 
     if isinstance(data, dict) and "samples" in data:
         samples = data["samples"]
+    elif isinstance(data, dict) and "rows" in data:
+        samples = data["rows"]
     elif isinstance(data, list):
         samples = data
     else:
@@ -373,6 +383,12 @@ def main():
         help="人工标注 xlsx 或 csv 文件",
     )
     parser.add_argument(
+        "--key",
+        type=str,
+        default=None,
+        help="answer-key CSV for a task generated with --blind",
+    )
+    parser.add_argument(
         "--ig_json",
         type=str,
         default=None,
@@ -397,7 +413,7 @@ def main():
     )
     args = parser.parse_args()
 
-    df = load_human_eval(args.input)
+    df = load_human_eval(args.input, args.key)
     print(f"加载：{args.input}，共 {len(df)} 行")
 
     pairs = reshape_to_pairs(df, uncertain_score=args.uncertain_score)

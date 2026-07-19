@@ -2,19 +2,22 @@
 汇总 LSTM 基线 6 个实验结果（3 种子 × 2 数据集），算均值±标准差。
 运行: python scripts/parse_lstm_results.py
 """
+import argparse
 import json
 from pathlib import Path
 from collections import defaultdict
 
 import numpy as np
 
-RESULT_DIR = Path("results/lstm")
-
-
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input_dir", type=Path, default=Path("results/lstm"))
+    parser.add_argument("--output", type=Path, default=None)
+    args = parser.parse_args()
+    result_dir = args.input_dir
     # key = dataset, value = list of (seed, test_metrics)
     groups = defaultdict(list)
-    for jf in sorted(RESULT_DIR.glob("lstm_*_result.json")):
+    for jf in sorted(result_dir.glob("lstm_*_result.json")):
         with open(jf) as f:
             data = json.load(f)
         groups[data["dataset"]].append((data["seed"], data["test"], data["best_val"]))
@@ -52,8 +55,9 @@ def main():
 
     # 保存 CSV
     import csv
-    out_csv = RESULT_DIR / "lstm_summary.csv"
+    out_csv = args.output or result_dir / "lstm_summary.csv"
     if csv_rows:
+        out_csv.parent.mkdir(parents=True, exist_ok=True)
         with open(out_csv, "w", newline="") as f:
             w = csv.DictWriter(f, fieldnames=csv_rows[0].keys())
             w.writeheader()

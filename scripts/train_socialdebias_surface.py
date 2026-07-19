@@ -248,9 +248,10 @@ def main():
     args.adaptive_orig_lambda_bias = args.lambda_bias
     args.adaptive_orig_lambda_consist = args.lambda_consist
     args.adaptive_baseline_val_f1 = None
+    args.adaptive_train_size = len(train_set)
 
     if args.adaptive_lambda:
-        train_size = len(train_set)
+        train_size = args.adaptive_train_size
         triggered_by_size = train_size >= args.adaptive_size_thresh
         if triggered_by_size:
             args.adaptive_trigger_reasons.append(f"train_size={train_size}>={args.adaptive_size_thresh}")
