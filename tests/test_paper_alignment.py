@@ -7,6 +7,7 @@ from pathlib import Path
 import torch
 
 from prepare_endef_data import encode_endef_label, repair_chinese_labels
+from scripts.patch_endef_ch_dataloader import patch_dataloader
 from modeling.social_debias import infer_bottleneck_dim
 from scripts.compute_nli_p_entail import resolve_nli_label_indices
 from scripts.prepare_nrc_emolex import load_long, load_translation_map, write_long
@@ -42,6 +43,21 @@ class PaperAlignmentTests(unittest.TestCase):
             repair_chinese_labels(root)
             repaired = json.loads((root / "val.json").read_text(encoding="utf-8"))
         self.assertEqual([row["label"] for row in repaired], ["real", "fake"])
+
+    def test_endef_ch_dataloader_patch_is_idempotent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "dataloader.py"
+            path.write_text(
+                "def load(df_data, torch, label_dict):\n"
+                "    label = torch.tensor(df_data['label'].apply(lambda c: label_dict[c]).astype(int).to_numpy())\n"
+                "    return label\n",
+                encoding="utf-8",
+            )
+            self.assertTrue(patch_dataloader(path))
+            self.assertFalse(patch_dataloader(path))
+            patched = path.read_text(encoding="utf-8")
+        self.assertIn("def normalize_endef_label(value):", patched)
+        self.assertIn("normalized not in (0, 1)", patched)
 
     def test_top_k_overlap_uses_intersection_over_k(self):
         tokens_a = ["a", "b", "c", "d"]

@@ -25,6 +25,12 @@ for ENDEF_CODE_DIR in "${ENDEF_ROOT}/ENDEF_en" "${ENDEF_ROOT}/ENDEF_ch"; do
     "${ENDEF_CODE_DIR}/backup_ckpt"
 done
 
+# ENDEF_ch upstream only accepts string labels (real/fake).  Install an
+# idempotent compatibility patch so equivalent numeric 0/1 data is accepted as
+# well.  The patcher preserves the original source as *.socialdebias.bak.
+"${PYTHON_BOOTSTRAP}" "${PROJECT_ROOT}/scripts/patch_endef_ch_dataloader.py" \
+  --endef_ch_root "${ENDEF_ROOT}/ENDEF_ch"
+
 if [[ ! -f "${VENV_DIR}/bin/activate" ]]; then
   "${PYTHON_BOOTSTRAP}" -m venv "${VENV_DIR}"
 fi
