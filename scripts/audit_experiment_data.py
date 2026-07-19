@@ -5,6 +5,7 @@ NLI/NRC readiness. It intentionally does not expose article contents.
 """
 import argparse
 import json
+import math
 import pickle
 import sys
 from collections import Counter, defaultdict
@@ -52,7 +53,12 @@ def inspect_base(path, dataframe=False):
     return result
 
 
-def inspect_adversarial(path, require_p_entail=False):
+def inspect_adversarial(
+    path,
+    require_p_entail=False,
+    entity_threshold=None,
+    semantic_threshold=None,
+):
     result = {"path": str(path), "exists": path.exists(), "kind": "adversarial"}
     if not path.exists():
         return result
@@ -62,7 +68,11 @@ def inspect_adversarial(path, require_p_entail=False):
         return result
     required = {"news", "labels", "style", "orig_idx"}
     if require_p_entail:
-        required.add("p_entail")
+        required.update({"p_entail", "p_neutral", "p_contradict", "nli_label"})
+    if entity_threshold is not None:
+        required.add("entity_recall_score")
+    if semantic_threshold is not None:
+        required.add("semantic_score")
     lengths, aligned = aligned_lengths(data, sorted(required | ({"status"} & set(data))))
     n = lengths.get("news", 0)
     statuses = Counter(data.get("status", []))
@@ -79,21 +89,62 @@ def inspect_adversarial(path, require_p_entail=False):
         "keys": sorted(data),
         "lengths": lengths,
         "aligned": aligned,
-        "schema_ok": required.issubset(data) and aligned,
+        "schema_ok": required.issubset(data) and aligned and n > 0,
         "status_counts": dict(sorted(statuses.items())),
         "success_rows": len(success_positions),
         "success_unique_orig": len(by_origin),
         "success_style_counts": dict(sorted(style_counts.items())),
         "success_versions_per_orig": dict(sorted(Counter(map(len, by_origin.values())).items())),
     })
+    if entity_threshold is not None and "entity_recall_score" in data:
+        values = [float(value) for value in data["entity_recall_score"]]
+        threshold_ok = bool(values) and all(
+            math.isfinite(value) and value >= entity_threshold for value in values
+        )
+        result["entity_recall"] = {
+            "threshold": entity_threshold,
+            "min": min(values) if values else None,
+            "threshold_ok": threshold_ok,
+        }
+        result["schema_ok"] = result["schema_ok"] and threshold_ok
+    if semantic_threshold is not None and "semantic_score" in data:
+        values = [float(value) for value in data["semantic_score"]]
+        threshold_ok = bool(values) and all(
+            math.isfinite(value) and value >= semantic_threshold for value in values
+        )
+        result["semantic"] = {
+            "threshold": semantic_threshold,
+            "min": min(values) if values else None,
+            "threshold_ok": threshold_ok,
+        }
+        result["schema_ok"] = result["schema_ok"] and threshold_ok
     if require_p_entail and "p_entail" in data:
         values = [float(value) for value in data["p_entail"]]
+        probability_keys = ("p_entail", "p_neutral", "p_contradict")
+        probability_rows = list(zip(*(data.get(key, []) for key in probability_keys)))
+        probabilities_ok = bool(values) and all(
+            all(math.isfinite(float(value)) and 0.0 <= float(value) <= 1.0 for value in row)
+            and abs(sum(float(value) for value in row) - 1.0) <= 1e-4
+            for row in probability_rows
+        )
+        contradiction_absent = (
+            "nli_label" in data
+            and all(str(label).lower() != "contradiction" for label in data["nli_label"])
+            and data.get("nli_filter", {}).get("exclude") == "contradiction"
+        )
         result["p_entail"] = {
             "min": min(values) if values else None,
             "max": max(values) if values else None,
             "mean": sum(values) / len(values) if values else None,
-            "in_unit_interval": all(0.0 <= value <= 1.0 for value in values),
+            "in_unit_interval": bool(values) and all(
+                math.isfinite(value) and 0.0 <= value <= 1.0 for value in values
+            ),
+            "probabilities_sum_to_one": probabilities_ok,
+            "contradiction_absent": contradiction_absent,
         }
+        result["schema_ok"] = (
+            result["schema_ok"] and probabilities_ok and contradiction_absent
+        )
     return result
 
 
@@ -149,6 +200,8 @@ def main():
     parser.add_argument("--json_output", default=None)
     parser.add_argument("--strict_training", action="store_true",
                         help="NRC 与三个 paper_v2 p_entail 缺失时返回非零")
+    parser.add_argument("--strict_paper_v2", action="store_true",
+                        help="三个 filtered 与三个 p_entail 输出无效时返回非零")
     args = parser.parse_args()
 
     assets = []
@@ -161,15 +214,25 @@ def main():
         "politifact_train_adv.pkl",
         "gossipcop_train_adv.pkl",
         "weibo21_train_adv_deepseek.pkl",
-        "politifact_train_adv_filtered_paper_v2.pkl",
-        "gossipcop_train_adv_filtered_paper_v2.pkl",
-        "weibo21_train_adv_filtered_paper_v2.pkl",
     ):
         assets.append(inspect_adversarial(ROOT / "data/qwen_adv" / name))
+    for dataset, entity_threshold in (
+        ("politifact", 0.7),
+        ("gossipcop", 0.7),
+        ("weibo21", 0.6),
+    ):
+        assets.append(inspect_adversarial(
+            ROOT / f"data/qwen_adv/{dataset}_train_adv_filtered_paper_v2.pkl",
+            entity_threshold=entity_threshold,
+            semantic_threshold=0.65,
+        ))
     for dataset in ("politifact", "gossipcop", "weibo21"):
+        entity_threshold = 0.6 if dataset == "weibo21" else 0.7
         assets.append(inspect_adversarial(
             ROOT / f"data/qwen_adv/{dataset}_p_entail_paper_v2.pkl",
             require_p_entail=True,
+            entity_threshold=entity_threshold,
+            semantic_threshold=0.65,
         ))
     assets.extend([
         inspect_nrc(
@@ -189,6 +252,18 @@ def main():
         item.get("exists", False) and item.get("schema_ok", False)
         for item in training_critical
     )
+    paper_v2_outputs = [
+        item for item in assets
+        if "_filtered_paper_v2.pkl" in item.get("path", "")
+        or "_p_entail_paper_v2.pkl" in item.get("path", "")
+    ]
+    report["paper_v2_data_ready"] = (
+        len(paper_v2_outputs) == 6
+        and all(
+            item.get("exists", False) and item.get("schema_ok", False)
+            for item in paper_v2_outputs
+        )
+    )
 
     for item in assets:
         state = "OK" if item.get("exists") and item.get("schema_ok") else "MISSING/INVALID"
@@ -199,7 +274,8 @@ def main():
         elif item.get("kind") == "nrc" and item.get("exists"):
             detail = f" words={item.get('words')} eight={item.get('all_eight_emotions')}"
         print(f"[{state}] {item.get('path', item.get('dataset'))}{detail}")
-    print(f"\ntraining_ready={report['training_ready']}")
+    print(f"\npaper_v2_data_ready={report['paper_v2_data_ready']}")
+    print(f"training_ready={report['training_ready']}")
 
     if args.json_output:
         output = Path(args.json_output)
@@ -208,6 +284,8 @@ def main():
         print(f"report={output}")
 
     if args.strict_training and not report["training_ready"]:
+        raise SystemExit(1)
+    if args.strict_paper_v2 and not report["paper_v2_data_ready"]:
         raise SystemExit(1)
 
 

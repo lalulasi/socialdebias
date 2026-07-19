@@ -66,6 +66,7 @@ done
   2>&1 | tee "${REPORT_DIR}/weibo21_nli.log"
 
 "${PYTHON_BIN}" scripts/audit_experiment_data.py \
+  --strict_paper_v2 \
   --json_output "${REPORT_DIR}/after.json" \
   2>&1 | tee "${REPORT_DIR}/after.log"
 
