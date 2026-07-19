@@ -63,6 +63,15 @@ def build_datasets(socialdebias_root, endef_en_root, endef_ch_root):
 # ============ 数据读取 ============
 def load_pkl_split(path, fmt):
     """返回 (texts: list[str], labels: list[int])"""
+    if fmt == "dataframe":
+        try:
+            import pandas  # noqa: F401 -- required to unpickle Weibo21 DataFrame
+        except (ImportError, ValueError) as exc:
+            raise RuntimeError(
+                "Weibo21 需要可用的 pandas。若出现 numpy.dtype size changed，"
+                "请在 ENDEF 虚拟环境执行：python -m pip install --no-cache-dir "
+                "--force-reinstall 'numpy==1.26.4' 'pandas==1.5.3'"
+            ) from exc
     with open(path, "rb") as f:
         d = pickle.load(f)
     if fmt == "dict":
