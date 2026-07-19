@@ -1,7 +1,7 @@
 """Token-level attribution with Captum Layer Integrated Gradients."""
 import torch
 import numpy as np
-from captum.attr import LayerIntegratedGradients
+from captum.attr import IntegratedGradients
 from typing import List, Dict, Optional
 
 
@@ -33,7 +33,7 @@ class BertAttributor:
         else:
             raise ValueError("模型必须有 .bert 属性")
 
-        self.lig = LayerIntegratedGradients(self._forward_fn, self.embedding_layer)
+        self.ig = IntegratedGradients(self._forward_embeds)
 
     def _forward_fn(self, input_ids, attention_mask):
         """
@@ -45,6 +45,18 @@ class BertAttributor:
         else:
             # BertClassifier 直接前向
             return self.model(input_ids, attention_mask)
+
+    def _forward_embeds(self, input_embeds, attention_mask):
+        """Forward from embedding vectors so the IG baseline can be zero."""
+        outputs = self.bert_model(
+            inputs_embeds=input_embeds, attention_mask=attention_mask
+        )
+        shared = outputs.last_hidden_state[:, 0, :]
+        if hasattr(self.model, "fact_projector"):
+            return self.model.fact_classifier(self.model.fact_projector(shared))
+        if hasattr(self.model, "dropout"):
+            shared = self.model.dropout(shared)
+        return self.model.classifier(shared)
 
     def attribute(
             self,
@@ -88,24 +100,18 @@ class BertAttributor:
         if target_class is None:
             target_class = pred_class
 
-        pad_token_id = self.tokenizer.pad_token_id
-        baseline_ids = torch.full_like(input_ids, pad_token_id)
-        baseline_ids[:, 0] = input_ids[:, 0]
-        sep_positions = (input_ids == self.tokenizer.sep_token_id).nonzero(as_tuple=True)
-        if len(sep_positions[1]) > 0:
-            sep_pos = sep_positions[1][0].item()
-            baseline_ids[:, sep_pos] = input_ids[:, sep_pos]
-
-        attributions, delta = self.lig.attribute(
-            inputs=input_ids,
-            baselines=baseline_ids,
+        input_embeds = self.embedding_layer(input_ids)
+        baseline_embeds = torch.zeros_like(input_embeds)
+        attributions, delta = self.ig.attribute(
+            inputs=input_embeds,
+            baselines=baseline_embeds,
             additional_forward_args=(attention_mask,),
             target=target_class,
             n_steps=self.n_steps,
             return_convergence_delta=True,
         )
 
-        token_scores = attributions.sum(dim=-1).squeeze(0).cpu().numpy()
+        token_scores = attributions.sum(dim=-1).squeeze(0).detach().cpu().numpy()
 
         token_ids = input_ids.squeeze(0).cpu().numpy()
         tokens = self.tokenizer.convert_ids_to_tokens(token_ids.tolist())
@@ -127,7 +133,7 @@ class BertAttributor:
             "pred_class": pred_class,
             "pred_prob": pred_prob,
             "target_class": target_class,
-            "convergence_delta": delta.item(),
+            "convergence_delta": float(delta.reshape(-1).mean().item()),
         }
 
     def attribute_batch(self, texts: List[str], **kwargs) -> List[Dict]:

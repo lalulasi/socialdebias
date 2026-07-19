@@ -11,7 +11,7 @@ from transformers import AutoTokenizer
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from modeling.social_debias import SocialDebiasModel
+from modeling.social_debias import SocialDebiasModel, infer_bottleneck_dim
 from modeling.attributor import BertAttributor
 from utils.explanation_metrics import compute_all_metrics
 from utils.surface_features import SurfaceFeatureExtractor
@@ -67,17 +67,22 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(args.bert_name)
 
     ckpt = torch.load(args.ckpt, map_location=device, weights_only=False)
-    surface_dim = ckpt["config"].get("surface_feat_dim", 0)
+    config = ckpt.get("config", {})
+    state_dict = ckpt["model_state_dict"]
+    surface_dim = config.get("surface_feat_dim", 0)
     feat_mean = np.array(ckpt["feat_mean"]) if ckpt.get("feat_mean") else None
     feat_std = np.array(ckpt["feat_std"]) if ckpt.get("feat_std") else None
     model = SocialDebiasModel(
-        model_name=args.bert_name, num_classes=2, hidden_dim=384, dropout=0.1,
+        model_name=args.bert_name, num_classes=2,
+        hidden_dim=config.get("hidden_dim", 384),
+        bottleneck_dim=infer_bottleneck_dim(state_dict, config), dropout=0.1,
         grl_lambda=1.0, use_frozen_bert=True, surface_feat_dim=surface_dim,
     ).to(device)
-    model.load_state_dict(ckpt["model_state_dict"], strict=False)
+    model.load_state_dict(state_dict, strict=True)
     model.eval()
     print(f"加载 ckpt: surface_dim={surface_dim}")
-    extractor = SurfaceFeatureExtractor(dim=surface_dim) if surface_dim > 0 else None
+    # fact_logits 不读取 surface_feat；表层特征只通过训练期偏置梯度生效。
+    extractor = None
     attributor = BertAttributor(model, tokenizer, device, n_steps=args.n_steps)
 
     # ---- 原文侧只算一次 ----

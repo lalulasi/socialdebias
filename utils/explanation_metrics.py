@@ -68,8 +68,9 @@ def top_k_overlap(
         return 0.0
 
     intersection = top_a & top_b
-    union = top_a | top_b
-    return len(intersection) / len(union)
+    # 论文公式 (5.12)：|TopK(a) ∩ TopK(b)| / K，不是 Jaccard。
+    effective_k = min(k, len(tokens_a), len(tokens_b))
+    return len(intersection) / effective_k if effective_k > 0 else 0.0
 
 
 def spearman_correlation(
@@ -102,25 +103,29 @@ def js_divergence(
         scores_b: List[float],
 ) -> float:
     """
-    把归因分数通过 softmax 转成概率分布，再算 JS 散度。
-    使用绝对值，避免负数无法归一化。
+    把归因幅值排序后通过 softmax 转成概率分布，再算 JS 散度。
+    排序后的分布比较不依赖原文与改写文具有相同的字面词元，符合论文
+    §5.4.2 对“归因分布形状”的定义。
 
     Returns:
         divergence ∈ [0, 1]，0 表示完全一致，1 表示完全不同。
     """
-    _, aligned_a, aligned_b = align_tokens(tokens_a, scores_a, tokens_b, scores_b)
-
-    if len(aligned_a) < 3:
+    if len(scores_a) < 3 or len(scores_b) < 3:
         return float("nan")
 
-    p = np.abs(np.array(aligned_a))
-    q = np.abs(np.array(aligned_b))
+    n = max(len(scores_a), len(scores_b))
+    a = np.sort(np.abs(np.asarray(scores_a, dtype=np.float64)))[::-1]
+    b = np.sort(np.abs(np.asarray(scores_b, dtype=np.float64)))[::-1]
+    a = np.pad(a, (0, n - len(a)), constant_values=0.0)
+    b = np.pad(b, (0, n - len(b)), constant_values=0.0)
 
-    if p.sum() == 0 or q.sum() == 0:
-        return 1.0
+    def softmax(values):
+        shifted = values - np.max(values)
+        exp_values = np.exp(shifted)
+        return exp_values / exp_values.sum()
 
-    p = p / p.sum()
-    q = q / q.sum()
+    p = softmax(a)
+    q = softmax(b)
 
     js_dist = jensenshannon(p, q, base=2)
     return float(js_dist ** 2)

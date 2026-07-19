@@ -84,12 +84,14 @@ class ContrastiveFakeNewsDataset(Dataset):
         with open(adversarial_pkl_path, "rb") as f:
             adv = pickle.load(f)
         has_p_entail = "p_entail" in adv
+        instance.has_p_entail = has_p_entail
 
         adv_by_idx = defaultdict(list)
         for i, idx in enumerate(adv["orig_idx"]):
             if styles and adv["style"][i] not in styles:
                 continue
-            adv_by_idx[idx].append(adv["news"][i])
+            p_entail = float(adv["p_entail"][i]) if has_p_entail else 1.0
+            adv_by_idx[idx].append((adv["news"][i], p_entail))
 
         instance.samples = []
         n_skipped = 0
@@ -98,20 +100,12 @@ class ContrastiveFakeNewsDataset(Dataset):
             if require_adv and not adv_versions:
                 n_skipped += 1
                 continue
-            p_entail_for_orig = None
-            if has_p_entail:
-                p_entails = [adv["p_entail"][i] for i, oi in enumerate(adv["orig_idx"]) if oi == idx]
-                if p_entails:
-                    p_entail_for_orig = sum(p_entails) / len(p_entails)
-            
             sample = {
                 "orig_idx": idx,
                 "orig_text": text,
                 "label": int(label),
                 "adv_versions": adv_versions,
             }
-            if p_entail_for_orig is not None:
-                sample["p_entail"] = p_entail_for_orig
             instance.samples.append(sample)
 
         print(f"[ContrastiveDataset] 加载完成")
@@ -140,9 +134,12 @@ class ContrastiveFakeNewsDataset(Dataset):
         )
 
         if s["adv_versions"]:
-            adv_text = random.choice(s["adv_versions"])
+            # p_entail 必须与本次随机抽到的改写版本一一对应，不能按原文
+            # 对所有风格求均值，否则 NLI 样本权重会错配。
+            adv_text, p_entail = random.choice(s["adv_versions"])
         else:
             adv_text = s["orig_text"]
+            p_entail = 1.0
 
         adv_enc = self.tokenizer(
             adv_text,
@@ -160,10 +157,7 @@ class ContrastiveFakeNewsDataset(Dataset):
             "label": torch.tensor(s["label"], dtype=torch.long),
             "orig_idx": s["orig_idx"],
         }
-        if "p_entail" in s:
-            result["p_entail"] = torch.tensor(s["p_entail"], dtype=torch.float32)
-        else:
-            result["p_entail"] = torch.tensor(1.0, dtype=torch.float32)
+        result["p_entail"] = torch.tensor(p_entail, dtype=torch.float32)
         return result
 
 

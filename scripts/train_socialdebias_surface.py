@@ -52,7 +52,7 @@ def set_seed(seed):
 
 def evaluate(model, loader, device):
     model.eval()
-    all_preds, all_labels, all_probs = [], [], []
+    all_preds, all_bias_preds, all_labels, all_probs = [], [], [], []
     with torch.no_grad():
         for batch in loader:
             input_ids = batch["input_ids"].to(device)
@@ -65,7 +65,9 @@ def evaluate(model, loader, device):
             logits = out["fact_logits"]
             probs = torch.softmax(logits, dim=-1)[:, 1].cpu().numpy()
             preds = logits.argmax(dim=-1).cpu().numpy()
+            bias_preds = out["bias_logits"].argmax(dim=-1).cpu().numpy()
             all_preds.extend(preds);
+            all_bias_preds.extend(bias_preds)
             all_labels.extend(labels.numpy());
             all_probs.extend(probs)
     acc = accuracy_score(all_labels, all_preds)
@@ -74,7 +76,10 @@ def evaluate(model, loader, device):
         auc = roc_auc_score(all_labels, all_probs)
     except ValueError:
         auc = float("nan")
-    return {"acc": acc, "f1": f1, "auc": auc}
+    return {
+        "acc": acc, "f1": f1, "auc": auc,
+        "bias_acc": accuracy_score(all_labels, all_bias_preds),
+    }
 
 
 def main():
@@ -86,7 +91,11 @@ def main():
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--batch_size", type=int, default=4)
     parser.add_argument("--lr", type=float, default=2e-5)
+    parser.add_argument("--weight_decay", type=float, default=0.01)
+    parser.add_argument("--label_smoothing", type=float, default=0.1)
     parser.add_argument("--max_length", type=int, default=512)
+    parser.add_argument("--hidden_dim", type=int, default=384)
+    parser.add_argument("--bottleneck_dim", type=int, default=128)
     parser.add_argument("--lambda_fact", type=float, default=1.0)
     parser.add_argument("--lambda_bias", type=float, default=0.5)
     parser.add_argument("--lambda_consist", type=float, default=0.3)
@@ -97,6 +106,11 @@ def main():
                         help="使用 LIAR 数据集（speaker 特征作为社交代理）")
     parser.add_argument("--surface_feat_dim", type=int, default=8,
                         help="表层特征维度（0 表示禁用）")
+    parser.add_argument("--surface_lexicon_path", default=None,
+                        help="官方 NRC-EmoLex 词典；也可设置 NRC_EMOLEX_PATH")
+    parser.add_argument("--surface_stopwords_path", default=None)
+    parser.add_argument("--surface_feature_version", default="nrc_emolex_v1",
+                        choices=["nrc_emolex_v1", "legacy_seed_v0"])
 
     parser.add_argument("--use_contrastive", action="store_true")
     parser.add_argument("--lambda_contrast", type=float, default=0.3)
@@ -147,9 +161,17 @@ def main():
         )
 
     extractor = None
-    if args.surface_feat_dim > 0:
+    if args.use_liar and args.surface_feat_dim != 5:
+        raise ValueError("LIAR speaker 历史特征固定为 5 维，请指定 --surface_feat_dim 5")
+    if args.surface_feat_dim > 0 and not args.use_liar:
         print("[Surface] 加载 SurfaceFeatureExtractor...")
-        extractor = SurfaceFeatureExtractor(dim=args.surface_feat_dim)
+        extractor = SurfaceFeatureExtractor(
+            dim=args.surface_feat_dim,
+            lexicon_path=args.surface_lexicon_path,
+            language="zh" if args.use_weibo21 else args.language,
+            feature_version=args.surface_feature_version,
+            stopwords_path=args.surface_stopwords_path,
+        )
 
     train_set = SurfaceAugmentedDataset(
         train_data, tokenizer, args.max_length,
@@ -169,31 +191,47 @@ def main():
     val_loader = DataLoader(val_set, batch_size=args.batch_size, shuffle=False, num_workers=0)
     test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=0)
 
-    contrast_loader = None
-    if args.use_contrastive:
+    paired_loader = None
+    needs_paired_data = (
+        (args.use_contrastive and args.lambda_contrast > 0)
+        or args.lambda_fact_soft > 0
+    )
+    if needs_paired_data:
         if not args.adv_pkl or not args.orig_pkl:
-            raise ValueError("--use_contrastive 需要同时指定 --orig_pkl 和 --adv_pkl")
+            raise ValueError(
+                "InfoNCE 或 NLI 分类软标签需要同时指定 --orig_pkl 和 --adv_pkl"
+            )
         from utils.contrastive_dataloader import ContrastiveFakeNewsDataset
-        contrast_set = ContrastiveFakeNewsDataset.from_pkl(
+        paired_set = ContrastiveFakeNewsDataset.from_pkl(
             original_pkl_path=args.orig_pkl,
             adversarial_pkl_path=args.adv_pkl,
             tokenizer=tokenizer,
             max_length=args.max_length,
         )
-        contrast_loader = DataLoader(
-            contrast_set, batch_size=args.batch_size, shuffle=True, num_workers=0
+        if (args.use_soft_labels or args.lambda_fact_soft > 0) and not paired_set.has_p_entail:
+            raise ValueError(
+                "NLI 软标签已启用，但 --adv_pkl 不包含 p_entail 字段"
+            )
+        paired_loader = DataLoader(
+            paired_set, batch_size=args.batch_size, shuffle=True, num_workers=0
         )
-        print(f"[Surface] 对比学习启用，contrast batches={len(contrast_loader)}")
+        print(
+            f"[Surface] 对抗样本对启用，batches={len(paired_loader)}, "
+            f"InfoNCE={args.use_contrastive}, fact_soft={args.lambda_fact_soft > 0}"
+        )
 
     model = SocialDebiasModel(
         model_name=bert_name, num_classes=2,
-        hidden_dim=384, dropout=0.1, grl_lambda=1.0,
+        hidden_dim=args.hidden_dim, bottleneck_dim=args.bottleneck_dim,
+        dropout=0.1, grl_lambda=1.0,
         use_frozen_bert=True,
         surface_feat_dim=args.surface_feat_dim,
     ).to(device)
 
-    optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
-    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
+    optimizer = AdamW(
+        model.parameters(), lr=args.lr, weight_decay=args.weight_decay
+    )
+    criterion = nn.CrossEntropyLoss(label_smoothing=args.label_smoothing)
 
     lang = "zh" if args.use_weibo21 else args.language
     dataset_tag = "weibo21" if args.use_weibo21 else (
@@ -221,13 +259,15 @@ def main():
         candidate_paths = [
             f"{args.save_dir}/baseline_{dataset_tag}_{lang}_seed{args.seed}_history.json",
             f"{args.save_dir}/socialdebias_{dataset_tag}_{lang}_seed{args.seed}_bert_history.json",
+            f"{args.save_dir}/socialdebias_{dataset_tag}_{lang}_seed{args.seed}_bert_baseline_history.json",
         ]
         for p in candidate_paths:
             if os.path.exists(p):
                 try:
                     with open(p, "r", encoding="utf-8") as f:
                         bert_hist = json.load(f)
-                    val_f1 = bert_hist.get("best_test", {}).get("f1") or bert_hist.get("best_val_f1")
+                    # 自适应判定使用验证集 F1，禁止误用测试集指标造成数据泄漏。
+                    val_f1 = bert_hist.get("best_val_f1")
                     if val_f1 is not None:
                         args.adaptive_baseline_val_f1 = float(val_f1)
                         if args.adaptive_baseline_val_f1 >= args.adaptive_f1_thresh:
@@ -288,8 +328,8 @@ def main():
             ll["bias"].append(loss_bias.item() if torch.is_tensor(loss_bias) else 0.0)
             ll["consist"].append(loss_consist.item() if torch.is_tensor(loss_consist) else 0.0)
 
-        if contrast_loader is not None and args.lambda_contrast > 0:
-            for batch in contrast_loader:
+        if paired_loader is not None:
+            for batch in paired_loader:
                 optimizer.zero_grad()
                 orig_ids = batch["orig_input_ids"].to(device)
                 orig_mask = batch["orig_attention_mask"].to(device)
@@ -297,20 +337,23 @@ def main():
                 adv_mask = batch["adv_attention_mask"].to(device)
                 out_orig = model(orig_ids, orig_mask, surface_feat=None)
                 out_adv = model(adv_ids, adv_mask, surface_feat=None)
-                if args.use_soft_labels and "p_entail" in batch:
-                    weights = batch["p_entail"].to(device)
-                    weights = torch.clamp(weights, min=args.alpha_floor)
-                    loss_contrast = info_nce_loss_weighted(
-                        out_orig["fact_repr"], out_adv["fact_repr"],
-                        weights=weights,
-                        temperature=args.temperature,
-                    )
-                else:
-                    loss_contrast = info_nce_loss(
-                        out_orig["fact_repr"], out_adv["fact_repr"],
-                        temperature=args.temperature,
-                    )
-                loss = args.lambda_contrast * loss_contrast
+                loss = torch.tensor(0.0, device=device)
+                if args.use_contrastive and args.lambda_contrast > 0:
+                    if args.use_soft_labels and "p_entail" in batch:
+                        weights = batch["p_entail"].to(device)
+                        weights = torch.clamp(weights, min=args.alpha_floor)
+                        loss_contrast = info_nce_loss_weighted(
+                            out_orig["fact_repr"], out_adv["fact_repr"],
+                            weights=weights,
+                            temperature=args.temperature,
+                        )
+                    else:
+                        loss_contrast = info_nce_loss(
+                            out_orig["fact_repr"], out_adv["fact_repr"],
+                            temperature=args.temperature,
+                        )
+                    loss = loss + args.lambda_contrast * loss_contrast
+                    ll["contrast"].append(loss_contrast.item())
 
                 if args.lambda_fact_soft > 0 and "p_entail" in batch:
                     labels_adv = batch["label"].to(device)
@@ -328,7 +371,7 @@ def main():
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
                 optimizer.step()
-                ll["contrast"].append(loss_contrast.item())
+                ll["total"].append(loss.item())
 
         epoch_time = time.time() - t0
         means = {k: (np.mean(v) if v else 0.0) for k, v in ll.items()}
@@ -343,7 +386,8 @@ def main():
               f"fact={means['fact']:.4f} fact_soft={means['fact_soft']:.4f} "
               f"bias={means['bias']:.4f} consist={means['consist']:.4f} "
               f"contrast={means['contrast']:.4f}")
-        print(f"        val acc={val_m['acc']:.4f} f1={val_m['f1']:.4f} auc={val_m['auc']:.4f}")
+        print(f"        val acc={val_m['acc']:.4f} f1={val_m['f1']:.4f} "
+              f"auc={val_m['auc']:.4f} bias_acc={val_m['bias_acc']:.4f}")
 
         if val_m["f1"] > best_val_f1:
             best_val_f1 = val_m["f1"]
@@ -355,16 +399,26 @@ def main():
                 "val_f1": val_m["f1"],
                 "val_acc": val_m["acc"],
                 "val_auc": val_m["auc"],
-                "feat_mean": train_set.feat_mean.tolist() if extractor else None,
-                "feat_std": train_set.feat_std.tolist() if extractor else None,
+                "val_bias_acc": val_m["bias_acc"],
+                "feat_mean": train_set.feat_mean.tolist() if train_set.feat_mean is not None else None,
+                "feat_std": train_set.feat_std.tolist() if train_set.feat_std is not None else None,
                 "config": {
                     "model_name": bert_name,
-                    "language": args.language, "dataset": args.dataset,
+                    "hidden_dim": args.hidden_dim,
+                    "bottleneck_dim": args.bottleneck_dim,
+                    "language": lang, "dataset": dataset_tag,
                     "lambda_fact": args.lambda_fact,
                     "lambda_bias": args.lambda_bias,
                     "lambda_consist": args.lambda_consist,
                     "lambda_contrast": args.lambda_contrast if args.use_contrastive else 0.0,
+                    "lambda_fact_soft": args.lambda_fact_soft,
+                    "temperature": args.temperature,
+                    "label_smoothing": args.label_smoothing,
+                    "weight_decay": args.weight_decay,
                     "surface_feat_dim": args.surface_feat_dim,
+                    "surface_feature_version": args.surface_feature_version,
+                    "surface_lexicon_path": args.surface_lexicon_path,
+                    "surface_stopwords_path": args.surface_stopwords_path,
                 },
             }, save_path)
             print(f"        best test acc={test_m['acc']:.4f} f1={test_m['f1']:.4f}")

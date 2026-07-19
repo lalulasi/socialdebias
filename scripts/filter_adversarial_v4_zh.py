@@ -29,7 +29,7 @@ def extract_entities_zh(text: str) -> set:
     import jieba.posseg as pseg
     
     entities = set()
-    text = text[:8000]  # 限制长度
+    text = text[:10000]  # 与论文 §4.3.1 的实体过滤截断一致
     
     # 用 jieba 分词标注词性
     words = pseg.cut(text)
@@ -84,9 +84,9 @@ class BertSemanticEncoderZh:
         print(f"[BertSemanticEncoderZh] 加载完成 (device={device})")
 
     @torch.no_grad()
-    def encode_pair(self, text_a: str, text_b: str, max_length: int = 256):
+    def encode_pair(self, text_a: str, text_b: str, max_length: int = 512):
         encoded = self.tokenizer(
-            [text_a[:2000], text_b[:2000]],
+            [text_a[:5000], text_b[:5000]],
             max_length=max_length,
             padding=True,
             truncation=True,

@@ -21,7 +21,7 @@ from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 
-from modeling.social_debias import SocialDebiasModel
+from modeling.social_debias import SocialDebiasModel, infer_bottleneck_dim
 from utils.dataloader import FakeNewsDataset
 from utils.real_dataloader import load_dataset
 from utils.device import get_device
@@ -100,15 +100,17 @@ def main():
     print(f"  设备: {device}")
     print("=" * 80)
     
+    ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
+    config = ckpt.get("config", {})
+    state_dict = ckpt["model_state_dict"]
     # 加载模型
     model = SocialDebiasModel(
         model_name=bert_name, num_classes=2,
-        hidden_dim=384, dropout=0.1,
+        hidden_dim=config.get("hidden_dim", 384),
+        bottleneck_dim=infer_bottleneck_dim(state_dict, config), dropout=0.1,
         grl_lambda=1.0, use_frozen_bert=True,
     ).to(device)
-    
-    ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
-    model.load_state_dict(ckpt["model_state_dict"], strict=False)
+    model.load_state_dict(state_dict, strict=True)
     print(f"加载 ckpt (val_f1={ckpt.get('val_f1', 'N/A'):.4f})")
 
     # 加载干净测试集

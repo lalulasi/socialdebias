@@ -11,6 +11,7 @@ if [ -z "$DEEPSEEK_API_KEY" ]; then
 fi
 
 OUT_DIR="results/llm_baseline"
+DEEPSEEK_MODEL="${DEEPSEEK_MODEL:-deepseek-v4-flash}"
 mkdir -p "$OUT_DIR"
 
 run_one () {
@@ -21,17 +22,13 @@ run_one () {
     local SAMPLE=$5
     local OUT="$OUT_DIR/${DATASET}_${VARIANT}.json"
 
-    if [ -f "$OUT" ]; then
-        echo "[SKIP] $OUT"
-        return
-    fi
-
     echo "=== ${DATASET} ${VARIANT} ==="
     python scripts/eval_llm_baseline.py \
         --pkl "$PKL" \
         --lang "$LANG" \
         --sample "$SAMPLE" \
         --seed 42 \
+        --model "$DEEPSEEK_MODEL" \
         --output "$OUT"
 }
 

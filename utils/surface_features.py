@@ -1,12 +1,16 @@
-"""
-Surface-style feature extractor.
+"""Surface-style features used by the SocialDebias bias branch.
 
-输出维度可选：
-  dim=8  情绪特征
-  dim=17 情绪 8 + 句法 5 + 词汇 4
-
-17 维顺序严格对应 FEATURE_NAMES。
+The paper configuration uses the official NRC Emotion Lexicon for the first
+eight dimensions.  The old hand-written seed-word implementation remains
+available only as ``feature_version="legacy_seed_v0"`` so historical
+checkpoints can still be evaluated explicitly.
 """
+import csv
+import json
+import os
+import re
+from pathlib import Path
+
 import numpy as np
 
 
@@ -29,11 +33,123 @@ class SurfaceFeatureExtractor:
 
     FEATURE_DIM = 17
 
-    def __init__(self, dim=8, spacy_model="en_core_web_sm"):
+    def __init__(
+            self,
+            dim=8,
+            spacy_model="en_core_web_sm",
+            lexicon_path=None,
+            language="en",
+            feature_version="nrc_emolex_v1",
+            stopwords_path=None,
+    ):
         assert dim in (8, 17), f"dim 仅支持 8 或 17，收到 {dim}"
         self.dim = dim
-        import spacy
-        self.nlp = spacy.load(spacy_model, disable=["ner", "lemmatizer"])
+        self.language = language
+        self.feature_version = feature_version
+        self.stopwords = set()
+        if stopwords_path:
+            self.stopwords = {
+                line.strip().lower()
+                for line in Path(stopwords_path).read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            }
+
+        self.nlp = None
+        if language == "en" or dim == 17:
+            import spacy
+            self.nlp = spacy.load(spacy_model, disable=["ner", "lemmatizer"])
+
+        self.lexicon = None
+        if feature_version == "nrc_emolex_v1":
+            lexicon_path = lexicon_path or os.environ.get("NRC_EMOLEX_PATH")
+            if not lexicon_path:
+                candidates = [
+                    Path("data/lexicons/NRC-Emotion-Lexicon-Wordlevel-v0.92.txt"),
+                    Path("data/lexicons/nrc_emolex.tsv"),
+                ]
+                lexicon_path = next((str(p) for p in candidates if p.exists()), None)
+            if not lexicon_path:
+                raise FileNotFoundError(
+                    "缺少 NRC-EmoLex 词典。请用 --surface_lexicon_path 指定官方词典，"
+                    "或设置 NRC_EMOLEX_PATH；不能用少量手写关键词替代论文中的 NRC 特征。"
+                )
+            self.lexicon = self._load_lexicon(lexicon_path)
+        elif feature_version != "legacy_seed_v0":
+            raise ValueError(f"未知表层特征版本: {feature_version}")
+
+    @classmethod
+    def _load_lexicon(cls, path):
+        """Load NRC long TSV, a wide TSV/CSV, or a JSON word mapping."""
+        path = Path(path)
+        if not path.exists():
+            raise FileNotFoundError(f"NRC-EmoLex 文件不存在: {path}")
+        if path.suffix.lower() == ".json":
+            raw = json.loads(path.read_text(encoding="utf-8"))
+            return {
+                str(word).lower(): {
+                    emo for emo, value in values.items()
+                    if emo in cls.EMOTION_ORDER and float(value) > 0
+                }
+                for word, values in raw.items()
+            }
+
+        with path.open("r", encoding="utf-8-sig", newline="") as f:
+            sample = f.read(4096)
+            f.seek(0)
+            delimiter = "," if path.suffix.lower() == ".csv" else "\t"
+            rows = list(csv.reader(f, delimiter=delimiter))
+        if not rows:
+            raise ValueError(f"空 NRC-EmoLex 文件: {path}")
+
+        lexicon = {}
+        header = [c.strip().lower() for c in rows[0]]
+        emotion_columns = {
+            emo: header.index(emo) for emo in cls.EMOTION_ORDER if emo in header
+        }
+        has_word_header = any(
+            name in header for name in ("word", "term", "english word")
+        )
+        if emotion_columns and has_word_header:
+            word_col = next(
+                (header.index(name) for name in ("word", "term", "english word") if name in header),
+                0,
+            )
+            for row in rows[1:]:
+                if len(row) <= word_col:
+                    continue
+                word = row[word_col].strip().lower()
+                labels = {
+                    emo for emo, col in emotion_columns.items()
+                    if col < len(row) and row[col].strip() not in ("", "0", "0.0")
+                }
+                if word and labels:
+                    lexicon[word] = labels
+        else:
+            # Official word-level format: word<TAB>emotion<TAB>association.
+            for row in rows:
+                if len(row) < 3:
+                    continue
+                word, emotion, association = row[0].strip().lower(), row[1].strip().lower(), row[2].strip()
+                if emotion in cls.EMOTION_ORDER and association not in ("", "0", "0.0"):
+                    lexicon.setdefault(word, set()).add(emotion)
+        if not lexicon:
+            raise ValueError(f"未从词典解析到 NRC 八类情绪词: {path}")
+        return lexicon
+
+    def _tokens(self, text):
+        if self.language == "zh":
+            import jieba
+            return [
+                token.strip().lower() for token in jieba.lcut(text)
+                if token.strip() and not re.fullmatch(r"\W+", token)
+                and token.strip().lower() not in self.stopwords
+            ]
+        doc = self.nlp(text)
+        return [
+            token.text.lower() for token in doc
+            if token.is_alpha and not token.is_stop
+            and token.text.lower() not in self.stopwords
+        ]
 
     @staticmethod
     def _syllables(word):
@@ -61,19 +177,31 @@ class SurfaceFeatureExtractor:
         if not text.strip():
             return np.zeros(self.dim, dtype=np.float32)
 
-        doc = self.nlp(text)
-        tokens = [t.text.lower() for t in doc if t.is_alpha]
+        doc = self.nlp(text) if self.nlp is not None else None
+        tokens = self._tokens(text)
         n_tok = max(len(tokens), 1)
 
-        features = []
-        text_lower = text.lower()
-        for emo in self.EMOTION_ORDER:
-            words = self.EMOTION_WORDS[emo]
-            count = sum(1 for w in words if w.lower() in text_lower)
-            norm = max(len(text), 100)
-            features.append(count / norm * 100)
+        emotion_counts = np.zeros(8, dtype=np.float32)
+        if self.feature_version == "legacy_seed_v0":
+            text_lower = text.lower()
+            for i, emo in enumerate(self.EMOTION_ORDER):
+                emotion_counts[i] = sum(
+                    1 for word in self.EMOTION_WORDS[emo] if word in text_lower
+                )
+            features = (emotion_counts / max(len(text), 100) * 100).tolist()
+        else:
+            emotion_to_idx = {emo: i for i, emo in enumerate(self.EMOTION_ORDER)}
+            for token in tokens:
+                for emotion in self.lexicon.get(token, ()):
+                    emotion_counts[emotion_to_idx[emotion]] += 1.0
+
+            # 论文 §3.7.1：累计强度后执行 L2 归一化。
+            norm = float(np.linalg.norm(emotion_counts))
+            features = (emotion_counts / norm if norm > 0 else emotion_counts).tolist()
 
         if self.dim >= 17:
+            if doc is None:
+                raise ValueError("17 维句法/词汇特征目前仅支持 spaCy 可处理的语言")
             sents = list(doc.sents)
             n_sent = max(len(sents), 1)
             slens = [sum(1 for t in s if t.is_alpha) for s in sents] or [0]

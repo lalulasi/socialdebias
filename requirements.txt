@@ -10,8 +10,14 @@ sentencepiece
 pandas
 numpy
 scikit-learn
+scipy
 # 可解释性
 captum==0.7.0
 # 工具
 tqdm
 matplotlib
+requests
+spacy>=3.5.0
+textstat
+sentence-transformers
+jieba

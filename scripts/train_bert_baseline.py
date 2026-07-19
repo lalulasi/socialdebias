@@ -22,14 +22,13 @@ from utils.device import get_device
 
 
 class BertBaselineModel(nn.Module):
-    """仅微调 encoder.layer.11，并使用 dropout 加线性分类头。
-    英文使用 bert-base-uncased，中文使用 bert-base-chinese。"""
+    """标准 BERT 全参数微调基线。
+
+    论文 §5.2.2 明确把 BERT 定义为不附加去偏约束的全参数微调模型。
+    """
     def __init__(self, model_name="bert-base-uncased", num_classes=2, dropout=0.1):
         super().__init__()
-        self.bert = BertModel.from_pretrained(model_name).requires_grad_(False)
-        for name, param in self.bert.named_parameters():
-            if name.startswith("encoder.layer.11"):
-                param.requires_grad = True
+        self.bert = BertModel.from_pretrained(model_name)
         self.dropout = nn.Dropout(dropout)
         self.classifier = nn.Linear(self.bert.config.hidden_size, num_classes)
 
@@ -104,13 +103,18 @@ def main():
                         help="训练中文 Weibo21（bert-base-chinese），忽略 --dataset")
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--lr", type=float, default=2e-5)
-    parser.add_argument("--batch_size", type=int, default=4)
+    parser.add_argument("--weight_decay", type=float, default=0.01)
+    parser.add_argument("--label_smoothing", type=float, default=0.1)
+    parser.add_argument("--batch_size", type=int, default=None,
+                        help="默认与论文一致：PolitiFact=4，GossipCop/Weibo21=16")
     parser.add_argument("--epoch", "--epochs", dest="epoch", type=int, default=3)
     parser.add_argument("--max_length", type=int, default=512)
     parser.add_argument("--val_ratio", type=float, default=0.15)
     parser.add_argument("--save_dir", default="results/models")
     parser.add_argument("--log_dir", default="results/baseline_logs")
     args = parser.parse_args()
+    if args.batch_size is None:
+        args.batch_size = 4 if (not args.use_weibo21 and args.dataset == "politifact") else 16
 
     set_seed(args.seed)
     device = get_device()
@@ -151,8 +155,10 @@ def main():
 
     # 模型
     model = BertBaselineModel(model_name=bert_name).to(device)
-    optimizer = AdamW(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr)
-    criterion = nn.CrossEntropyLoss()
+    optimizer = AdamW(
+        model.parameters(), lr=args.lr, weight_decay=args.weight_decay
+    )
+    criterion = nn.CrossEntropyLoss(label_smoothing=args.label_smoothing)
 
     # 训练
     Path(args.save_dir).mkdir(parents=True, exist_ok=True)
@@ -195,10 +201,14 @@ def main():
                     "dataset": dataset_tag,
                     "seed": args.seed,
                     "lr": args.lr,
+                    "weight_decay": args.weight_decay,
+                    "label_smoothing": args.label_smoothing,
                     "batch_size": args.batch_size,
                     "epoch_best": ep,
                     "max_length": args.max_length,
                     "val_ratio": args.val_ratio,
+                    "full_finetune": True,
+                    "architecture_version": "paper_v1",
                 },
                 "val_f1": best_val_f1,
                 "test_metrics_at_best_val": test_m,

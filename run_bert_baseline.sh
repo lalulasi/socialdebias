@@ -17,11 +17,6 @@ for DATASET in politifact gossipcop; do
     TAG="${DATASET}_seed${SEED}"
     CKPT="./results/models/socialdebias_${DATASET}_en_seed${SEED}_bert_baseline.pt"
     
-    if [ -f "$CKPT" ]; then
-        echo "[SKIP TRAIN] 已存在: $CKPT"
-        continue
-    fi
-    
     echo ""
     echo "---------------- 训练 $TAG ----------------"
     python scripts/train_bert_baseline.py \
@@ -38,11 +33,6 @@ for DATASET in politifact gossipcop; do
   for SEED in 42 2024 3407; do
     TAG="${DATASET}_seed${SEED}"
     JSON="results/bert_adv/bert_adv_${DATASET}_seed${SEED}.json"
-    
-    if [ -f "$JSON" ]; then
-        echo "[SKIP EVAL] 已存在: $JSON"
-        continue
-    fi
     
     echo ""
     echo "---------------- 评估 $TAG ----------------"
@@ -76,10 +66,10 @@ for DS in ["politifact", "gossipcop"]:
         drops.append(s["f1_drop"])
         asrs.append(s["avg_asr"])
     if cleans:
-        cm = statistics.mean(cleans); cs = statistics.stdev(cleans) if len(cleans)>1 else 0
-        am = statistics.mean(advs);  as_ = statistics.stdev(advs)   if len(advs)>1   else 0
-        dm = statistics.mean(drops); ds = statistics.stdev(drops)   if len(drops)>1  else 0
-        rm = statistics.mean(asrs);  rs = statistics.stdev(asrs)    if len(asrs)>1   else 0
+        cm = statistics.mean(cleans); cs = statistics.pstdev(cleans) if len(cleans)>1 else 0
+        am = statistics.mean(advs);  as_ = statistics.pstdev(advs)   if len(advs)>1   else 0
+        dm = statistics.mean(drops); ds = statistics.pstdev(drops)   if len(drops)>1  else 0
+        rm = statistics.mean(asrs);  rs = statistics.pstdev(asrs)    if len(asrs)>1   else 0
         print(f"{DS:<14}{cm:.4f}±{cs:.4f}    {am:.4f}±{as_:.4f}    {dm*100:.2f}±{ds*100:.2f}pp    {rm*100:.2f}±{rs*100:.2f}%")
 print()
 print("→ 用这些数字替换论文表 5-3 / 5-4 的 BERT-base 行（4 列均含 std）")

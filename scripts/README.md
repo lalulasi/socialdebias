@@ -24,6 +24,12 @@
 | `train_socialdebias_contrastive.py` | 对比学习扫描 |
 | `train_ablation.py` | 消融实验 |
 
+`train_ablation.py` 的完整模型需显式传入
+`--use_contrastive --use_soft_labels --lambda_fact_soft 0.5`；仅给出
+`--orig_pkl/--adv_pkl` 不会隐式改变实验配置。`w/o InfoNCE` 保留软标签参数但
+移除 `--use_contrastive`，`w/o AdvAug` 同时移除对抗数据路径和所有对抗损失，
+`w/o LabelSmooth` 使用 `--label_smoothing 0 --lambda_fact_soft 0`。
+
 ## 评估
 
 | 脚本 | 用途 |

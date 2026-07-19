@@ -5,6 +5,19 @@ from transformers import AutoModel
 from modeling.grl import GradientReversalLayer
 
 
+def infer_bottleneck_dim(state_dict, config=None):
+    """Return 128-style bottleneck size, or 0 for legacy one-layer heads."""
+    config = config or {}
+    if "bottleneck_dim" in config:
+        return int(config["bottleneck_dim"])
+    weight = state_dict.get("fact_classifier.weight")
+    if weight is None:
+        return 128
+    classifier_input = int(weight.shape[1])
+    hidden_dim = int(config.get("hidden_dim", 384))
+    return 0 if classifier_input == hidden_dim else classifier_input
+
+
 class SocialDebiasModel(nn.Module):
     """BERT encoder with a fact branch, an adversarial bias branch, and an optional semantic anchor."""
 
@@ -13,6 +26,7 @@ class SocialDebiasModel(nn.Module):
             model_name: str = "bert-base-uncased",
             num_classes: int = 2,
             hidden_dim: int = 384,
+            bottleneck_dim: int = 128,
             dropout: float = 0.1,
             grl_lambda: float = 1.0,
             use_frozen_bert: bool = True,
@@ -32,21 +46,38 @@ class SocialDebiasModel(nn.Module):
                 p.requires_grad = False
             self.frozen_bert.eval()
 
-        self.fact_projector = nn.Sequential(
+        # 论文 §3.4.2 / 附录 A：768 -> 384 -> 128 双瓶颈。
+        # bottleneck_dim=0 仅用于读取早期 768 -> 384 checkpoint。
+        fact_layers = [
             nn.Linear(bert_hidden, hidden_dim),
             nn.ReLU(),
             nn.Dropout(dropout),
-        )
-        self.fact_classifier = nn.Linear(hidden_dim, num_classes)
+        ]
+        if bottleneck_dim > 0:
+            fact_layers.extend([
+                nn.Linear(hidden_dim, bottleneck_dim),
+                nn.ReLU(),
+                nn.Dropout(dropout),
+            ])
+        branch_output_dim = bottleneck_dim if bottleneck_dim > 0 else hidden_dim
+        self.fact_projector = nn.Sequential(*fact_layers)
+        self.fact_classifier = nn.Linear(branch_output_dim, num_classes)
 
         self.grl = GradientReversalLayer(lambda_=grl_lambda)
         self.surface_feat_dim = surface_feat_dim
-        self.bias_projector = nn.Sequential(
+        bias_layers = [
             nn.Linear(bert_hidden, hidden_dim),
             nn.ReLU(),
             nn.Dropout(dropout),
-        )
-        self.bias_classifier = nn.Linear(hidden_dim, num_classes)
+        ]
+        if bottleneck_dim > 0:
+            bias_layers.extend([
+                nn.Linear(hidden_dim, bottleneck_dim),
+                nn.ReLU(),
+                nn.Dropout(dropout),
+            ])
+        self.bias_projector = nn.Sequential(*bias_layers)
+        self.bias_classifier = nn.Linear(branch_output_dim, num_classes)
 
         self.use_comment_encoder = use_comment_encoder
         if use_comment_encoder:
@@ -73,8 +104,8 @@ class SocialDebiasModel(nn.Module):
                 'fact_logits':  [B, num_classes]  事实分支预测
                 'bias_logits':  [B, num_classes]  偏置分支预测
                 'shared_repr':  [B, bert_hidden]  共享 BERT 表示
-                'fact_repr':    [B, hidden_dim]   事实分支的中间表示
-                'bias_repr':    [B, hidden_dim]   偏置分支的中间表示
+                'fact_repr':    [B, bottleneck_dim] 事实分支的中间表示
+                'bias_repr':    [B, bottleneck_dim] 偏置分支的中间表示
                 'frozen_repr':  [B, bert_hidden]  冻结 BERT 表示（如果启用）
         """
         outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)

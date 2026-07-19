@@ -70,9 +70,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", choices=["politifact", "gossipcop", "lun"], required=True)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--max_len", type=int, default=128)
-    parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--max_len", type=int, default=512)
+    parser.add_argument("--batch_size", type=int, default=None,
+                        help="默认与论文一致：PolitiFact=4，其余数据集=16")
+    parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--embed_dim", type=int, default=300)
     parser.add_argument("--hidden_dim", type=int, default=256)
@@ -82,6 +83,8 @@ def main():
     parser.add_argument("--glove_path", type=str, default="")
     parser.add_argument("--output_dir", type=str, default="results/lstm")
     args = parser.parse_args()
+    if args.batch_size is None:
+        args.batch_size = 4 if args.dataset == "politifact" else 16
 
     # 种子
     torch.manual_seed(args.seed)

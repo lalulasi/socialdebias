@@ -12,7 +12,7 @@ from transformers import AutoModel, AutoTokenizer
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from modeling.attributor import BertAttributor
-from modeling.social_debias import SocialDebiasModel
+from modeling.social_debias import SocialDebiasModel, infer_bottleneck_dim
 from utils.explanation_metrics import compute_all_metrics
 
 
@@ -43,16 +43,26 @@ def load_texts(path):
 
 
 def load_socialdebias(ckpt_path, model_name, device, surface_feat_dim):
+    checkpoint = torch.load(ckpt_path, map_location=device, weights_only=False)
+    state = checkpoint.get("model_state_dict", checkpoint)
+    config = checkpoint.get("config", {}) if isinstance(checkpoint, dict) else {}
     model = SocialDebiasModel(
         model_name=model_name,
         num_classes=2,
+        hidden_dim=config.get("hidden_dim", 384),
+        bottleneck_dim=infer_bottleneck_dim(state, config),
         use_frozen_bert=False,
-        surface_feat_dim=surface_feat_dim,
+        surface_feat_dim=config.get("surface_feat_dim", surface_feat_dim),
     ).to(device)
-    state = torch.load(ckpt_path, map_location=device, weights_only=False)
-    if isinstance(state, dict) and "model_state_dict" in state:
-        state = state["model_state_dict"]
-    model.load_state_dict(state, strict=False)
+    # frozen_bert.* is expected to be absent because attribution does not use
+    # the semantic anchor; all trainable branch weights must still match.
+    incompatible = model.load_state_dict(state, strict=False)
+    unexpected = [k for k in incompatible.unexpected_keys if not k.startswith("frozen_bert.")]
+    if incompatible.missing_keys or unexpected:
+        raise ValueError(
+            f"解释模型 checkpoint 架构不匹配: missing={incompatible.missing_keys}, "
+            f"unexpected={unexpected}"
+        )
     return model.eval()
 
 

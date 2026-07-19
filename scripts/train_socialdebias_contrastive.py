@@ -254,6 +254,8 @@ def main():
                 "val_auc": val_m["auc"],
                 "config": {
                     "model_name": bert_name,
+                    "hidden_dim": 384,
+                    "bottleneck_dim": 128,
                     "language": args.language,
                     "dataset": args.dataset,
                     "lambda_fact": args.lambda_fact,

@@ -24,7 +24,7 @@ if not API_KEY:
 API_URL = "https://api.deepseek.com/v1/chat/completions"
 
 
-def call_deepseek(prompt: str, model: str = "deepseek-chat", timeout: int = 60) -> str:
+def call_deepseek(prompt: str, model: str = "deepseek-v4-flash", timeout: int = 60) -> str:
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",
@@ -35,6 +35,7 @@ def call_deepseek(prompt: str, model: str = "deepseek-chat", timeout: int = 60) 
         "temperature": 0.7,
         "top_p": 0.9,
         "max_tokens": 1000,
+        "thinking": {"type": "disabled"},
     }
     try:
         resp = requests.post(API_URL, headers=headers, json=payload, timeout=timeout)

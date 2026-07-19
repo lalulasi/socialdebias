@@ -11,12 +11,14 @@ import time
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
 from modeling.social_debias import SocialDebiasModel
+from modeling.infonce import info_nce_loss, info_nce_loss_weighted
 from utils.dataloader import SurfaceAugmentedDataset
 from utils.device import get_device
 from utils.real_dataloader import load_dataset
@@ -80,6 +82,21 @@ def main():
     parser.add_argument("--lambda_bias", type=float, default=None)
     parser.add_argument("--lambda_consist", type=float, default=None)
     parser.add_argument("--surface_feat_dim", type=int, default=8)
+    parser.add_argument("--surface_lexicon_path", default=None)
+    parser.add_argument("--surface_stopwords_path", default=None)
+    parser.add_argument("--surface_feature_version", default="nrc_emolex_v1",
+                        choices=["nrc_emolex_v1", "legacy_seed_v0"])
+    parser.add_argument("--hidden_dim", type=int, default=384)
+    parser.add_argument("--bottleneck_dim", type=int, default=128)
+    parser.add_argument("--weight_decay", type=float, default=0.01)
+    parser.add_argument("--label_smoothing", type=float, default=0.1)
+    parser.add_argument("--use_contrastive", action="store_true")
+    parser.add_argument("--lambda_contrast", type=float, default=0.3)
+    parser.add_argument("--temperature", type=float, default=0.07)
+    parser.add_argument("--use_soft_labels", action="store_true")
+    parser.add_argument("--alpha_floor", type=float, default=0.5)
+    parser.add_argument("--lambda_fact_soft", type=float, default=0.0)
+    parser.add_argument("--soft_label_floor", type=float, default=0.5)
     parser.add_argument("--orig_pkl", default=None)
     parser.add_argument("--adv_pkl", default=None)
     parser.add_argument("--save_dir", default="results/models")
@@ -102,7 +119,13 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(bert_name)
 
     train_data, val_data, test_data = load_dataset(args.dataset, seed=args.seed)
-    extractor = SurfaceFeatureExtractor(dim=args.surface_feat_dim) if args.surface_feat_dim > 0 else None
+    extractor = SurfaceFeatureExtractor(
+        dim=args.surface_feat_dim,
+        lexicon_path=args.surface_lexicon_path,
+        language=args.language,
+        feature_version=args.surface_feature_version,
+        stopwords_path=args.surface_stopwords_path,
+    ) if args.surface_feat_dim > 0 else None
 
     train_set = SurfaceAugmentedDataset(
         train_data, tokenizer, args.max_length, surface_extractor=extractor
@@ -119,18 +142,41 @@ def main():
     val_loader = DataLoader(val_set, batch_size=args.batch_size, shuffle=False, num_workers=0)
     test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=0)
 
+    paired_loader = None
+    needs_paired_data = (
+        (args.use_contrastive and args.lambda_contrast > 0)
+        or args.lambda_fact_soft > 0
+    )
+    if needs_paired_data:
+        if not args.orig_pkl or not args.adv_pkl:
+            raise ValueError(
+                "InfoNCE 或 NLI 分类软标签需要 --orig_pkl 与 --adv_pkl"
+            )
+        from utils.contrastive_dataloader import ContrastiveFakeNewsDataset
+        paired_set = ContrastiveFakeNewsDataset.from_pkl(
+            args.orig_pkl, args.adv_pkl, tokenizer, args.max_length
+        )
+        if (args.use_soft_labels or args.lambda_fact_soft > 0) and not paired_set.has_p_entail:
+            raise ValueError("NLI 软标签已启用，但 --adv_pkl 不包含 p_entail")
+        paired_loader = DataLoader(
+            paired_set, batch_size=args.batch_size, shuffle=True, num_workers=0
+        )
+
     model = SocialDebiasModel(
         model_name=bert_name,
         num_classes=2,
-        hidden_dim=384,
+        hidden_dim=args.hidden_dim,
+        bottleneck_dim=args.bottleneck_dim,
         dropout=0.1,
         grl_lambda=1.0,
         use_frozen_bert=True,
         surface_feat_dim=args.surface_feat_dim,
     ).to(device)
 
-    optimizer = AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
-    criterion = torch.nn.CrossEntropyLoss(label_smoothing=0.1)
+    optimizer = AdamW(
+        model.parameters(), lr=args.lr, weight_decay=args.weight_decay
+    )
+    criterion = torch.nn.CrossEntropyLoss(label_smoothing=args.label_smoothing)
     Path(args.save_dir).mkdir(parents=True, exist_ok=True)
     ckpt_path = Path(args.save_dir) / (
         f"socialdebias_{args.dataset}_{args.language}_seed{args.seed}_{args.save_suffix}.pt"
@@ -145,7 +191,10 @@ def main():
     for epoch in range(1, args.epochs + 1):
         model.train()
         t0 = time.time()
-        losses = {"total": [], "fact": [], "bias": [], "consist": []}
+        losses = {
+            "total": [], "fact": [], "bias": [], "consist": [],
+            "contrast": [], "fact_soft": [],
+        }
 
         for batch in train_loader:
             optimizer.zero_grad()
@@ -179,6 +228,56 @@ def main():
             losses["bias"].append(loss_bias.item())
             losses["consist"].append(loss_consist.item())
 
+        if paired_loader is not None:
+            for batch in paired_loader:
+                optimizer.zero_grad()
+                orig_ids = batch["orig_input_ids"].to(device)
+                orig_mask = batch["orig_attention_mask"].to(device)
+                adv_ids = batch["adv_input_ids"].to(device)
+                adv_mask = batch["adv_attention_mask"].to(device)
+                out_orig = model(orig_ids, orig_mask)
+                out_adv = model(adv_ids, adv_mask)
+                pair_loss = torch.tensor(0.0, device=device)
+
+                if args.use_contrastive and args.lambda_contrast > 0:
+                    if args.use_soft_labels:
+                        weights = torch.clamp(
+                            batch["p_entail"].to(device), min=args.alpha_floor
+                        )
+                        loss_contrast = info_nce_loss_weighted(
+                            out_orig["fact_repr"], out_adv["fact_repr"], weights,
+                            temperature=args.temperature,
+                        )
+                    else:
+                        loss_contrast = info_nce_loss(
+                            out_orig["fact_repr"], out_adv["fact_repr"],
+                            temperature=args.temperature,
+                        )
+                    pair_loss = pair_loss + args.lambda_contrast * loss_contrast
+                    losses["contrast"].append(loss_contrast.item())
+
+                if args.lambda_fact_soft > 0:
+                    labels_adv = batch["label"].to(device)
+                    alpha = torch.clamp(
+                        batch["p_entail"].to(device), min=args.soft_label_floor
+                    )
+                    n_classes = out_adv["fact_logits"].size(1)
+                    y_hard = F.one_hot(labels_adv, num_classes=n_classes).float()
+                    y_soft = (
+                        alpha.unsqueeze(1) * y_hard
+                        + (1 - alpha.unsqueeze(1)) / n_classes
+                    )
+                    loss_fact_soft = -(
+                        y_soft * F.log_softmax(out_adv["fact_logits"], dim=1)
+                    ).sum(dim=1).mean()
+                    pair_loss = pair_loss + args.lambda_fact_soft * loss_fact_soft
+                    losses["fact_soft"].append(loss_fact_soft.item())
+
+                pair_loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                optimizer.step()
+                losses["total"].append(pair_loss.item())
+
         val_m = evaluate(model, val_loader, device)
         means = {k: float(np.mean(v)) if v else 0.0 for k, v in losses.items()}
         history.append({
@@ -188,7 +287,8 @@ def main():
             **{f"val_{k}": v for k, v in val_m.items()},
         })
         print(f"[E{epoch}] total={means['total']:.4f} fact={means['fact']:.4f} "
-              f"bias={means['bias']:.4f} consist={means['consist']:.4f}")
+              f"bias={means['bias']:.4f} consist={means['consist']:.4f} "
+              f"contrast={means['contrast']:.4f} fact_soft={means['fact_soft']:.4f}")
         print(f"       val acc={val_m['acc']:.4f} f1={val_m['f1']:.4f} auc={val_m['auc']:.4f}")
 
         if val_m["f1"] > best_val_f1:
@@ -198,8 +298,8 @@ def main():
                 "epoch": epoch,
                 "model_state_dict": model.state_dict(),
                 "val_f1": best_val_f1,
-                "feat_mean": train_set.feat_mean.tolist() if extractor else None,
-                "feat_std": train_set.feat_std.tolist() if extractor else None,
+                "feat_mean": train_set.feat_mean.tolist() if train_set.feat_mean is not None else None,
+                "feat_std": train_set.feat_std.tolist() if train_set.feat_std is not None else None,
                 "config": vars(args),
             }, ckpt_path)
             print(f"       best test acc={best_test['acc']:.4f} f1={best_test['f1']:.4f}")

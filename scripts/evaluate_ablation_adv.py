@@ -29,7 +29,7 @@ from scripts.evaluate_surface_adv import (
 from utils.real_dataloader import load_dataset
 from utils.device import get_device
 from utils.surface_features import SurfaceFeatureExtractor
-from modeling.social_debias import SocialDebiasModel
+from modeling.social_debias import SocialDebiasModel, infer_bottleneck_dim
 
 
 def build_loader(samples, tokenizer, extractor, feat_mean, feat_std,
@@ -53,8 +53,10 @@ def main():
                         help="仅用于校验检查点的表层特征维度")
     parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--max_length", type=int, default=512)
-    parser.add_argument("--variants_adv", type=str, default="A,B,C,D",
+    parser.add_argument("--variants_adv", "--variants", dest="variants_adv", type=str, default="A,B,C,D",
                         help="要评估的对抗变体（逗号分隔）")
+    parser.add_argument("--surface_lexicon_path", default=None)
+    parser.add_argument("--surface_stopwords_path", default=None)
     parser.add_argument("--output_dir", type=str, default="results/ablation_adv")
     args = parser.parse_args()
     if args.save_suffix is None:
@@ -92,7 +94,8 @@ def main():
     model = SocialDebiasModel(
         model_name=args.bert_name,
         num_classes=2,
-        hidden_dim=384,
+        hidden_dim=config.get("hidden_dim", 384),
+        bottleneck_dim=infer_bottleneck_dim(checkpoint["model_state_dict"], config),
         dropout=0.1,
         grl_lambda=1.0,
         use_frozen_bert=True,
@@ -102,7 +105,13 @@ def main():
     model.eval()
 
     tokenizer = AutoTokenizer.from_pretrained(args.bert_name)
-    extractor = SurfaceFeatureExtractor(dim=surface_dim) if surface_dim > 0 else None
+    extractor = SurfaceFeatureExtractor(
+        dim=surface_dim,
+        lexicon_path=args.surface_lexicon_path or config.get("surface_lexicon_path"),
+        language=args.language,
+        feature_version=config.get("surface_feature_version", "legacy_seed_v0"),
+        stopwords_path=args.surface_stopwords_path or config.get("surface_stopwords_path"),
+    ) if surface_dim > 0 else None
 
     # ==== 加载干净测试集 ====
     print(f"\n[AblAdv] 加载干净测试集 {args.dataset}")

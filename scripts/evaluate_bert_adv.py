@@ -78,16 +78,22 @@ def main():
     parser.add_argument("--dataset", required=True, choices=["politifact", "gossipcop"])
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--variants", default="A,B,C,D")
-    parser.add_argument("--batch_size", type=int, default=4)
+    parser.add_argument("--batch_size", type=int, default=None)
     parser.add_argument("--max_length", type=int, default=512)
+    parser.add_argument("--ckpt_dir", default="results/models")
     parser.add_argument("--output_dir", default="results/bert_adv")
     args = parser.parse_args()
+    if args.batch_size is None:
+        args.batch_size = 4 if args.dataset == "politifact" else 16
 
     device = get_device()
     bert_name = "bert-base-uncased"
     tokenizer = AutoTokenizer.from_pretrained(bert_name)
 
-    ckpt_path = f"./results/models/socialdebias_{args.dataset}_en_seed{args.seed}_bert_baseline.pt"
+    ckpt_path = str(
+        Path(args.ckpt_dir)
+        / f"socialdebias_{args.dataset}_en_seed{args.seed}_bert_baseline.pt"
+    )
     if not os.path.exists(ckpt_path):
         print(f"[ERROR] ckpt 不存在: {ckpt_path}")
         sys.exit(1)
@@ -134,7 +140,9 @@ def main():
         adv_y_pred = sample_preds[f"adv_{v}"]["y_pred"]
         adv_y_true = sample_preds[f"adv_{v}"]["y_true"]
         if not np.array_equal(clean_y_true, adv_y_true):
-            print(f"  ⚠ 警告: adv_{v} label 序列与 clean 不一致，ASR 不可靠")
+            raise ValueError(
+                f"adv_{v} label 序列与 clean 不一致，无法计算论文定义的 paired ASR"
+            )
         asr, attacked_n, base_n = compute_paired_asr(
             sample_preds["clean"]["y_pred"], clean_y_true, adv_y_pred
         )

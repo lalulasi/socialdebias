@@ -18,6 +18,27 @@ import torch
 import numpy as np
 
 
+def resolve_nli_label_indices(id2label):
+    """Resolve entailment/neutral/contradiction indices from model metadata."""
+    normalized = {str(v).lower(): int(k) for k, v in id2label.items()}
+    aliases = {
+        "entailment": ("entailment", "entail"),
+        "neutral": ("neutral",),
+        "contradiction": ("contradiction", "contradictory", "contradict"),
+    }
+    resolved = {}
+    for target, names in aliases.items():
+        for label, idx in normalized.items():
+            if any(name in label for name in names):
+                resolved[target] = idx
+                break
+    if len(resolved) != 3:
+        raise ValueError(
+            f"NLI 模型 id2label 无法解析三分类标签: {id2label}"
+        )
+    return resolved
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--original", required=True, help="原数据 pkl")
@@ -30,6 +51,8 @@ def main():
                         default="MoritzLaurer/mDeBERTa-v3-base-mnli-xnli")
     parser.add_argument("--max_length", type=int, default=512)
     parser.add_argument("--batch_size", type=int, default=8)
+    parser.add_argument("--keep_contradictions", action="store_true",
+                        help="保留 contradiction；默认按论文三级过滤要求剔除")
     args = parser.parse_args()
 
     # 加载原数据
@@ -56,18 +79,13 @@ def main():
     model = AutoModelForSequenceClassification.from_pretrained(args.nli_model).to(device)
     model.eval()
     
-    # NLI 标签：mDeBERTa 顺序为 [entailment, neutral, contradiction]
-    # 不同模型可能不同，跑前确认
     print(f"  NLI 标签: {model.config.id2label}")
-    
-    # 找到 entailment 索引
-    label_map = {v.lower(): k for k, v in model.config.id2label.items()}
-    entail_idx = label_map.get("entailment", 0)
-    print(f"  entailment 索引: {entail_idx}")
+    label_indices = resolve_nli_label_indices(model.config.id2label)
+    print(f"  标签索引: {label_indices}")
 
     # 批量推理
     n = len(rewritten["news"])
-    p_entails = []
+    p_entails, p_neutrals, p_contradicts, pred_labels = [], [], [], []
     
     print(f"\n开始 NLI 推理...")
     with torch.no_grad():
@@ -92,17 +110,34 @@ def main():
             
             outputs = model(**encoded)
             probs = torch.softmax(outputs.logits, dim=-1)
-            p_entail = probs[:, entail_idx].cpu().numpy()
-            p_entails.extend(p_entail.tolist())
+            probs_np = probs.cpu().numpy()
+            p_entails.extend(probs_np[:, label_indices["entailment"]].tolist())
+            p_neutrals.extend(probs_np[:, label_indices["neutral"]].tolist())
+            p_contradicts.extend(probs_np[:, label_indices["contradiction"]].tolist())
+            idx_to_name = {idx: name for name, idx in label_indices.items()}
+            pred_labels.extend(
+                idx_to_name[int(i)] for i in probs_np.argmax(axis=1)
+            )
 
     # 保存
-    output_data = {
-        "news": rewritten["news"],
-        "labels": rewritten["labels"],
-        "style": rewritten["style"],
-        "orig_idx": rewritten["orig_idx"],
-        "p_entail": p_entails,
-    }
+    keep_indices = [
+        i for i, label in enumerate(pred_labels)
+        if args.keep_contradictions or label != "contradiction"
+    ]
+    output_data = {}
+    for key, values in rewritten.items():
+        if isinstance(values, (list, tuple)) and len(values) == n:
+            output_data[key] = [values[i] for i in keep_indices]
+    output_data.update({
+        "p_entail": [p_entails[i] for i in keep_indices],
+        "p_neutral": [p_neutrals[i] for i in keep_indices],
+        "p_contradict": [p_contradicts[i] for i in keep_indices],
+        "nli_label": [pred_labels[i] for i in keep_indices],
+        "nli_filter": {
+            "exclude": None if args.keep_contradictions else "contradiction",
+            "model": args.nli_model,
+        },
+    })
     
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -110,8 +145,10 @@ def main():
         pickle.dump(output_data, f)
 
     # 统计
-    p_arr = np.array(p_entails)
+    p_arr = np.array(output_data["p_entail"])
+    n_dropped = n - len(keep_indices)
     print(f"\n=== p_entail 统计 ===")
+    print(f"  NLI contradiction 剔除: {n_dropped}/{n}")
     print(f"  均值: {p_arr.mean():.4f}")
     print(f"  中位数: {np.median(p_arr):.4f}")
     print(f"  std: {p_arr.std():.4f}")

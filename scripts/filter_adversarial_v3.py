@@ -33,13 +33,11 @@ def normalize_entity(s: str) -> str:
 
 def extract_entities_spacy(text: str, nlp) -> set:
     doc = nlp(text[:10000])
-    keep_types = {"PERSON", "GPE", "ORG", "MONEY"}
     ents = set()
     for ent in doc.ents:
-        if ent.label_ in keep_types:
-            normalized = normalize_entity(ent.text)
-            if len(normalized) >= 2:
-                ents.add(normalized)
+        normalized = normalize_entity(ent.text)
+        if len(normalized) >= 2:
+            ents.add(normalized)
     return ents
 
 

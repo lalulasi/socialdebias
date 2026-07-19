@@ -93,8 +93,20 @@ class NLIScorer:
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModelForSequenceClassification.from_pretrained(model_name).to(device).eval()
         self.device = device
-        # mDeBERTa-v3 标签顺序: 0=entailment, 1=neutral, 2=contradiction
         self.id2label = self.model.config.id2label
+        normalized = {str(v).lower(): int(k) for k, v in self.id2label.items()}
+        self.label_indices = {}
+        for target, aliases in {
+            "entailment": ("entailment", "entail"),
+            "neutral": ("neutral",),
+            "contradiction": ("contradiction", "contradictory", "contradict"),
+        }.items():
+            for label, idx in normalized.items():
+                if any(alias in label for alias in aliases):
+                    self.label_indices[target] = idx
+                    break
+        if len(self.label_indices) != 3:
+            raise ValueError(f"无法解析 NLI id2label: {self.id2label}")
 
     @torch.no_grad()
     def score(self, premise, hypothesis, max_length=512):
@@ -104,11 +116,12 @@ class NLIScorer:
         logits = self.model(**enc).logits[0]
         probs = F.softmax(logits, dim=-1)
         pred_idx = int(probs.argmax().item())
-        pred_label = self.id2label[pred_idx].lower()
+        idx_to_name = {idx: name for name, idx in self.label_indices.items()}
+        pred_label = idx_to_name[pred_idx]
         return {
-            "p_entail": float(probs[0]),
-            "p_neutral": float(probs[1]),
-            "p_contradict": float(probs[2]),
+            "p_entail": float(probs[self.label_indices["entailment"]]),
+            "p_neutral": float(probs[self.label_indices["neutral"]]),
+            "p_contradict": float(probs[self.label_indices["contradiction"]]),
             "pred_label": pred_label,
         }
 
@@ -227,10 +240,9 @@ def main():
 
     in_dir = Path(args.input_dir)
     out_dir = Path(args.output_dir)
-    files = sorted(f for f in in_dir.glob("*.pkl")
-                   if not f.name.startswith("_") and "filtered" not in str(f.parent.name).lower()
-                   or f.parent == in_dir)
-    files = [f for f in files if not f.name.startswith("_")]
+    files = sorted(
+        f for f in in_dir.glob("*.pkl") if not f.name.startswith("_")
+    )
     if not files:
         raise RuntimeError(f"未找到 pkl: {in_dir}")
     print(f"待过滤 {len(files)} 个文件")

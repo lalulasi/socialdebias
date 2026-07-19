@@ -26,7 +26,7 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import AutoTokenizer
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 
-from modeling.social_debias import SocialDebiasModel
+from modeling.social_debias import SocialDebiasModel, infer_bottleneck_dim
 from utils.surface_features import SurfaceFeatureExtractor
 from utils.real_dataloader import load_dataset
 from utils.device import get_device
@@ -121,17 +121,23 @@ def main():
     parser.add_argument("--save_suffix", required=True,
                         help="surface 或 surface_contrast")
     parser.add_argument("--variants", default="A,B,C,D")
+    parser.add_argument("--ckpt_dir", default="results/models")
     parser.add_argument("--output_dir", default="results/surface_adv")
     parser.add_argument("--batch_size", type=int, default=4)
     parser.add_argument("--max_length", type=int, default=512)
+    parser.add_argument("--surface_lexicon_path", default=None)
+    parser.add_argument("--surface_stopwords_path", default=None)
     args = parser.parse_args()
 
     device = get_device()
     bert_name = "bert-base-uncased"
     tokenizer = AutoTokenizer.from_pretrained(bert_name)
 
-    ckpt_path = (f"./results/models/socialdebias_{args.dataset}_{args.language}"
-                 f"_seed{args.seed}_{args.save_suffix}.pt")
+    ckpt_path = str(
+        Path(args.ckpt_dir)
+        / (f"socialdebias_{args.dataset}_{args.language}"
+           f"_seed{args.seed}_{args.save_suffix}.pt")
+    )
     if not os.path.exists(ckpt_path):
         print(f"[ERROR] ckpt 不存在: {ckpt_path}")
         sys.exit(1)
@@ -143,20 +149,31 @@ def main():
 
     # 加载 ckpt
     ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
-    surface_dim = ckpt["config"].get("surface_feat_dim", 0)
+    config = ckpt.get("config", {})
+    state_dict = ckpt["model_state_dict"]
+    surface_dim = config.get("surface_feat_dim", 0)
     feat_mean = np.array(ckpt["feat_mean"]) if ckpt.get("feat_mean") else None
     feat_std = np.array(ckpt["feat_std"]) if ckpt.get("feat_std") else None
 
     model = SocialDebiasModel(
         model_name=bert_name, num_classes=2,
-        hidden_dim=384, dropout=0.1, grl_lambda=1.0,
+        hidden_dim=config.get("hidden_dim", 384),
+        bottleneck_dim=infer_bottleneck_dim(state_dict, config),
+        dropout=0.1, grl_lambda=1.0,
         use_frozen_bert=True,
         surface_feat_dim=surface_dim,
     ).to(device)
-    model.load_state_dict(ckpt["model_state_dict"], strict=False)
+    model.load_state_dict(state_dict, strict=True)
     print(f"加载 ckpt (val_f1={ckpt.get('val_f1', 'N/A'):.4f}, surface_dim={surface_dim})")
 
-    extractor = SurfaceFeatureExtractor(dim=surface_dim) if surface_dim > 0 else None
+    feature_version = config.get("surface_feature_version", "legacy_seed_v0")
+    extractor = SurfaceFeatureExtractor(
+        dim=surface_dim,
+        lexicon_path=args.surface_lexicon_path or config.get("surface_lexicon_path"),
+        language=args.language,
+        feature_version=feature_version,
+        stopwords_path=args.surface_stopwords_path or config.get("surface_stopwords_path"),
+    ) if surface_dim > 0 else None
 
     # 干净集
     _, _, clean_samples = load_dataset(dataset_name=args.dataset, seed=args.seed)
@@ -189,18 +206,15 @@ def main():
 
     # === Paired ASR 计算（与 ENDEF 评估口径一致）===
     asr_per_variant = {}
-    label_warned = False
     for v in args.variants.split(","):
         v = v.strip()
         adv_y_pred = sample_preds[f"adv_{v}"]["y_pred"]
         adv_y_true = sample_preds[f"adv_{v}"]["y_true"]
         # sanity check：label 序列必须一致才能 paired ASR
         if not np.array_equal(clean_y_true, adv_y_true):
-            if not label_warned:
-                print(f"  ⚠ 警告: adv_{v} label 序列与 clean 不一致！将按 label 序列重排对齐前不可靠")
-                print(f"    clean labels 前 5: {clean_y_true[:5].tolist()}")
-                print(f"    adv_{v} labels 前 5: {adv_y_true[:5].tolist()}")
-                label_warned = True
+            raise ValueError(
+                f"adv_{v} label 序列与 clean 不一致，无法计算论文定义的 paired ASR"
+            )
         asr, attacked_n, base_n = compute_paired_asr(
             sample_preds["clean"]["y_pred"], clean_y_true, adv_y_pred
         )

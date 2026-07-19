@@ -49,11 +49,11 @@ QWEN_URLS = {
 }
 
 
-def call_qwen(prompt, api_key, region="intl", max_retries=3):
+def call_qwen(prompt, api_key, model="qwen3.6-plus", region="intl", max_retries=3):
     url = QWEN_URLS[region]
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     payload = {
-        "model": "qwen3.6-plus",
+        "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7,
         "max_tokens": 2048,
@@ -62,11 +62,11 @@ def call_qwen(prompt, api_key, region="intl", max_retries=3):
     return _call_with_retry(url, headers, payload, max_retries)
 
 
-def call_deepseek(prompt, api_key, max_retries=3):
+def call_deepseek(prompt, api_key, model="deepseek-v4-flash", max_retries=3):
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     payload = {
-        "model": "deepseek-v4-flash",
+        "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.7,
         "max_tokens": 2048,
@@ -159,6 +159,8 @@ def main():
     parser.add_argument("--source", required=True, choices=["qwen", "deepseek"])
     parser.add_argument("--qwen_region", default="intl", choices=["intl", "cn", "us"],
                         help="Qwen API 节点：intl=新加坡(默认), cn=北京, us=弗吉尼亚")
+    parser.add_argument("--qwen_model", default="qwen3.6-plus")
+    parser.add_argument("--deepseek_model", default="deepseek-v4-flash")
     parser.add_argument("--sample", type=int, default=0, help="0=全量")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output", required=True)
@@ -169,10 +171,14 @@ def main():
     # API key
     if args.source == "qwen":
         api_key = os.environ.get("DASHSCOPE_API_KEY")
-        call_fn = lambda p, k: call_qwen(p, k, region=args.qwen_region)
+        source_model = args.qwen_model
+        call_fn = lambda p, k: call_qwen(
+            p, k, model=source_model, region=args.qwen_region
+        )
     else:
         api_key = os.environ.get("DEEPSEEK_API_KEY")
-        call_fn = call_deepseek
+        source_model = args.deepseek_model
+        call_fn = lambda p, k: call_deepseek(p, k, model=source_model)
     if not api_key:
         raise RuntimeError(f"{args.source} API key 环境变量未设置")
 
@@ -200,7 +206,8 @@ def main():
         with open(out_path, "rb") as f:
             cached = pickle.load(f)
         if (cached.get("pkl") == args.pkl and cached.get("sample") == args.sample
-                and cached.get("tone") == args.tone and cached.get("source") == args.source):
+                and cached.get("tone") == args.tone and cached.get("source") == args.source
+                and cached.get("model") == source_model):
             records = cached.get("records", [])
             start_i = len(records)
             if start_i >= len(texts):
@@ -233,7 +240,8 @@ def main():
             with open(out_path, "wb") as f:
                 pickle.dump({
                     "pkl": args.pkl, "lang": args.lang, "tone": args.tone,
-                    "source": args.source, "sample": args.sample, "seed": args.seed,
+                    "source": args.source, "model": source_model,
+                    "sample": args.sample, "seed": args.seed,
                     "records": records,
                 }, f)
             elapsed = time.time() - t0

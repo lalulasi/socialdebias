@@ -3,11 +3,11 @@ SocialDebias-Adv 三方鲁棒性评估（H.3）
 
 输入:  data/socialdebias_adv/filtered/*.pkl    (24 个过滤后的对抗 pkl)
 ckpt:  results/models/  (BERT baseline + SD surface / sd_surface_adaptive)
-输出:  results/socialdebias_adv_eval.csv  (24 测试集 × 3 方法 × Acc/F1/ASR)
+输出:  results/socialdebias_adv_eval.csv（逐 seed、跨 seed mean/std、数据集汇总）
 
 三方:
   1. BERT 基线        (PolitiFact/GossipCop/Weibo21 各 3 seed 平均)
-  2. SocialDebias    (PF/GC: surface 3 seed; Weibo21: sd_surface_adaptive 3 seed)
+  2. SocialDebias    (PF: surface；GC/Weibo21: surface_all；均为 3 seed)
   3. DeepSeek 零样本  (调 API)
 
 ASR 计算: 与原始测试集预测对比，"翻转率" = 在原始上预测对、在改写上预测错的比例
@@ -18,6 +18,7 @@ import os
 import pickle
 import random
 import time
+from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
@@ -30,8 +31,8 @@ from transformers import AutoTokenizer
 
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from modeling.social_debias import SocialDebiasModel
-from utils.surface_features import SurfaceFeatureExtractor
+from modeling.social_debias import SocialDebiasModel, infer_bottleneck_dim
+from scripts.train_bert_baseline import BertBaselineModel
 
 
 # ============== 数据集类（轻量内联，不依赖 SurfaceAugmentedDataset） ==============
@@ -65,33 +66,31 @@ class _SimpleEvalDataset(torch.utils.data.Dataset):
 
 # ============== 模型加载 ==============
 def load_bert_ckpt(ckpt_path, lang, device):
-    """加载 BERT baseline ckpt（用 SocialDebiasModel 兼容架构 or 单独 BERT 分类器）。
-    
-    根据用户实际 baseline ckpt 结构判断。这里假设 baseline 是简单的 BertForSequenceClassification。
-    """
-    from transformers import BertForSequenceClassification
+    """Load the exact baseline architecture used during training."""
     model_name = "bert-base-uncased" if lang == "en" else "bert-base-chinese"
-    model = BertForSequenceClassification.from_pretrained(model_name, num_labels=2).to(device)
+    model = BertBaselineModel(model_name=model_name).to(device)
     state = torch.load(ckpt_path, map_location=device, weights_only=False)
     if isinstance(state, dict) and "model_state_dict" in state:
         state = state["model_state_dict"]
-    model.load_state_dict(state, strict=False)
+    model.load_state_dict(state, strict=True)
     model.eval()
     return model
 
 
-def load_sd_ckpt(ckpt_path, lang, device, surface_feat_dim=8):
+def load_sd_ckpt(ckpt_path, lang, device):
     """加载 SocialDebiasModel ckpt"""
     bert_name = "bert-base-uncased" if lang == "en" else "bert-base-chinese"
+    checkpoint = torch.load(ckpt_path, map_location=device, weights_only=False)
+    state = checkpoint.get("model_state_dict", checkpoint)
+    config = checkpoint.get("config", {}) if isinstance(checkpoint, dict) else {}
     model = SocialDebiasModel(
         model_name=bert_name,
         num_classes=2,
-        surface_feat_dim=surface_feat_dim,
+        hidden_dim=config.get("hidden_dim", 384),
+        bottleneck_dim=infer_bottleneck_dim(state, config),
+        surface_feat_dim=config.get("surface_feat_dim", 8),
     ).to(device)
-    state = torch.load(ckpt_path, map_location=device, weights_only=False)
-    if isinstance(state, dict) and "model_state_dict" in state:
-        state = state["model_state_dict"]
-    model.load_state_dict(state, strict=False)
+    model.load_state_dict(state, strict=True)
     model.eval()
     return model
 
@@ -103,7 +102,8 @@ def infer_bert(model, dataloader, device):
     for batch in dataloader:
         ids = batch["input_ids"].to(device)
         mask = batch["attention_mask"].to(device)
-        logits = model(input_ids=ids, attention_mask=mask).logits
+        output = model(input_ids=ids, attention_mask=mask)
+        logits = output.logits if hasattr(output, "logits") else output
         preds.extend(logits.argmax(dim=1).cpu().tolist())
     return preds
 
@@ -130,13 +130,14 @@ PROMPT_EN = ('You are a fact-checker. Determine if the following news is real or
 PROMPT_ZH = '你是一个新闻真伪判别员。判断以下新闻是真还是假。只回答"真"或"假"。\n\n新闻：\n{text}\n\n答：'
 
 
-def call_deepseek(prompt, api_key, max_retries=3):
+def call_deepseek(prompt, api_key, model, max_retries=3):
     url = "https://api.deepseek.com/v1/chat/completions"
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     payload = {
-        "model": "deepseek-chat",
+        "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.0, "max_tokens": 8,
+        "thinking": {"type": "disabled"},
     }
     for attempt in range(max_retries):
         try:
@@ -165,12 +166,12 @@ def parse_ds_response(raw, lang):
     return -1
 
 
-def infer_deepseek(texts, lang, api_key):
+def infer_deepseek(texts, lang, api_key, model):
     """DeepSeek API 推理。返回 preds（-1 表示解析失败）"""
     tmpl = PROMPT_EN if lang == "en" else PROMPT_ZH
     preds = []
     for i, t in enumerate(texts):
-        raw = call_deepseek(tmpl.format(text=t[:2000]), api_key)
+        raw = call_deepseek(tmpl.format(text=t[:2000]), api_key, model)
         preds.append(parse_ds_response(raw, lang))
         if (i + 1) % 50 == 0:
             print(f"    DeepSeek [{i+1}/{len(texts)}]")
@@ -199,6 +200,25 @@ def compute_asr(orig_preds, adv_preds, labels):
     return flipped / correct_in_orig if correct_in_orig > 0 else None
 
 
+def metric_triplet(labels, adv_preds, orig_preds):
+    acc, f1 = compute_metrics(labels, adv_preds)
+    return acc, f1, compute_asr(orig_preds, adv_preds, labels)
+
+
+def append_mean_row(rows, file_name, dataset, tone, source, method, metrics):
+    """Append the paper's across-seed mean/std rather than majority voting."""
+    values = np.asarray(metrics, dtype=np.float64)
+    means = values.mean(axis=0)
+    stds = values.std(axis=0)
+    rows.append({
+        "file": file_name, "dataset": dataset, "tone": tone, "source": source,
+        "method": method, "seed": "mean", "n": "",
+        "acc": f"{means[0]:.4f}", "f1": f"{means[1]:.4f}",
+        "asr": f"{means[2]:.4f}", "acc_std": f"{stds[0]:.4f}",
+        "f1_std": f"{stds[1]:.4f}", "asr_std": f"{stds[2]:.4f}",
+    })
+
+
 # ============== 主流程 ==============
 def main():
     parser = argparse.ArgumentParser()
@@ -213,6 +233,12 @@ def main():
     parser.add_argument("--max_length", type=int, default=512)
     parser.add_argument("--skip_deepseek", action="store_true",
                         help="跳过 DeepSeek API（省钱）")
+    parser.add_argument("--deepseek_model", default="deepseek-v4-flash")
+    parser.add_argument(
+        "--sd_suffix", default=None,
+        help=("统一指定三个数据集使用的 SocialDebias checkpoint 后缀；"
+              "正式论文主实验建议传 surface_all，未传时保留历史数据集映射"),
+    )
     args = parser.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -221,18 +247,14 @@ def main():
     # ckpt 后缀
     SD_SUFFIX = {
         "politifact": "surface",
-        "gossipcop":  "surface",
-        "weibo21":    "sd_surface_adaptive",
+        "gossipcop":  "surface_all",
+        "weibo21":    "surface_all",
     }
 
     api_key = os.environ.get("DEEPSEEK_API_KEY") if not args.skip_deepseek else None
     if not args.skip_deepseek and not api_key:
         print("[WARN] DEEPSEEK_API_KEY 未设置，将跳过 DeepSeek 评估")
         api_key = None
-
-    # 加载 surface 特征提取器（中英文共用一个实例，词典内置中英 emotion 词混合）
-    print("[加载] SurfaceFeatureExtractor")
-    feat_extractor = SurfaceFeatureExtractor()
 
     # 处理每个 filtered pkl
     filtered_files = sorted(Path(args.filtered_dir).glob("*.pkl"))
@@ -272,6 +294,7 @@ def main():
 
     # ============== 第二步：循环评估每个 filtered pkl ==============
     rows = []
+    aggregate = defaultdict(lambda: {"labels": [], "adv": [], "orig": []})
     for fp in filtered_files:
         with open(fp, "rb") as f:
             data = pickle.load(f)
@@ -299,88 +322,107 @@ def main():
         # 取对应的原始 texts（用于 BERT/SD 在原始上的预测，算 ASR）
         orig_subset_texts = [orig_data[ds]["texts"][i] for i in orig_idxs]
 
-        # 提取 surface features（单条 extract 循环 + stack 成 [N, 17/8] numpy）
-        adv_feats = np.stack([feat_extractor.extract(t) for t in adv_texts]).astype(np.float32)
-        orig_subset_feats = np.stack([feat_extractor.extract(t) for t in orig_subset_texts]).astype(np.float32)
-
         bert_name = "bert-base-uncased" if lang == "en" else "bert-base-chinese"
         tokenizer = AutoTokenizer.from_pretrained(bert_name)
 
-        adv_ds_obj = _SimpleEvalDataset(adv_texts, labels, tokenizer, adv_feats, args.max_length)
-        orig_ds_obj = _SimpleEvalDataset(orig_subset_texts, labels, tokenizer, orig_subset_feats, args.max_length)
+        # 最终预测只读取事实分支；surface 特征只在训练时通过偏置分支
+        # 影响共享编码器，因此推理不需要再次送入 surface_feat。
+        adv_ds_obj = _SimpleEvalDataset(adv_texts, labels, tokenizer, None, args.max_length)
+        orig_ds_obj = _SimpleEvalDataset(orig_subset_texts, labels, tokenizer, None, args.max_length)
         adv_loader = DataLoader(adv_ds_obj, batch_size=args.batch_size)
         orig_loader = DataLoader(orig_ds_obj, batch_size=args.batch_size)
 
         print(f"\n========== [{fp.name}] ds={ds} tone={tone} src={source} N={len(records)} ==========")
 
         # ----- BERT 三 seed -----
-        bert_advs, bert_origs = [], []
+        bert_metrics = []
         for seed in args.seeds:
-            ckpt = Path(args.ckpt_dir) / f"socialdebias_{ds}_{lang}_seed{seed}_bert.pt"
+            ckpt = Path(args.ckpt_dir) / f"socialdebias_{ds}_{lang}_seed{seed}_bert_baseline.pt"
             if not ckpt.exists():
                 print(f"  [skip] BERT seed={seed} ckpt 不存在: {ckpt.name}")
                 continue
             model = load_bert_ckpt(str(ckpt), lang, device)
-            bert_advs.append(infer_bert(model, adv_loader, device))
-            bert_origs.append(infer_bert(model, orig_loader, device))
+            adv_pred = infer_bert(model, adv_loader, device)
+            orig_pred = infer_bert(model, orig_loader, device)
+            metrics = metric_triplet(labels, adv_pred, orig_pred)
+            bert_metrics.append(metrics)
+            rows.append({"file": fp.name, "dataset": ds, "tone": tone, "source": source,
+                         "method": "BERT", "seed": seed, "n": len(labels),
+                         "acc": f"{metrics[0]:.4f}", "f1": f"{metrics[1]:.4f}",
+                         "asr": f"{metrics[2]:.4f}", "acc_std": "", "f1_std": "", "asr_std": ""})
+            agg = aggregate[(ds, "BERT", seed)]
+            agg["labels"].extend(labels); agg["adv"].extend(adv_pred); agg["orig"].extend(orig_pred)
             del model
             torch.cuda.empty_cache() if torch.cuda.is_available() else None
 
-        # 多 seed 投票（majority vote）
-        if bert_advs:
-            bert_adv_pred = [int(np.median([s[i] for s in bert_advs])) for i in range(len(adv_texts))]
-            bert_orig_pred = [int(np.median([s[i] for s in bert_origs])) for i in range(len(adv_texts))]
-            acc, f1 = compute_metrics(labels, bert_adv_pred)
-            asr = compute_asr(bert_orig_pred, bert_adv_pred, labels)
-            rows.append({"file": fp.name, "dataset": ds, "tone": tone, "source": source,
-                         "method": "BERT", "n": len(adv_texts),
-                         "acc": f"{acc:.4f}" if acc else "", "f1": f"{f1:.4f}" if f1 else "",
-                         "asr": f"{asr:.4f}" if asr is not None else ""})
-            print(f"  BERT:     acc={acc:.4f} f1={f1:.4f} asr={asr:.4f}" if acc else "  BERT: 无有效预测")
+        if bert_metrics:
+            append_mean_row(rows, fp.name, ds, tone, source, "BERT", bert_metrics)
 
         # ----- SD 三 seed -----
-        sd_advs, sd_origs = [], []
-        sd_suffix = SD_SUFFIX[ds]
+        sd_metrics = []
+        sd_suffix = args.sd_suffix or SD_SUFFIX[ds]
         for seed in args.seeds:
             ckpt = Path(args.ckpt_dir) / f"socialdebias_{ds}_{lang}_seed{seed}_{sd_suffix}.pt"
             if not ckpt.exists():
                 print(f"  [skip] SD seed={seed} ckpt 不存在: {ckpt.name}")
                 continue
-            model = load_sd_ckpt(str(ckpt), lang, device, surface_feat_dim=8)
-            sd_advs.append(infer_sd(model, adv_loader, device))
-            sd_origs.append(infer_sd(model, orig_loader, device))
+            model = load_sd_ckpt(str(ckpt), lang, device)
+            adv_pred = infer_sd(model, adv_loader, device)
+            orig_pred = infer_sd(model, orig_loader, device)
+            metrics = metric_triplet(labels, adv_pred, orig_pred)
+            sd_metrics.append(metrics)
+            rows.append({"file": fp.name, "dataset": ds, "tone": tone, "source": source,
+                         "method": "SocialDebias", "seed": seed, "n": len(labels),
+                         "acc": f"{metrics[0]:.4f}", "f1": f"{metrics[1]:.4f}",
+                         "asr": f"{metrics[2]:.4f}", "acc_std": "", "f1_std": "", "asr_std": ""})
+            agg = aggregate[(ds, "SocialDebias", seed)]
+            agg["labels"].extend(labels); agg["adv"].extend(adv_pred); agg["orig"].extend(orig_pred)
             del model
             torch.cuda.empty_cache() if torch.cuda.is_available() else None
 
-        if sd_advs:
-            sd_adv_pred = [int(np.median([s[i] for s in sd_advs])) for i in range(len(adv_texts))]
-            sd_orig_pred = [int(np.median([s[i] for s in sd_origs])) for i in range(len(adv_texts))]
-            acc, f1 = compute_metrics(labels, sd_adv_pred)
-            asr = compute_asr(sd_orig_pred, sd_adv_pred, labels)
-            rows.append({"file": fp.name, "dataset": ds, "tone": tone, "source": source,
-                         "method": "SocialDebias", "n": len(adv_texts),
-                         "acc": f"{acc:.4f}" if acc else "", "f1": f"{f1:.4f}" if f1 else "",
-                         "asr": f"{asr:.4f}" if asr is not None else ""})
-            print(f"  SD:       acc={acc:.4f} f1={f1:.4f} asr={asr:.4f}" if acc else "  SD: 无有效预测")
+        if sd_metrics:
+            append_mean_row(rows, fp.name, ds, tone, source, "SocialDebias", sd_metrics)
 
         # ----- DeepSeek 零样本 -----
         if api_key:
-            ds_adv_pred = infer_deepseek(adv_texts, lang, api_key)
-            ds_orig_pred = infer_deepseek(orig_subset_texts, lang, api_key)
+            ds_adv_pred = infer_deepseek(adv_texts, lang, api_key, args.deepseek_model)
+            ds_orig_pred = infer_deepseek(orig_subset_texts, lang, api_key, args.deepseek_model)
             acc, f1 = compute_metrics(labels, ds_adv_pred)
             asr = compute_asr(ds_orig_pred, ds_adv_pred, labels)
             rows.append({"file": fp.name, "dataset": ds, "tone": tone, "source": source,
-                         "method": "DeepSeek", "n": len(adv_texts),
-                         "acc": f"{acc:.4f}" if acc else "", "f1": f"{f1:.4f}" if f1 else "",
-                         "asr": f"{asr:.4f}" if asr is not None else ""})
+                         "method": "DeepSeek", "seed": "single", "n": len(adv_texts),
+                         "acc": f"{acc:.4f}" if acc is not None else "",
+                         "f1": f"{f1:.4f}" if f1 is not None else "",
+                         "asr": f"{asr:.4f}" if asr is not None else "",
+                         "acc_std": "", "f1_std": "", "asr_std": ""})
+            agg = aggregate[(ds, "DeepSeek", "single")]
+            agg["labels"].extend(labels); agg["adv"].extend(ds_adv_pred); agg["orig"].extend(ds_orig_pred)
             print(f"  DeepSeek: acc={acc:.4f} f1={f1:.4f} asr={asr:.4f}" if acc else "  DeepSeek: 无有效预测")
 
         # 增量保存
         Path(args.output).parent.mkdir(parents=True, exist_ok=True)
         with open(args.output, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=["file","dataset","tone","source","method","n","acc","f1","asr"])
+            writer = csv.DictWriter(f, fieldnames=["file","dataset","tone","source","method","seed","n","acc","f1","asr","acc_std","f1_std","asr_std"])
             writer.writeheader()
             writer.writerows(rows)
+
+    # 论文表 5-7 使用整个数据集（所有 tone/source）的逐种子指标均值。
+    dataset_seed_metrics = defaultdict(list)
+    for (ds, method, seed), values in aggregate.items():
+        metrics = metric_triplet(values["labels"], values["adv"], values["orig"])
+        dataset_seed_metrics[(ds, method)].append(metrics)
+        rows.append({"file": "__dataset_summary__", "dataset": ds, "tone": "all", "source": "all",
+                     "method": method, "seed": seed, "n": len(values["labels"]),
+                     "acc": f"{metrics[0]:.4f}", "f1": f"{metrics[1]:.4f}",
+                     "asr": f"{metrics[2]:.4f}", "acc_std": "", "f1_std": "", "asr_std": ""})
+    for (ds, method), metrics in dataset_seed_metrics.items():
+        if method != "DeepSeek":
+            append_mean_row(rows, "__dataset_summary__", ds, "all", "all", method, metrics)
+
+    Path(args.output).parent.mkdir(parents=True, exist_ok=True)
+    with open(args.output, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["file","dataset","tone","source","method","seed","n","acc","f1","asr","acc_std","f1_std","asr_std"])
+        writer.writeheader(); writer.writerows(rows)
 
     print(f"\n========== 完成 ==========")
     print(f"结果 CSV: {args.output}")

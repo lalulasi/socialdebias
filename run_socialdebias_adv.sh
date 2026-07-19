@@ -12,6 +12,9 @@ fi
 
 OUT_DIR="data/socialdebias_adv"
 LOG_DIR="logs/socialdebias_adv"
+QWEN_MODEL="${QWEN_MODEL:-qwen3.6-plus}"
+DEEPSEEK_MODEL="${DEEPSEEK_MODEL:-deepseek-v4-flash}"
+QWEN_REGION="${QWEN_REGION:-intl}"
 mkdir -p "$OUT_DIR" "$LOG_DIR"
 
 TONES=("neutral" "objective" "sensational" "emotionally_triggering")
@@ -24,6 +27,8 @@ run_one () {
     echo "--- ${DATASET} ${TONE} ${SRC} $(date +%H:%M:%S) ---"
     python scripts/gen_socialdebias_adv.py \
         --pkl "$PKL" --lang "$LANG" --tone "$TONE" --source "$SRC" \
+        --qwen_model "$QWEN_MODEL" --qwen_region "$QWEN_REGION" \
+        --deepseek_model "$DEEPSEEK_MODEL" \
         --sample "$SAMPLE" --seed 42 \
         --output "$OUT" 2>&1 | tee "$LOG"
 }
