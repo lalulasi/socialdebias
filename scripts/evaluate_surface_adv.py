@@ -47,6 +47,19 @@ class SurfaceTestDataset(Dataset):
             for s in tqdm(samples, desc="提取表层特征"):
                 feats.append(extractor.extract(s["text"]))
             feats = np.stack(feats, axis=0).astype(np.float32)
+            if feat_mean is None or feat_std is None:
+                raise ValueError("checkpoint 缺少表层特征的均值或标准差")
+            # Checkpoints store these arrays as JSON-compatible lists.  Convert
+            # them back before arithmetic so both list- and ndarray-based
+            # checkpoints follow the exact same evaluation path.
+            feat_mean = np.asarray(feat_mean, dtype=np.float32)
+            feat_std = np.asarray(feat_std, dtype=np.float32)
+            expected_shape = (feats.shape[1],)
+            if feat_mean.shape != expected_shape or feat_std.shape != expected_shape:
+                raise ValueError(
+                    "表层特征 normalizer 维度不匹配: "
+                    f"features={expected_shape}, mean={feat_mean.shape}, std={feat_std.shape}"
+                )
             self.surface_features = (feats - feat_mean) / (feat_std + 1e-8)
 
     def __len__(self):

@@ -5,9 +5,11 @@ import unittest
 from pathlib import Path
 
 import torch
+import numpy as np
 
 from prepare_endef_data import encode_endef_label, repair_chinese_labels
 from scripts.patch_endef_ch_dataloader import patch_dataloader
+from scripts.evaluate_surface_adv import SurfaceTestDataset
 from modeling.social_debias import infer_bottleneck_dim
 from scripts.compute_nli_p_entail import resolve_nli_label_indices
 from scripts.prepare_nrc_emolex import load_long, load_translation_map, write_long
@@ -25,7 +27,26 @@ class FakeTokenizer:
         }
 
 
+class FakeSurfaceExtractor:
+    def extract(self, text):
+        return [float(len(text)), 4.0]
+
+
 class PaperAlignmentTests(unittest.TestCase):
+    def test_surface_eval_accepts_list_normalizer_from_checkpoint(self):
+        dataset = SurfaceTestDataset(
+            [{"text": "ab", "label": 1}],
+            tokenizer=None,
+            max_length=8,
+            extractor=FakeSurfaceExtractor(),
+            feat_mean=[1.0, 2.0],
+            feat_std=[1.0, 2.0],
+        )
+        np.testing.assert_allclose(
+            dataset.surface_features,
+            np.asarray([[1.0, 1.0]], dtype=np.float32),
+        )
+
     def test_endef_labels_match_language_specific_loaders(self):
         self.assertEqual(encode_endef_label(0, "en"), 0)
         self.assertEqual(encode_endef_label(1, "en"), 1)

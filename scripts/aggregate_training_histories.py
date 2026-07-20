@@ -126,7 +126,10 @@ def main():
 
     if not rows:
         raise FileNotFoundError(
-            f"No matching histories in {args.model_dir}; suffixes={sorted(wanted_suffixes)}"
+            f"No matching histories in {args.model_dir.resolve()}; "
+            f"suffixes={sorted(wanted_suffixes)}. If --model_dir came from "
+            "$MODEL_DIR, restore the experiment environment with: "
+            "source scripts/init_paper_v2_env.sh <original EXP_ID>"
         )
 
     rows.sort(key=lambda row: (row["dataset"], row["suffix"], int(row["seed"])))
