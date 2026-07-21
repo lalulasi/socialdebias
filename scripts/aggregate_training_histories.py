@@ -8,7 +8,7 @@ mean/std summaries (ddof=0), and can fail on incomplete three-seed groups.
 import argparse
 import csv
 import json
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 import numpy as np
@@ -115,21 +115,27 @@ def main():
     wanted_seeds = set(args.expected_seeds)
     rows = []
     errors = []
-    for path in sorted(args.model_dir.glob("socialdebias_*_history.json")):
+    available_suffixes = Counter()
+    candidate_paths = sorted(args.model_dir.glob("socialdebias_*_history.json"))
+    for path in candidate_paths:
         try:
             row = load_row(path)
         except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
             errors.append(f"{path}: {exc}")
             continue
+        available_suffixes[str(row["suffix"])] += 1
         if row["suffix"] in wanted_suffixes and row["seed"] in wanted_seeds:
             rows.append(row)
 
     if not rows:
         raise FileNotFoundError(
             f"No matching histories in {args.model_dir.resolve()}; "
-            f"suffixes={sorted(wanted_suffixes)}. If --model_dir came from "
-            "$MODEL_DIR, restore the experiment environment with: "
-            "source scripts/init_paper_v2_env.sh <original EXP_ID>"
+            f"suffixes={sorted(wanted_suffixes)}. The directory exists but "
+            "contains no readable history with the requested save_suffix. "
+            f"Scanned {len(candidate_paths)} candidate histories; "
+            f"available suffix counts={dict(sorted(available_suffixes.items()))}; "
+            f"unreadable={len(errors)}. Locate or complete the requested "
+            "training outputs before aggregation."
         )
 
     rows.sort(key=lambda row: (row["dataset"], row["suffix"], int(row["seed"])))
