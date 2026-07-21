@@ -43,6 +43,9 @@ from utils.real_dataloader import load_dataset
 from utils.device import get_device
 
 
+PAIRED_FORWARD_VERSION = "skip_unused_orig_v1"
+
+
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
@@ -138,6 +141,8 @@ def main():
                         help="触发后 λ_bias 与 λ_consist 的乘数（默认 0.1，即缩小到 1/10）")
     
     args = parser.parse_args()
+    # Persist implementation provenance for NLI mechanism comparisons.
+    args.paired_forward_version = PAIRED_FORWARD_VERSION
 
     set_seed(args.seed)
     device = get_device()
@@ -426,6 +431,7 @@ def main():
                     "surface_feature_version": args.surface_feature_version,
                     "surface_lexicon_path": args.surface_lexicon_path,
                     "surface_stopwords_path": args.surface_stopwords_path,
+                    "paired_forward_version": args.paired_forward_version,
                 },
             }, save_path)
             print(f"        best test acc={test_m['acc']:.4f} f1={test_m['f1']:.4f}")

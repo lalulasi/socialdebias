@@ -45,7 +45,7 @@ for seed in 42 2024 3407; do
     }
   fi
 
-  if [[ -s "${evaluation}" ]]; then
+  if [[ -s "${evaluation}" && "${evaluation}" -nt "${checkpoint}" && "${evaluation}" -nt "${history}" ]]; then
     echo "[SKIP EVAL] politifact/surface17_full/seed${seed}"
   else
     echo "[EVAL] politifact/surface17_full/seed${seed}"

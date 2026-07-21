@@ -78,7 +78,18 @@ for dataset in politifact gossipcop; do
       history="${model_dir}/socialdebias_${dataset}_en_seed${seed}_${suffix}_history.json"
       evaluation="${evaluation_dir}/ablation_adv_${dataset}_${suffix}_seed${seed}.json"
 
+      training_is_current=false
       if [[ -s "${checkpoint}" && -s "${history}" ]]; then
+        if [[ "${config}" != no_infonce ]]; then
+          training_is_current=true
+        elif python -c 'import json,sys; p=json.load(open(sys.argv[1], encoding="utf-8")); raise SystemExit(0 if p.get("args", {}).get("paired_forward_version") == "skip_unused_orig_v1" else 1)' "${history}"; then
+          training_is_current=true
+        else
+          echo "[STALE TRAIN] ${dataset}/${suffix}/seed${seed}: paired forward implementation changed"
+        fi
+      fi
+
+      if [[ "${training_is_current}" == true ]]; then
         echo "[SKIP TRAIN] ${dataset}/${suffix}/seed${seed}"
       else
         echo "[TRAIN] ${dataset}/${suffix}/seed${seed}"
@@ -99,7 +110,7 @@ for dataset in politifact gossipcop; do
         }
       fi
 
-      if [[ -s "${evaluation}" ]]; then
+      if [[ -s "${evaluation}" && "${evaluation}" -nt "${checkpoint}" && "${evaluation}" -nt "${history}" ]]; then
         echo "[SKIP EVAL] ${dataset}/${suffix}/seed${seed}"
       else
         echo "[EVAL] ${dataset}/${suffix}/seed${seed}"

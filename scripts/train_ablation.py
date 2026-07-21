@@ -31,6 +31,7 @@ VARIANT_LAMBDAS = {
     "no_consist": (1.0, 0.5, 0.0),
     "no_both": (1.0, 0.0, 0.0),
 }
+PAIRED_FORWARD_VERSION = "skip_unused_orig_v1"
 
 
 def set_seed(seed):
@@ -112,6 +113,8 @@ def main():
     args.lambda_consist = 0.3 if args.lambda_consist is None else args.lambda_consist
     if args.save_suffix is None:
         args.save_suffix = f"abl_{args.variant or 'custom'}"
+    # Persist implementation provenance in both history and checkpoint config.
+    args.paired_forward_version = PAIRED_FORWARD_VERSION
 
     set_seed(args.seed)
     device = get_device()
