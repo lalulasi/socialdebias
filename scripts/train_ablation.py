@@ -231,15 +231,22 @@ def main():
         if paired_loader is not None:
             for batch in paired_loader:
                 optimizer.zero_grad()
-                orig_ids = batch["orig_input_ids"].to(device)
-                orig_mask = batch["orig_attention_mask"].to(device)
                 adv_ids = batch["adv_input_ids"].to(device)
                 adv_mask = batch["adv_attention_mask"].to(device)
-                out_orig = model(orig_ids, orig_mask)
+                needs_orig_forward = args.use_contrastive and args.lambda_contrast > 0
+                if needs_orig_forward:
+                    orig_ids = batch["orig_input_ids"].to(device)
+                    orig_mask = batch["orig_attention_mask"].to(device)
+                    out_orig = model(orig_ids, orig_mask)
+                else:
+                    # Classification-only NLI loss never reads the original
+                    # representation.  Avoid retaining an unused full BERT
+                    # graph while forwarding the adversarial view.
+                    out_orig = None
                 out_adv = model(adv_ids, adv_mask)
                 pair_loss = torch.tensor(0.0, device=device)
 
-                if args.use_contrastive and args.lambda_contrast > 0:
+                if needs_orig_forward:
                     if args.use_soft_labels:
                         weights = torch.clamp(
                             batch["p_entail"].to(device), min=args.alpha_floor

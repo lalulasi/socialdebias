@@ -332,14 +332,20 @@ def main():
         if paired_loader is not None:
             for batch in paired_loader:
                 optimizer.zero_grad()
-                orig_ids = batch["orig_input_ids"].to(device)
-                orig_mask = batch["orig_attention_mask"].to(device)
                 adv_ids = batch["adv_input_ids"].to(device)
                 adv_mask = batch["adv_attention_mask"].to(device)
-                out_orig = model(orig_ids, orig_mask, surface_feat=None)
+                needs_orig_forward = args.use_contrastive and args.lambda_contrast > 0
+                if needs_orig_forward:
+                    orig_ids = batch["orig_input_ids"].to(device)
+                    orig_mask = batch["orig_attention_mask"].to(device)
+                    out_orig = model(orig_ids, orig_mask, surface_feat=None)
+                else:
+                    # nli_cls_only uses only the adversarial classification
+                    # logits; an original-view BERT graph would be unused.
+                    out_orig = None
                 out_adv = model(adv_ids, adv_mask, surface_feat=None)
                 loss = torch.tensor(0.0, device=device)
-                if args.use_contrastive and args.lambda_contrast > 0:
+                if needs_orig_forward:
                     if args.use_soft_labels and "p_entail" in batch:
                         weights = batch["p_entail"].to(device)
                         weights = torch.clamp(weights, min=args.alpha_floor)

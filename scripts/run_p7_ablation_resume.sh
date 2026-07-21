@@ -82,7 +82,7 @@ for dataset in politifact gossipcop; do
         echo "[SKIP TRAIN] ${dataset}/${suffix}/seed${seed}"
       else
         echo "[TRAIN] ${dataset}/${suffix}/seed${seed}"
-        python scripts/train_ablation.py \
+        python -u scripts/train_ablation.py \
           --dataset "${dataset}" --language en --seed "${seed}" \
           --epochs 3 --batch_size "${batch_size}" --max_length 512 \
           --lr 2e-5 --weight_decay 0.01 --label_smoothing "${label_smoothing}" \
@@ -103,7 +103,7 @@ for dataset in politifact gossipcop; do
         echo "[SKIP EVAL] ${dataset}/${suffix}/seed${seed}"
       else
         echo "[EVAL] ${dataset}/${suffix}/seed${seed}"
-        python scripts/evaluate_ablation_adv.py \
+        python -u scripts/evaluate_ablation_adv.py \
           --dataset "${dataset}" --language en --seed "${seed}" \
           --save_suffix "${suffix}" --variants A,B,C,D \
           --batch_size "${batch_size}" --max_length 512 \
@@ -126,7 +126,7 @@ if [[ "${history_count}" -ne 42 || "${evaluation_count}" -ne 42 ]]; then
   exit 1
 fi
 
-python scripts/aggregate_training_histories.py \
+python -u scripts/aggregate_training_histories.py \
   --model_dir "${model_dir}" \
   --suffixes abl_full abl_no_grl abl_no_infonce abl_no_consist \
              abl_no_surface abl_no_advaug abl_no_labelsmooth \
@@ -134,5 +134,5 @@ python scripts/aggregate_training_histories.py \
   --expected_seeds 42 2024 3407 --require_complete \
   --output /autodl-fs/data/socialdebias/results/paper_v2_20260719/ablation_clean_summary.csv
 
-python scripts/parse_ablation_adv.py "${evaluation_dir}"
+python -u scripts/parse_ablation_adv.py "${evaluation_dir}"
 echo "P7_ABLATION_READY=True"
