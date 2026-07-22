@@ -1,0 +1,55 @@
+{
+  "title": "旧论文实验结果基线（paper v1.x）",
+  "source": "罗俊2241507.pdf 及其配套复现指南中的论文表格值",
+  "warning": "旧实现与 paper-v2 在模型结构、BERT 微调、数据过滤和解释指标上存在差异；差值只用于定位论文需修改处，不能与新结果混合求均值。",
+  "table_4_3": [
+    {"dataset": "politifact", "method": "nli_soft14", "test_f1": 0.8628},
+    {"dataset": "gossipcop", "method": "nli_soft14", "test_f1": 0.7513},
+    {"dataset": "weibo21", "method": "nli_soft14", "test_f1": 0.9067}
+  ],
+  "table_4_4": [
+    {"dataset": "politifact", "retained": 361},
+    {"dataset": "gossipcop", "retained": 793},
+    {"dataset": "weibo21", "retained": 1080},
+    {"dataset": "all", "retained": 2234, "keep_rate": 0.57}
+  ],
+  "main_results": [
+    {"table": "表 5-3", "dataset": "politifact", "method": "BERT", "clean_f1": 0.8703, "clean_f1_std": 0.0064, "avg_adv_f1": 0.8110, "avg_adv_f1_std": 0.0167, "f1_drop": 0.0594, "f1_drop_std": 0.0225, "avg_asr": 0.0956},
+    {"table": "表 5-3", "dataset": "politifact", "method": "ENDEF (bert)", "clean_f1": 0.7960, "clean_f1_std": 0.0801, "avg_adv_f1": 0.7613, "avg_adv_f1_std": 0.0315, "f1_drop": 0.0347, "f1_drop_std": 0.0528, "avg_asr": 0.0996},
+    {"table": "表 5-3", "dataset": "politifact", "method": "ENDEF (bert_endef)", "clean_f1": 0.7046, "clean_f1_std": 0.0649, "avg_adv_f1": 0.6782, "avg_adv_f1_std": 0.0112, "f1_drop": 0.0265, "f1_drop_std": 0.0734, "avg_asr": 0.0950},
+    {"table": "表 5-3", "dataset": "politifact", "method": "SheepDog（引用值）", "clean_f1": 0.8839, "avg_adv_f1": 0.8112, "f1_drop": 0.0727},
+    {"table": "表 5-3", "dataset": "politifact", "method": "SocialDebias", "config": "surface", "clean_f1": 0.8770, "clean_f1_std": 0.0304, "avg_adv_f1": 0.8285, "avg_adv_f1_std": 0.0089, "f1_drop": 0.0485, "f1_drop_std": 0.0299, "avg_asr": 0.0971},
+    {"table": "表 5-3", "dataset": "politifact", "method": "SocialDebias Adaptive", "config": "surface_adaptive", "clean_f1": 0.8771, "clean_f1_std": 0.0229, "avg_adv_f1": 0.8303, "avg_adv_f1_std": 0.0024, "f1_drop": 0.0468, "f1_drop_std": 0.0246},
+    {"table": "表 5-4", "dataset": "gossipcop", "method": "BERT", "clean_f1": 0.7397, "clean_f1_std": 0.0014, "avg_adv_f1": 0.6991, "avg_adv_f1_std": 0.0177, "f1_drop": 0.0405, "f1_drop_std": 0.0164},
+    {"table": "表 5-4", "dataset": "gossipcop", "method": "ENDEF (bert)", "clean_f1": 0.6333, "clean_f1_std": 0.0111, "avg_adv_f1": 0.5974, "avg_adv_f1_std": 0.0093, "f1_drop": 0.0359, "f1_drop_std": 0.0181, "avg_asr": 0.1189},
+    {"table": "表 5-4", "dataset": "gossipcop", "method": "ENDEF (bert_endef)", "clean_f1": 0.6485, "clean_f1_std": 0.0046, "avg_adv_f1": 0.6303, "avg_adv_f1_std": 0.0160, "f1_drop": 0.0182, "f1_drop_std": 0.0118, "avg_asr": 0.0945},
+    {"table": "表 5-4", "dataset": "gossipcop", "method": "SocialDebias", "config": "surface_all", "clean_f1": 0.7549, "clean_f1_std": 0.0011, "avg_adv_f1": 0.7369, "avg_adv_f1_std": 0.0039, "f1_drop": 0.0180, "f1_drop_std": 0.0049, "avg_asr": 0.0709},
+    {"table": "表 5-4", "dataset": "gossipcop", "method": "SocialDebias Adaptive", "config": "surface_adaptive", "clean_f1": 0.7373, "clean_f1_std": 0.0025, "avg_adv_f1": 0.6892, "avg_adv_f1_std": 0.0255, "f1_drop": 0.0482, "f1_drop_std": 0.0231, "avg_asr": 0.1150},
+    {"table": "表 5-5", "dataset": "weibo21", "method": "BERT", "clean_f1": 0.9065, "clean_f1_std": 0.0079},
+    {"table": "表 5-5", "dataset": "weibo21", "method": "ENDEF (bert)", "clean_f1": 0.8899, "clean_f1_std": 0.0075},
+    {"table": "表 5-5", "dataset": "weibo21", "method": "ENDEF (bert_endef)", "clean_f1": 0.8818, "clean_f1_std": 0.0035},
+    {"table": "表 5-5", "dataset": "weibo21", "method": "SocialDebias", "config": "surface_all", "clean_f1": 0.9112, "clean_f1_std": 0.0034}
+  ],
+  "table_5_7": [
+    {"dataset": "politifact", "method": "DeepSeek", "acc": 0.6410},
+    {"dataset": "politifact", "method": "SocialDebias", "acc": 0.8132},
+    {"dataset": "gossipcop", "method": "DeepSeek", "acc": 0.5884},
+    {"dataset": "gossipcop", "method": "SocialDebias", "acc": 0.7912},
+    {"dataset": "weibo21", "method": "BERT", "acc": 0.5600},
+    {"dataset": "weibo21", "method": "DeepSeek", "acc": 0.6593},
+    {"dataset": "weibo21", "method": "SocialDebias", "acc": 0.7107}
+  ],
+  "table_5_8": [
+    {"model": "bert", "top_k_overlap": 0.1203, "spearman": 0.2564, "js_divergence": 0.2257},
+    {"model": "socialdebias", "top_k_overlap": 0.1446, "spearman": 0.4707, "js_divergence": 0.1750}
+  ],
+  "human_eval": {
+    "n_samples": 50,
+    "human_acc_clean": 1.0,
+    "human_acc_adv": 0.75,
+    "human_acc_drop": 0.25,
+    "human_asr": 0.50,
+    "jaccard_orig_adv_mean": 0.256,
+    "jaccard_orig_adv_std": 0.196
+  }
+}

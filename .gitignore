@@ -48,3 +48,7 @@ data/
 # 保留 qwen_adv
 !data/qwen_adv/
 !data/qwen_adv/*.pkl
+
+# 论文旧结果对照基线（小型、可审计配置，不是实验输出）
+!paper_reference/
+!paper_reference/*.json

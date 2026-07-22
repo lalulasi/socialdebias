@@ -14,6 +14,7 @@ from modeling.social_debias import infer_bottleneck_dim
 from scripts.compute_nli_p_entail import resolve_nli_label_indices
 from scripts.prepare_nrc_emolex import load_long, load_translation_map, write_long
 from scripts.analyze_human_eval import load_human_eval
+from scripts.build_paper_results_report import build_report
 from utils.contrastive_dataloader import ContrastiveFakeNewsDataset
 from utils.explanation_metrics import js_divergence, top_k_overlap
 from utils.surface_features import SurfaceFeatureExtractor
@@ -34,6 +35,20 @@ class FakeSurfaceExtractor:
 
 
 class PaperAlignmentTests(unittest.TestCase):
+    def test_final_report_marks_incomplete_run_without_crashing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            results = root / "results" / "paper_v2_test"
+            results.mkdir(parents=True)
+            report, machine = build_report(
+                root, results,
+                {"source": "unit-test", "main_results": []},
+                endef_root=None,
+            )
+        self.assertFalse(machine["overall_pass"])
+        self.assertIn("全实验产物验收", report)
+        self.assertIn("表 5-3", report)
+
     def test_legacy_gb18030_human_eval_is_normalized(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "legacy.csv"
