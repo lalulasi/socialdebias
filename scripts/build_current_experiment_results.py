@@ -109,6 +109,48 @@ def add_current_main_tables(lines, results_root, histories):
 def build_document(project_root, results_root, endef_root):
     histories, unreadable = common.collect_histories(results_root / "models")
     checks = common.build_checks(project_root, results_root, endef_root)
+    correlation_dir = results_root / "explanation_robustness"
+    pair_files = sorted(correlation_dir.glob("expl_robust_xy_politifact_seed*.csv"))
+    complete_pair_files = 0
+    for path in pair_files:
+        rows = common.read_csv(path)
+        variants = defaultdict(int)
+        for row in rows:
+            variants[row.get("variant", "")] += 1
+        if len(rows) == 360 and dict(variants) == {"A": 90, "B": 90, "C": 90, "D": 90}:
+            complete_pair_files += 1
+    checks.extend([
+        {
+            "stage": "P6B", "item": "相关性逐样本 CSV",
+            "actual": f"{complete_pair_files}/3", "expected": "3/3 (360 rows each)",
+            "ok": complete_pair_files == 3, "path": str(correlation_dir),
+        },
+        {
+            "stage": "P6B", "item": "表5-10统计",
+            "actual": "present" if (correlation_dir / "table5_10_seed42.csv").is_file() else "missing",
+            "expected": "present", "ok": (correlation_dir / "table5_10_seed42.csv").is_file(),
+            "path": str(correlation_dir / "table5_10_seed42.csv"),
+        },
+        {
+            "stage": "P6B", "item": "三seed相关性汇总",
+            "actual": "present" if (correlation_dir / "explanation_robustness_3seed_stats.csv").is_file() else "missing",
+            "expected": "present", "ok": (correlation_dir / "explanation_robustness_3seed_stats.csv").is_file(),
+            "path": str(correlation_dir / "explanation_robustness_3seed_stats.csv"),
+        },
+        {
+            "stage": "P6B", "item": "图5-4 PNG/PDF",
+            "actual": sum(
+                (correlation_dir / f"figure5_4_explanation_robustness_seed42.{suffix}").is_file()
+                for suffix in ("png", "pdf")
+            ),
+            "expected": 2,
+            "ok": all(
+                (correlation_dir / f"figure5_4_explanation_robustness_seed42.{suffix}").is_file()
+                for suffix in ("png", "pdf")
+            ),
+            "path": str(correlation_dir),
+        },
+    ])
     filter_path = project_root / "data/socialdebias_adv/filtered/filter_report.csv"
     social_path = results_root / "socialdebias_adv_eval.csv"
     filter_rows = common.read_csv(filter_path)
@@ -130,6 +172,23 @@ def build_document(project_root, results_root, endef_root):
         row for row in common.build_artifact_mapping(project_root, results_root)
         if row[0] != "P12"
     ]
+    corrected_tables = {
+        "P7": "表5-11",
+        "P8": "表5-12",
+        "P9": "表4-3、表5-13、图5.5",
+        "P10": "表5-14",
+    }
+    mapping = [
+        [row[0], row[1], corrected_tables.get(row[0], row[2]), row[3], row[4], *row[5:]]
+        for row in mapping
+    ]
+    p6_index = next((i for i, row in enumerate(mapping) if row[0] == "P6"), len(mapping) - 1)
+    mapping.insert(p6_index + 1, [
+        "P6B", "§5.4.5", "表5-10、图5.4",
+        "解释一致性与置信度下降的相关性、聚类bootstrap和攻破/存活组检验",
+        correlation_dir / "explanation_robustness_summary.json",
+        "本轮新增验收项",
+    ])
     add_table(
         lines,
         ["阶段", "论文章节", "表格/图", "本轮实验内容", "数据来源"],
@@ -306,37 +365,53 @@ def build_document(project_root, results_root, endef_root):
     lines.extend([f"来源：`{human_path}`", ""])
 
     add_csv(
-        lines, "§5.5.1 / 表5-10：组件消融 Clean",
+        lines, "§5.4.5 / 表5-10：解释一致性与对抗鲁棒性相关性（seed 42）",
+        correlation_dir / "table5_10_seed42.csv",
+        ["analysis", "sample_size", "statistic", "significance"],
+    )
+    add_csv(
+        lines, "§5.4.5：解释一致性—鲁棒性三随机种子统计",
+        correlation_dir / "explanation_robustness_3seed_stats.csv",
+        [
+            "seed", "pooled_n", "pooled_rho", "pooled_p",
+            "cluster_ci_low", "cluster_ci_high", "cluster_sign_p",
+            "by_original_n", "by_original_rho", "by_original_p",
+            "broken_n", "survived_n", "broken_mean", "survived_mean", "mwu_p",
+        ],
+    )
+
+    add_csv(
+        lines, "§5.5.1 / 表5-11：组件消融 Clean",
         results_root / "ablation_clean_summary.csv",
         ["dataset", "suffix", "n", "test_f1_mean", "test_f1_std", "test_bias_acc_mean"],
     )
     add_csv(
-        lines, "§5.5.1 / 表5-10：组件消融对抗结果",
+        lines, "§5.5.1 / 表5-11：组件消融对抗结果",
         results_root / "ablation_adv/ablation_adv_summary.csv",
         ["dataset", "variant", "n", "clean_f1_mean", "avg_adv_f1_mean", "f1_drop_mean", "avg_asr_mean"],
     )
     add_csv(
-        lines, "§3.3.1、§5.5.1 / 表5-11：8维与17维表层特征",
+        lines, "§3.3.1、§5.5.1 / 表5-12：8维与17维表层特征",
         results_root / "surface_8_vs_17_clean_summary.csv",
         ["dataset", "suffix", "n", "test_f1_mean", "test_f1_std"],
     )
     add_csv(
-        lines, "§5.5.2 / 表5-12：NLI机制完整结果",
+        lines, "§5.5.2 / 表5-13：NLI机制完整结果",
         results_root / "nli_mechanism_summary.csv",
         ["dataset", "suffix", "n", "test_f1_mean", "test_f1_std", "test_bias_acc_mean"],
     )
     add_csv(
-        lines, "§5.5.3 / 表5-13：固定λ与自适应λ Clean结果",
+        lines, "§5.5.3 / 表5-14：固定λ与自适应λ Clean结果",
         results_root / "adaptive_clean_summary.csv",
         ["dataset", "suffix", "n", "test_f1_mean", "test_f1_std", "test_bias_acc_mean"],
     )
     add_csv(
-        lines, "§5.5.3 / 表5-13：固定λ对抗结果",
+        lines, "§5.5.3 / 表5-14：固定λ对抗结果",
         results_root / "surface_fixed_adv_summary.csv",
         ["dataset", "model", "split", "f1_mean", "f1_std", "asr_mean", "asr_std", "n"],
     )
     add_csv(
-        lines, "§5.5.3 / 表5-13：自适应λ对抗结果",
+        lines, "§5.5.3 / 表5-14：自适应λ对抗结果",
         results_root / "surface_adaptive_adv_summary.csv",
         ["dataset", "model", "split", "f1_mean", "f1_std", "asr_mean", "asr_std", "n"],
     )
