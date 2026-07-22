@@ -107,6 +107,13 @@ def main():
                         help="legacy random-head control; not for paper tables")
     parser.add_argument("--topk", "--top_k", dest="topk", type=int, default=10)
     parser.add_argument("--n_steps", type=int, default=50)
+    parser.add_argument(
+        "--ig_internal_batch_size", type=int, default=4,
+        help=(
+            "Captum IG interpolation points processed per forward/backward pass. "
+            "Smaller values reduce GPU memory without changing n_steps."
+        ),
+    )
     parser.add_argument("--max_length", type=int, default=512)
     parser.add_argument("--max_samples", type=int, default=0)
     parser.add_argument("--surface_feat_dim", type=int, default=8)
@@ -129,17 +136,37 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     sd_model = load_socialdebias(args.ckpt, model_name, device, args.surface_feat_dim)
-    sd_attr = BertAttributor(sd_model, tokenizer, device, n_steps=args.n_steps)
+    if args.ig_internal_batch_size <= 0:
+        raise ValueError("--ig_internal_batch_size must be positive")
+    sd_attr = BertAttributor(
+        sd_model,
+        tokenizer,
+        device,
+        n_steps=args.n_steps,
+        internal_batch_size=args.ig_internal_batch_size,
+    )
 
     bert_attr = None
     bert_key = None
     if args.bert_ckpt:
         bert_model = load_bert_baseline(args.bert_ckpt, model_name, device)
-        bert_attr = BertAttributor(bert_model, tokenizer, device, n_steps=args.n_steps)
+        bert_attr = BertAttributor(
+            bert_model,
+            tokenizer,
+            device,
+            n_steps=args.n_steps,
+            internal_batch_size=args.ig_internal_batch_size,
+        )
         bert_key = "bert"
     elif args.baseline_zero:
         bert_model = BertZeroBaseline(model_name).to(device).eval()
-        bert_attr = BertAttributor(bert_model, tokenizer, device, n_steps=args.n_steps)
+        bert_attr = BertAttributor(
+            bert_model,
+            tokenizer,
+            device,
+            n_steps=args.n_steps,
+            internal_batch_size=args.ig_internal_batch_size,
+        )
         bert_key = "zero_bert"
 
     rows = []

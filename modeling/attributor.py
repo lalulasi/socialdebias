@@ -15,10 +15,18 @@ class BertAttributor:
         # result = {'tokens': ['This', 'is', ...], 'scores': [0.12, -0.03, ...]}
     """
 
-    def __init__(self, model, tokenizer, device, n_steps: int = 50):
+    def __init__(
+            self,
+            model,
+            tokenizer,
+            device,
+            n_steps: int = 50,
+            internal_batch_size: Optional[int] = None,
+    ):
         self.model = model
         self.tokenizer = tokenizer
         self.n_steps = n_steps
+        self.internal_batch_size = internal_batch_size
 
         if device.type == "mps":
             print("Captum attribution is running on CPU because MPS has dtype limitations.")
@@ -108,6 +116,7 @@ class BertAttributor:
             additional_forward_args=(attention_mask,),
             target=target_class,
             n_steps=self.n_steps,
+            internal_batch_size=self.internal_batch_size,
             return_convergence_delta=True,
         )
 
