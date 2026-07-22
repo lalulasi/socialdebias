@@ -173,6 +173,7 @@ def build_document(project_root, results_root, endef_root):
         if row[0] != "P12"
     ]
     corrected_tables = {
+        "P1": "表4-3、表5-13、图5.5",
         "P7": "表5-11",
         "P8": "表5-12",
         "P9": "表4-3、表5-13、图5.5",
