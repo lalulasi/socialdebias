@@ -575,12 +575,119 @@ def csv_section(lines, title, path, columns, rename=None, predicate=None):
         lines.append("")
         return []
     rename = rename or {}
-    table_rows = [[row.get(column, "") for column in columns] for row in rows]
+    def display(row, column):
+        value = row.get(column, "")
+        parsed = number(value)
+        if parsed is None:
+            return value
+        if column == "n":
+            return str(int(parsed))
+        return fmt(parsed)
+
+    table_rows = [[display(row, column) for column in columns] for row in rows]
     lines.extend(markdown_table([rename.get(column, column) for column in columns], table_rows))
     lines.append("")
     lines.append(f"来源：`{path}`")
     lines.append("")
     return rows
+
+
+def summarize_social_adv_detail(rows, group_keys, metric, weighted=False):
+    """Aggregate per-file SocialDebias rows into per-seed and three-seed results."""
+    per_seed = defaultdict(list)
+    for row in rows:
+        if row.get("file") == "__dataset_summary__":
+            continue
+        if row.get("method") != "SocialDebias":
+            continue
+        try:
+            seed = int(row.get("seed"))
+        except (TypeError, ValueError):
+            continue
+        value = number(row.get(metric))
+        weight = number(row.get("n"))
+        if value is None:
+            continue
+        key = tuple(row.get(field, "") for field in group_keys)
+        per_seed[(key, seed)].append((value, weight))
+
+    grouped = defaultdict(list)
+    for (key, _seed), values in per_seed.items():
+        if weighted and all(weight is not None and weight > 0 for _, weight in values):
+            total_weight = sum(weight for _, weight in values)
+            seed_value = sum(value * weight for value, weight in values) / total_weight
+        else:
+            seed_value = statistics.fmean(value for value, _ in values)
+        grouped[key].append(seed_value)
+
+    result = {}
+    for key, values in grouped.items():
+        mean, std = mean_std(values)
+        result[key] = {"mean": mean, "std": std, "n_seeds": len(values)}
+    return result
+
+
+def build_artifact_mapping(project_root: Path, results_root: Path):
+    """Single source of truth for artifact-to-thesis-section/table mapping."""
+    return [
+        ["P0", "§5.2.1", "表5-1",
+         "PolitiFact、GossipCop、Weibo21 与 SocialDebias-Adv 的数据划分和规模",
+         project_root / "data", "属于实验口径核对；不与结果指标混合比较"],
+        ["P0", "§5.2.2–§5.2.4、附录A.2–A.3", "表5-2",
+         "基线定义、评估指标、随机种子、训练超参数、软硬件环境",
+         results_root / "manifests", "核对新旧配置差异；不计算性能差值"],
+        ["P1", "§4.3.1–§4.4.2", "表4-3、表5-12、图5.4",
+         "训练对抗集三级过滤、NLI p_entail、双重软标签机制",
+         project_root / "data/qwen_adv", "旧表4-3/5-12；同配置项计算差值"],
+        ["P2", "§5.2.2、§5.3.1", "表5-2～表5-5、图5.1～5.2",
+         "BiLSTM、BERT、DeepSeek、ENDEF 基线的 Clean/Adv/F1 Drop/ASR",
+         results_root / "lstm_summary.csv", "旧表5-3～5-5；方法与数据切分不同时标注不可直接比较"],
+        ["P3", "§3.4–§3.8、§5.3.1", "表5-3～表5-5、图5.1～5.2",
+         "统一 surface_all 主模型在三数据集上的三随机种子 Clean 结果",
+         results_root / "surface_all_clean_summary.csv", "旧论文 surface/surface_all 混用；新表统一使用 surface_all"],
+        ["P4", "§5.3.1", "表5-3、表5-4、图5.1",
+         "PolitiFact/GossipCop 的 SheepDog adv_A/B/C/D 对抗鲁棒性",
+         results_root / "main_summary.csv", "旧表5-3/5-4；比较 Clean、Avg Adv、Drop、ASR"],
+        ["P5", "§4.2.1", "表4-1",
+         "Qwen 与 DeepSeek 两类攻击源的非对称攻击强度",
+         results_root / "socialdebias_adv_eval.csv", "按数据集和攻击源重算 SocialDebias Accuracy"],
+        ["P5", "§4.2.2、附录B", "表4-2",
+         "四风格×双语提示词、API采样参数、长度限制与输出清洗配置",
+         project_root / "run_socialdebias_adv.sh", "属于生成配置核对；不能用新模型名配旧生成结果"],
+        ["P5", "§4.5.1", "表4-4、图4.2",
+         "SocialDebias-Adv 生成量、过滤后保留量与保留率",
+         project_root / "data/socialdebias_adv/filtered/filter_report.csv", "旧表4-4；比较各数据集保留数量和总保留率"],
+        ["P5", "§4.5.2", "表4-5",
+         "不同 LLM 来源与四种改写风格的质量过滤保留率",
+         project_root / "data/socialdebias_adv/filtered/filter_report.csv", "旧表4-5；比较来源/风格保留率"],
+        ["P5", "§5.3.2", "表5-6",
+         "四种 tone 攻击下 SocialDebias 的 ASR 与最强攻击风格",
+         results_root / "socialdebias_adv_eval.csv", "旧表5-6；逐数据集、逐风格比较 ASR"],
+        ["P5", "§5.3.3", "表5-7",
+         "BERT、DeepSeek、SocialDebias 在自建对抗集上的三方评估",
+         results_root / "socialdebias_adv_eval.csv", "旧表5-7；比较 Accuracy/F1/ASR"],
+        ["P6", "§5.4.1–§5.4.3", "表5-8、图5.3",
+         "IG 的 Top-10 重合度、Spearman 相关与 JS 散度（三随机种子）",
+         results_root / "explanation/explanation_3seed_summary.csv", "旧表5-8基线实现有误；新表整体替换"],
+        ["P7", "§5.5.1", "表5-10",
+         "GRL、InfoNCE、Consist、表层特征、对抗增强、标签平滑消融",
+         results_root / "ablation_adv/ablation_adv_summary.csv", "旧表5-10；仅同名且同开关配置可直接比较"],
+        ["P8", "§3.3.1、§5.5.1", "表5-11",
+         "8维情绪特征与17维情绪+句法+词汇特征对照",
+         results_root / "surface_8_vs_17_clean_summary.csv", "旧表5-11；比较 Clean F1 与对抗 Drop"],
+        ["P9", "§4.4.1、§5.5.2", "表4-3、表5-12、图5.4",
+         "NLI 硬标签、分类软化、对比加权、floor 与 Soft14 机制拆分",
+         results_root / "nli_mechanism_summary.csv", "旧论文仅 Soft14 可严格对应；其余为本轮新增机制拆分"],
+        ["P10", "§3.8.3、§5.5.3", "表5-13",
+         "固定 λ 与自适应 λ 的跨数据集 Clean/Adv/触发行为",
+         results_root / "adaptive_clean_summary.csv", "旧表5-13；比较 Clean、Avg Adv 和 F1 Drop"],
+        ["P11", "§5.4.4", "表5-9、附录C",
+         "50对人工真假判断、置信度、Human ASR、关键词稳定性及 IG 对齐",
+         results_root / "human_eval/final/human_eval_metrics.json", "旧表5-9和附录C；按既有单标注者口径比较"],
+        ["P12", "§5.6、§6.1–§6.3、摘要与创新点", "无独立表",
+         "根据全部新结果重写实验结论、适用边界、不足和未来工作",
+         results_root / "论文实验结果总验收与旧论文对照.md", "只引用本轮验收通过结果，不混合旧种子"],
+    ]
 
 
 def build_report(project_root, results_root, legacy, endef_root):
@@ -591,6 +698,7 @@ def build_report(project_root, results_root, legacy, endef_root):
     passed = sum(check["ok"] for check in checks if check["required"])
     total = sum(check["required"] for check in checks)
     overall = passed == total
+    artifact_mapping = build_artifact_mapping(project_root, results_root)
 
     lines = [
         "# SocialDebias paper-v2 完整实验验收与旧论文对照",
@@ -604,9 +712,21 @@ def build_report(project_root, results_root, legacy, endef_root):
         "",
         f"> {legacy.get('warning', '')}",
         "",
-        "## 一、全实验产物验收（P1–P11）",
+        "## 一、实验数据与论文章节、表格总索引",
         "",
     ]
+    lines.extend(markdown_table(
+        ["阶段", "论文章节", "表格/图", "实验内容", "本轮数据来源", "与旧论文对比口径"],
+        [[stage, section, table, content, f"`{source}`", comparison]
+         for stage, section, table, content, source, comparison in artifact_mapping],
+    ))
+    lines.extend([
+        "",
+        "> 使用顺序：先看本索引定位论文位置，再看下一节验收状态，最后到第4章/第5章分表读取本轮值、旧值和差值。",
+        "",
+        "## 二、全实验产物验收（P1–P11）",
+        "",
+    ])
     lines.extend(markdown_table(
         ["阶段", "验收项", "实际", "期望", "状态", "路径"],
         [[
@@ -620,8 +740,35 @@ def build_report(project_root, results_root, legacy, endef_root):
         lines.extend(f"- `{item}`" for item in unreadable_histories)
         lines.append("")
 
-    lines.extend(["## 二、第 4 章：对抗数据与 NLI 机制", ""])
-    lines.append("### P9 / 表 4-3：NLI 双软标签与 floor 机制")
+    lines.extend(["## 三、第 4 章：对抗数据与 NLI 机制", ""])
+
+    social_detail_rows = read_csv(results_root / "socialdebias_adv_eval.csv")
+    source_acc = summarize_social_adv_detail(
+        social_detail_rows, ("dataset", "source"), "acc", weighted=True
+    )
+    old_source_acc = {
+        (row["dataset"], row["source"]): row
+        for row in legacy.get("table_4_1", [])
+    }
+    lines.append("### P5 / §4.2.1 / 表 4-1：异构攻击源强度")
+    lines.append("")
+    source_rendered = []
+    for dataset in ("politifact", "gossipcop", "weibo21"):
+        for source in ("qwen", "deepseek"):
+            current = source_acc.get((dataset, source), {})
+            old = old_source_acc.get((dataset, source), {}).get("acc")
+            source_rendered.append([
+                dataset, source, current.get("n_seeds", 0),
+                fmt_ms(current.get("mean"), current.get("std")),
+                fmt(old), fmt_delta(current.get("mean"), old),
+            ])
+    lines.extend(markdown_table(
+        ["数据集", "攻击源", "n", "本轮 Accuracy", "旧论文 Accuracy", "差值"],
+        source_rendered,
+    ))
+    lines.extend(["", f"来源：`{results_root / 'socialdebias_adv_eval.csv'}`", ""])
+
+    lines.append("### P9 / §4.4.1 / 表 4-3：NLI 双软标签与 floor 机制")
     lines.append("")
     nli_rows = read_csv(results_root / "nli_mechanism_summary.csv")
     old_nli = {(row["dataset"], row["method"]): row for row in legacy.get("table_4_3", [])}
@@ -642,7 +789,7 @@ def build_report(project_root, results_root, legacy, endef_root):
         lines.append(f"> 缺失：`{results_root / 'nli_mechanism_summary.csv'}`")
     lines.extend(["", "旧论文只保留了 `nli_soft14` 的可比值；其余四项是本轮新增的可审计机制拆分。", ""])
 
-    lines.append("### P5 / 表 4-4：SocialDebias-Adv 三级过滤")
+    lines.append("### P5 / §4.5.1 / 表 4-4：SocialDebias-Adv 三级过滤")
     lines.append("")
     filter_rows = read_csv(project_root / "data/socialdebias_adv/filtered/filter_report.csv")
     filter_groups = defaultdict(lambda: [0, 0])
@@ -665,9 +812,48 @@ def build_report(project_root, results_root, legacy, endef_root):
     lines.extend(markdown_table(["数据集", "生成量", "本轮保留", "本轮保留率", "旧论文保留", "数量差"], filter_rendered))
     lines.extend(["", f"来源：`{project_root / 'data/socialdebias_adv/filtered/filter_report.csv'}`", ""])
 
-    lines.extend(["## 三、第 5 章：主实验与机制实验", ""])
+    lines.append("### P5 / §4.5.2 / 表 4-5：不同来源与风格的过滤保留率")
+    lines.append("")
+    quality_groups = defaultdict(lambda: [0, 0])
+    for row in filter_rows:
+        name = row.get("file", "")
+        source = "qwen" if "qwen" in name else "deepseek" if "deepseek" in name else "unknown"
+        tone = next((item for item in (
+            "emotionally_triggering", "sensational", "objective", "neutral"
+        ) if item in name), "unknown")
+        n_in = int(float(row.get("n_in", 0)))
+        n_out = int(float(row.get("n_out", 0)))
+        quality_groups[("LLM来源", source)][0] += n_in
+        quality_groups[("LLM来源", source)][1] += n_out
+        quality_groups[("改写风格", tone)][0] += n_in
+        quality_groups[("改写风格", tone)][1] += n_out
+    old_quality = {
+        (row["dimension"], row["category"]): row
+        for row in legacy.get("table_4_5", [])
+    }
+    quality_rendered = []
+    for dimension, categories in (
+        ("LLM来源", ("deepseek", "qwen")),
+        ("改写风格", ("neutral", "objective", "sensational", "emotionally_triggering")),
+    ):
+        for category in categories:
+            n_in, n_out = quality_groups.get((dimension, category), (0, 0))
+            current_rate = n_out / n_in if n_in else None
+            old_rate = old_quality.get((dimension, category), {}).get("keep_rate")
+            quality_rendered.append([
+                dimension, category, n_in or "—", n_out or "—",
+                fmt_pct(current_rate), fmt_pct(old_rate),
+                fmt_delta(current_rate, old_rate, percentage_points=True),
+            ])
+    lines.extend(markdown_table(
+        ["分析维度", "类别", "生成量", "保留量", "本轮保留率", "旧论文保留率", "差值"],
+        quality_rendered,
+    ))
+    lines.extend(["", f"来源：`{project_root / 'data/socialdebias_adv/filtered/filter_report.csv'}`", ""])
+
+    lines.extend(["## 四、第 5 章：主实验与机制实验", ""])
     for dataset, table in (("politifact", "表 5-3"), ("gossipcop", "表 5-4"), ("weibo21", "表 5-5")):
-        lines.append(f"### P2–P4 / {table}：{dataset} 主结果")
+        lines.append(f"### P2–P4 / §5.3.1 / {table}：{dataset} 主结果")
         lines.append("")
         selected = [row for row in main_rows if row["dataset"] == dataset]
         table_rows = []
@@ -691,7 +877,39 @@ def build_report(project_root, results_root, legacy, endef_root):
             lines.append("> 没有可用的本轮主结果。")
         lines.append("")
 
-    lines.append("### P5 / 表 5-7：SocialDebias-Adv 三方评估")
+    tone_asr = summarize_social_adv_detail(
+        social_detail_rows, ("dataset", "tone"), "asr", weighted=False
+    )
+    old_tone_asr = {
+        (row["dataset"], row["tone"]): row
+        for row in legacy.get("table_5_6", [])
+    }
+    lines.append("### P5 / §5.3.2 / 表 5-6：四种改写风格的 ASR")
+    lines.append("")
+    tone_rendered = []
+    for dataset in ("politifact", "gossipcop", "weibo21"):
+        dataset_values = []
+        for tone in ("neutral", "objective", "sensational", "emotionally_triggering"):
+            current = tone_asr.get((dataset, tone), {})
+            old = old_tone_asr.get((dataset, tone), {}).get("asr")
+            current_mean = current.get("mean")
+            if current_mean is not None:
+                dataset_values.append((tone, current_mean))
+            tone_rendered.append([
+                dataset, tone, current.get("n_seeds", 0),
+                fmt_pct(current_mean), fmt_pct(old),
+                fmt_delta(current_mean, old, percentage_points=True),
+            ])
+        if dataset_values:
+            strongest = max(dataset_values, key=lambda item: item[1])[0]
+            tone_rendered.append([dataset, "本轮最强攻击", "—", strongest, "—", "—"])
+    lines.extend(markdown_table(
+        ["数据集", "风格", "n", "本轮 ASR", "旧论文 ASR", "差值"],
+        tone_rendered,
+    ))
+    lines.extend(["", f"来源：`{results_root / 'socialdebias_adv_eval.csv'}`", ""])
+
+    lines.append("### P5 / §5.3.3 / 表 5-7：SocialDebias-Adv 三方评估")
     lines.append("")
     social_rows = [
         row for row in read_csv(results_root / "socialdebias_adv_eval.csv")
@@ -713,7 +931,7 @@ def build_report(project_root, results_root, legacy, endef_root):
         lines.append(f"> 缺失数据集汇总行：`{results_root / 'socialdebias_adv_eval.csv'}`")
     lines.append("")
 
-    lines.append("### P6 / 表 5-8：三 seed IG 解释一致性")
+    lines.append("### P6 / §5.4.3 / 表 5-8：三 seed IG 解释一致性")
     lines.append("")
     explanation_rows = read_csv(results_root / "explanation/explanation_3seed_summary.csv")
     old_expl = {row["model"]: row for row in legacy.get("table_5_8", [])}
@@ -733,63 +951,7 @@ def build_report(project_root, results_root, legacy, endef_root):
         lines.append("> 缺失三 seed 解释汇总。")
     lines.extend(["", "旧表使用未微调/错误基线和旧指标实现；新表必须整体替换，不能只替换 SocialDebias 一行。", ""])
 
-    csv_section(lines, "P7 / 表 5-10：六组件消融（Clean）", results_root / "ablation_clean_summary.csv", ["dataset", "suffix", "n", "test_f1_mean", "test_f1_std"])
-    csv_section(lines, "P7 / 表 5-10：六组件消融（对抗）", results_root / "ablation_adv/ablation_adv_summary.csv", ["dataset", "variant", "n", "clean_f1_mean", "avg_adv_f1_mean", "f1_drop_mean", "avg_asr_mean"])
-    csv_section(lines, "P8 / 表 5-11：8 维与 17 维表层特征", results_root / "surface_8_vs_17_clean_summary.csv", ["dataset", "suffix", "n", "test_f1_mean", "test_f1_std"])
-    csv_section(
-        lines, "P8 / 表 5-11：8 维与 17 维对抗结果",
-        results_root / "ablation_adv/ablation_adv_summary.csv",
-        ["dataset", "variant", "n", "clean_f1_mean", "avg_adv_f1_mean", "f1_drop_mean", "avg_asr_mean"],
-        predicate=lambda row: row.get("dataset") == "politifact"
-        and row.get("variant") in ("full", "surface17_full"),
-    )
-    csv_section(lines, "P9 / 表 5-12：NLI 机制完整结果", results_root / "nli_mechanism_summary.csv", ["dataset", "suffix", "n", "test_f1_mean", "test_f1_std", "test_bias_acc_mean"])
-    csv_section(lines, "P10 / 表 5-13：Adaptive λ Clean 对照", results_root / "adaptive_clean_summary.csv", ["dataset", "suffix", "n", "test_f1_mean", "test_f1_std", "test_bias_acc_mean"])
-    csv_section(lines, "P10 / 表 5-13：固定 λ 英文对抗", results_root / "surface_fixed_adv_summary.csv", ["dataset", "model", "split", "f1_mean", "f1_std", "asr_mean", "n"])
-    csv_section(lines, "P10 / 表 5-13：Adaptive λ 英文对抗", results_root / "surface_adaptive_adv_summary.csv", ["dataset", "model", "split", "f1_mean", "f1_std", "asr_mean", "n"])
-
-    lines.append("### P10 / 表 5-13：Adaptive λ 与旧论文方向对照")
-    lines.append("")
-    adaptive_clean = read_csv(results_root / "adaptive_clean_summary.csv")
-    adaptive_adv_rows = []
-    for suffix in ("surface_fixed", "surface_adaptive"):
-        grouped, _ = collect_adv_group(
-            (results_root / "surface_adv").glob(f"surface_adv_*_{suffix}.json"),
-            forced_model=suffix,
-        )
-        for row in grouped:
-            adaptive_adv_rows.append({**row, "suffix": suffix})
-    adaptive_adv_index = {
-        (row["dataset"], row["suffix"]): row for row in adaptive_adv_rows
-    }
-    old_adaptive = old_index(legacy)
-    adaptive_rendered = []
-    for row in adaptive_clean:
-        dataset = row.get("dataset")
-        suffix = row.get("suffix")
-        adv = adaptive_adv_index.get((dataset, suffix), {})
-        old = old_adaptive.get((dataset, "SocialDebias Adaptive"), {}) \
-            if suffix == "surface_adaptive" else {}
-        clean = number(row.get("test_f1_mean"))
-        adaptive_rendered.append([
-            dataset, suffix, row.get("n"),
-            fmt_ms(clean, number(row.get("test_f1_std"))),
-            fmt(old.get("clean_f1")), fmt_delta(clean, old.get("clean_f1")),
-            fmt_ms(adv.get("avg_adv_f1_mean"), adv.get("avg_adv_f1_std")),
-            fmt(old.get("avg_adv_f1")),
-            fmt_pp(adv.get("f1_drop_mean"), adv.get("f1_drop_std")),
-            fmt_pp(old.get("f1_drop")),
-        ])
-    if adaptive_rendered:
-        lines.extend(markdown_table(
-            ["数据集", "配置", "n", "本轮 Clean", "旧 Clean", "ΔClean", "本轮 Avg Adv", "旧 Avg Adv", "本轮 Drop", "旧 Drop"],
-            adaptive_rendered,
-        ))
-    else:
-        lines.append("> 缺失 Adaptive λ 汇总。")
-    lines.append("")
-
-    lines.append("### P11 / §5.4.4：人工评估")
+    lines.append("### P11 / §5.4.4 / 表 5-9：人工评估")
     lines.append("")
     human_path = results_root / "human_eval/final/human_eval_metrics.json"
     if human_path.exists():
@@ -811,7 +973,119 @@ def build_report(project_root, results_root, legacy, endef_root):
         lines.append(f"> 缺失：`{human_path}`")
     lines.extend(["", "该文件按单份既有最终标注处理，不报告 Cohen's Kappa；IG 对齐是 seed 42 案例分析。", ""])
 
-    lines.extend(["## 四、第 6 章：结论回填与差异清单", ""])
+    csv_section(lines, "P7 / §5.5.1 / 表 5-10：六组件消融（Clean）", results_root / "ablation_clean_summary.csv", ["dataset", "suffix", "n", "test_f1_mean", "test_f1_std"])
+    ablation_adv_rows = csv_section(lines, "P7 / §5.5.1 / 表 5-10：六组件消融（对抗）", results_root / "ablation_adv/ablation_adv_summary.csv", ["dataset", "variant", "n", "clean_f1_mean", "avg_adv_f1_mean", "f1_drop_mean", "avg_asr_mean"])
+    old_ablation = {
+        (row["dataset"], row["variant"]): row
+        for row in legacy.get("table_5_10", [])
+    }
+    ablation_comparison = []
+    for row in ablation_adv_rows:
+        old = old_ablation.get((row.get("dataset"), row.get("variant")))
+        if not old:
+            continue
+        current_clean = number(row.get("clean_f1_mean"))
+        current_adv = number(row.get("avg_adv_f1_mean"))
+        current_drop = number(row.get("f1_drop_mean"))
+        ablation_comparison.append([
+            row.get("dataset"), row.get("variant"), row.get("n"),
+            fmt(current_clean), fmt(old.get("clean_f1")), fmt_delta(current_clean, old.get("clean_f1")),
+            fmt(current_adv), fmt(old.get("avg_adv_f1")), fmt_delta(current_adv, old.get("avg_adv_f1")),
+            fmt_pp(current_drop), fmt_pp(old.get("f1_drop")),
+        ])
+    if ablation_comparison:
+        lines.append("#### 表 5-10 与旧论文同名配置对照")
+        lines.append("")
+        lines.extend(markdown_table(
+            ["数据集", "配置", "n", "本轮 Clean", "旧 Clean", "ΔClean", "本轮 Adv", "旧 Adv", "ΔAdv", "本轮 Drop", "旧 Drop"],
+            ablation_comparison,
+        ))
+        lines.extend(["", "旧表中的 `no_both` 与本轮任一单组件消融不等价，因此不强行计算差值。", ""])
+    csv_section(lines, "P8 / §3.3.1、§5.5.1 / 表 5-11：8 维与 17 维表层特征", results_root / "surface_8_vs_17_clean_summary.csv", ["dataset", "suffix", "n", "test_f1_mean", "test_f1_std"])
+    surface_dimension_rows = csv_section(
+        lines, "P8 / §3.3.1、§5.5.1 / 表 5-11：8 维与 17 维对抗结果",
+        results_root / "ablation_adv/ablation_adv_summary.csv",
+        ["dataset", "variant", "n", "clean_f1_mean", "avg_adv_f1_mean", "f1_drop_mean", "avg_asr_mean"],
+        predicate=lambda row: row.get("dataset") == "politifact"
+        and row.get("variant") in ("full", "surface17_full"),
+    )
+    old_dimensions = {
+        (row["dataset"], row["variant"]): row
+        for row in legacy.get("table_5_11", [])
+    }
+    dimension_comparison = []
+    for row in surface_dimension_rows:
+        old = old_dimensions.get((row.get("dataset"), row.get("variant")))
+        if not old:
+            continue
+        current_clean = number(row.get("clean_f1_mean"))
+        current_drop = number(row.get("f1_drop_mean"))
+        dimension_comparison.append([
+            row.get("dataset"), old.get("dimension"), row.get("n"),
+            fmt(current_clean), fmt(old.get("clean_f1")), fmt_delta(current_clean, old.get("clean_f1")),
+            fmt_pp(current_drop), fmt_pp(old.get("f1_drop")),
+            fmt_delta(current_drop, old.get("f1_drop"), percentage_points=True),
+        ])
+    if dimension_comparison:
+        lines.append("#### 表 5-11 与旧论文对照")
+        lines.append("")
+        lines.extend(markdown_table(
+            ["数据集", "维度", "n", "本轮 Clean", "旧 Clean", "ΔClean", "本轮 Drop", "旧 Drop", "ΔDrop"],
+            dimension_comparison,
+        ))
+        lines.append("")
+    csv_section(lines, "P9 / §5.5.2 / 表 5-12：NLI 机制完整结果", results_root / "nli_mechanism_summary.csv", ["dataset", "suffix", "n", "test_f1_mean", "test_f1_std", "test_bias_acc_mean"])
+    csv_section(lines, "P10 / §5.5.3 / 表 5-13：Adaptive λ Clean 对照", results_root / "adaptive_clean_summary.csv", ["dataset", "suffix", "n", "test_f1_mean", "test_f1_std", "test_bias_acc_mean"])
+    csv_section(lines, "P10 / §5.5.3 / 表 5-13：固定 λ 英文对抗", results_root / "surface_fixed_adv_summary.csv", ["dataset", "model", "split", "f1_mean", "f1_std", "asr_mean", "n"])
+    csv_section(lines, "P10 / §5.5.3 / 表 5-13：Adaptive λ 英文对抗", results_root / "surface_adaptive_adv_summary.csv", ["dataset", "model", "split", "f1_mean", "f1_std", "asr_mean", "n"])
+
+    lines.append("### P10 / §5.5.3 / 表 5-13：Adaptive λ 与旧论文方向对照")
+    lines.append("")
+    adaptive_clean = read_csv(results_root / "adaptive_clean_summary.csv")
+    adaptive_adv_rows = []
+    for suffix in ("surface_fixed", "surface_adaptive"):
+        grouped, _ = collect_adv_group(
+            (results_root / "surface_adv").glob(f"surface_adv_*_{suffix}.json"),
+            forced_model=suffix,
+        )
+        for row in grouped:
+            adaptive_adv_rows.append({**row, "suffix": suffix})
+    adaptive_adv_index = {
+        (row["dataset"], row["suffix"]): row for row in adaptive_adv_rows
+    }
+    old_adaptive = old_index(legacy)
+    old_adaptive_table = {
+        (row["dataset"], row["suffix"]): row
+        for row in legacy.get("table_5_13", [])
+    }
+    adaptive_rendered = []
+    for row in adaptive_clean:
+        dataset = row.get("dataset")
+        suffix = row.get("suffix")
+        adv = adaptive_adv_index.get((dataset, suffix), {})
+        old = old_adaptive_table.get((dataset, suffix), {})
+        if not old and suffix == "surface_adaptive":
+            old = old_adaptive.get((dataset, "SocialDebias Adaptive"), {})
+        clean = number(row.get("test_f1_mean"))
+        adaptive_rendered.append([
+            dataset, suffix, row.get("n"),
+            fmt_ms(clean, number(row.get("test_f1_std"))),
+            fmt(old.get("clean_f1")), fmt_delta(clean, old.get("clean_f1")),
+            fmt_ms(adv.get("avg_adv_f1_mean"), adv.get("avg_adv_f1_std")),
+            fmt(old.get("avg_adv_f1")),
+            fmt_pp(adv.get("f1_drop_mean"), adv.get("f1_drop_std")),
+            fmt_pp(old.get("f1_drop")),
+        ])
+    if adaptive_rendered:
+        lines.extend(markdown_table(
+            ["数据集", "配置", "n", "本轮 Clean", "旧 Clean", "ΔClean", "本轮 Avg Adv", "旧 Avg Adv", "本轮 Drop", "旧 Drop"],
+            adaptive_rendered,
+        ))
+    else:
+        lines.append("> 缺失 Adaptive λ 汇总。")
+    lines.append("")
+
+    lines.extend(["## 五、第 6 章：结论回填与差异清单", ""])
     changed = []
     for row in main_rows:
         old = row.get("old_clean_f1")
@@ -852,6 +1126,13 @@ def build_report(project_root, results_root, legacy, endef_root):
         "checks": checks,
         "main_results": main_rows,
         "history_summary": history_summary,
+        "artifact_mapping": [
+            {
+                "stage": row[0], "section": row[1], "table_or_figure": row[2],
+                "content": row[3], "source": str(row[4]), "comparison": row[5],
+            }
+            for row in artifact_mapping
+        ],
         "unreadable_histories": unreadable_histories,
     }
     return "\n".join(lines), machine

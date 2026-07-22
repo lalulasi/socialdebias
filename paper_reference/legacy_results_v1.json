@@ -2,6 +2,14 @@
   "title": "旧论文实验结果基线（paper v1.x）",
   "source": "罗俊2241507.pdf 及其配套复现指南中的论文表格值",
   "warning": "旧实现与 paper-v2 在模型结构、BERT 微调、数据过滤和解释指标上存在差异；差值只用于定位论文需修改处，不能与新结果混合求均值。",
+  "table_4_1": [
+    {"dataset": "politifact", "source": "qwen", "acc": 0.8141},
+    {"dataset": "politifact", "source": "deepseek", "acc": 0.7854},
+    {"dataset": "gossipcop", "source": "qwen", "acc": 0.7825},
+    {"dataset": "gossipcop", "source": "deepseek", "acc": 0.8248},
+    {"dataset": "weibo21", "source": "qwen", "acc": 0.7029},
+    {"dataset": "weibo21", "source": "deepseek", "acc": 0.7179}
+  ],
   "table_4_3": [
     {"dataset": "politifact", "method": "nli_soft14", "test_f1": 0.8628},
     {"dataset": "gossipcop", "method": "nli_soft14", "test_f1": 0.7513},
@@ -12,6 +20,14 @@
     {"dataset": "gossipcop", "retained": 793},
     {"dataset": "weibo21", "retained": 1080},
     {"dataset": "all", "retained": 2234, "keep_rate": 0.57}
+  ],
+  "table_4_5": [
+    {"dimension": "LLM来源", "category": "deepseek", "keep_rate": 0.654},
+    {"dimension": "LLM来源", "category": "qwen", "keep_rate": 0.486},
+    {"dimension": "改写风格", "category": "neutral", "keep_rate": 0.638},
+    {"dimension": "改写风格", "category": "objective", "keep_rate": 0.602},
+    {"dimension": "改写风格", "category": "sensational", "keep_rate": 0.534},
+    {"dimension": "改写风格", "category": "emotionally_triggering", "keep_rate": 0.506}
   ],
   "main_results": [
     {"table": "表 5-3", "dataset": "politifact", "method": "BERT", "clean_f1": 0.8703, "clean_f1_std": 0.0064, "avg_adv_f1": 0.8110, "avg_adv_f1_std": 0.0167, "f1_drop": 0.0594, "f1_drop_std": 0.0225, "avg_asr": 0.0956},
@@ -39,9 +55,38 @@
     {"dataset": "weibo21", "method": "DeepSeek", "acc": 0.6593},
     {"dataset": "weibo21", "method": "SocialDebias", "acc": 0.7107}
   ],
+  "table_5_6": [
+    {"dataset": "politifact", "tone": "neutral", "asr": 0.1058},
+    {"dataset": "politifact", "tone": "objective", "asr": 0.0765},
+    {"dataset": "politifact", "tone": "sensational", "asr": 0.2620},
+    {"dataset": "politifact", "tone": "emotionally_triggering", "asr": 0.1103},
+    {"dataset": "gossipcop", "tone": "neutral", "asr": 0.0659},
+    {"dataset": "gossipcop", "tone": "objective", "asr": 0.0724},
+    {"dataset": "gossipcop", "tone": "sensational", "asr": 0.0941},
+    {"dataset": "gossipcop", "tone": "emotionally_triggering", "asr": 0.0826},
+    {"dataset": "weibo21", "tone": "neutral", "asr": 0.2134},
+    {"dataset": "weibo21", "tone": "objective", "asr": 0.2360},
+    {"dataset": "weibo21", "tone": "sensational", "asr": 0.3386},
+    {"dataset": "weibo21", "tone": "emotionally_triggering", "asr": 0.2172}
+  ],
   "table_5_8": [
     {"model": "bert", "top_k_overlap": 0.1203, "spearman": 0.2564, "js_divergence": 0.2257},
     {"model": "socialdebias", "top_k_overlap": 0.1446, "spearman": 0.4707, "js_divergence": 0.1750}
+  ],
+  "table_5_10": [
+    {"dataset": "gossipcop", "variant": "full", "clean_f1": 0.7400, "avg_adv_f1": 0.6939, "f1_drop": 0.0462},
+    {"dataset": "gossipcop", "variant": "no_grl", "clean_f1": 0.7440, "avg_adv_f1": 0.6820, "f1_drop": 0.0619},
+    {"dataset": "gossipcop", "variant": "no_consist", "clean_f1": 0.7346, "avg_adv_f1": 0.7157, "f1_drop": 0.0190},
+    {"dataset": "gossipcop", "variant": "no_both", "clean_f1": 0.7441, "avg_adv_f1": 0.6937, "f1_drop": 0.0504}
+  ],
+  "table_5_11": [
+    {"dataset": "politifact", "variant": "full", "dimension": 8, "clean_f1": 0.8732, "f1_drop": 0.0521},
+    {"dataset": "politifact", "variant": "surface17_full", "dimension": 17, "clean_f1": 0.8345, "f1_drop": 0.0811}
+  ],
+  "table_5_13": [
+    {"dataset": "politifact", "suffix": "surface_adaptive", "clean_f1": 0.8771, "avg_adv_f1": 0.8303, "f1_drop": 0.0468},
+    {"dataset": "gossipcop", "suffix": "surface_adaptive", "clean_f1": 0.7373, "avg_adv_f1": 0.6892, "f1_drop": 0.0482},
+    {"dataset": "weibo21", "suffix": "surface_adaptive", "clean_f1": 0.9091}
   ],
   "human_eval": {
     "n_samples": 50,
