@@ -21,6 +21,7 @@ scripts/analyze_human_eval.py
         --output_dir results/human_eval/
 """
 import argparse
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -31,6 +32,17 @@ import pandas as pd
 
 # 关键词分隔符：英文逗号 / 中文逗号 / 管道符 / 分号
 KEYWORD_SEP = re.compile(r"[,，|;；]")
+
+COLUMN_ALIASES = {
+    "ID": "id",
+    "真实标签": "label",
+    "文本类型": "text_type",
+    "人类圈选关键词": "human_keywords",
+    "人类判断": "human_judgment",
+    "置信度 (1-5)": "confidence",
+    "置信度（1-5）": "confidence",
+    "标注备注": "notes",
+}
 
 
 def parse_keywords(s):
@@ -74,23 +86,97 @@ def jaccard(a, b):
     return len(a & b) / len(a | b)
 
 
+def read_table(path):
+    """Read xlsx or CSV, including the legacy GB18030 annotation export."""
+    path = Path(path)
+    if str(path).lower().endswith((".xlsx", ".xlsm")):
+        return pd.read_excel(path), "xlsx"
+    errors = []
+    for encoding in ("utf-8-sig", "utf-8", "gb18030"):
+        try:
+            return pd.read_csv(path, encoding=encoding), encoding
+        except UnicodeDecodeError as exc:
+            errors.append(f"{encoding}: {exc}")
+    raise UnicodeError(f"Unable to decode {path}: {'; '.join(errors)}")
+
+
+def normalize_columns(df):
+    renamed = {
+        column: COLUMN_ALIASES.get(str(column).strip(), str(column).strip())
+        for column in df.columns
+    }
+    df = df.rename(columns=renamed)
+    duplicates = df.columns[df.columns.duplicated()].tolist()
+    if duplicates:
+        raise ValueError(f"Duplicate columns after normalization: {duplicates}")
+    return df
+
+
+def normalize_label(value):
+    if pd.isna(value):
+        return "missing"
+    value = str(value).strip().lower()
+    if value in ("real", "true", "0"):
+        return "real"
+    if value in ("fake", "false", "1"):
+        return "fake"
+    return value
+
+
+def normalize_text_type(value):
+    if pd.isna(value):
+        return "missing"
+    value = str(value).strip().lower()
+    if value in ("original", "orig", "原文"):
+        return "original"
+    if value in ("adv_c", "advc", "对抗", "对抗文本"):
+        return "adv_C"
+    return value
+
+
 def load_human_eval(path, key_path=None):
-    if str(path).endswith((".xlsx", ".xlsm")):
-        df = pd.read_excel(path)
-    else:
-        df = pd.read_csv(path)
+    df, source_encoding = read_table(path)
+    df = normalize_columns(df)
     if key_path:
-        if str(key_path).endswith((".xlsx", ".xlsm")):
-            key = pd.read_excel(key_path)
-        else:
-            key = pd.read_csv(key_path)
+        key, key_encoding = read_table(key_path)
+        key = normalize_columns(key)
         if "blind_id" not in df.columns or "blind_id" not in key.columns:
             raise ValueError("Blind task and answer key must both contain blind_id")
         df = df.merge(key, on="blind_id", how="left", validate="one_to_one")
+        source_encoding = f"{source_encoding}; key={key_encoding}"
     required = {"id", "label", "text_type", "human_keywords", "human_judgment"}
     missing = required - set(df.columns)
     if missing:
         raise ValueError(f"Missing required columns: {missing}")
+
+    df["id"] = df["id"].astype(str).str.strip()
+    df["label"] = df["label"].map(normalize_label)
+    df["text_type"] = df["text_type"].map(normalize_text_type)
+    df["human_judgment"] = df["human_judgment"].map(normalize_judgment)
+    invalid_labels = sorted(set(df["label"]) - {"real", "fake"})
+    invalid_types = sorted(set(df["text_type"]) - {"original", "adv_C"})
+    invalid_judgments = sorted(
+        set(df["human_judgment"]) - {"real", "fake", "uncertain"}
+    )
+    if invalid_labels:
+        raise ValueError(f"Invalid labels: {invalid_labels}")
+    if invalid_types:
+        raise ValueError(f"Invalid text types: {invalid_types}")
+    if invalid_judgments:
+        raise ValueError(f"Invalid or missing human judgments: {invalid_judgments}")
+    if df.duplicated(["id", "text_type"]).any():
+        raise ValueError("Duplicate id/text_type rows in human evaluation input")
+    pair_types = df.groupby("id")["text_type"].apply(set)
+    incomplete = pair_types[pair_types != {"original", "adv_C"}]
+    if not incomplete.empty:
+        raise ValueError(f"Incomplete original/adv_C pairs: {incomplete.index.tolist()[:10]}")
+    if (df.groupby("id")["label"].nunique() != 1).any():
+        raise ValueError("Label mismatch within original/adv_C pairs")
+    if "confidence" in df.columns:
+        df["confidence"] = pd.to_numeric(df["confidence"], errors="coerce")
+        if df["confidence"].isna().any() or not df["confidence"].between(1, 5).all():
+            raise ValueError("Confidence must be complete numeric values from 1 to 5")
+    df.attrs["source_encoding"] = source_encoding
     return df
 
 
@@ -416,6 +502,26 @@ def main():
     df = load_human_eval(args.input, args.key)
     print(f"加载：{args.input}，共 {len(df)} 行")
 
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    normalized_path = output_dir / "human_eval_normalized_input.csv"
+    df.to_csv(normalized_path, index=False, encoding="utf-8-sig")
+    source_path = Path(args.input)
+    manifest = {
+        "input": str(source_path.resolve()),
+        "input_sha256": hashlib.sha256(source_path.read_bytes()).hexdigest(),
+        "source_encoding": df.attrs.get("source_encoding", "unknown"),
+        "rows": int(len(df)),
+        "pairs": int(df["id"].nunique()),
+        "normalized_input": str(normalized_path),
+    }
+    manifest_path = output_dir / "human_eval_input_manifest.json"
+    manifest_path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    print(f"规范化输入：{normalized_path}")
+    print(f"输入清单：{manifest_path}")
+
     pairs = reshape_to_pairs(df, uncertain_score=args.uncertain_score)
     print(f"重塑为 {len(pairs)} 个样本对")
 
@@ -428,7 +534,7 @@ def main():
             alignment_df, alignment_metrics = compute_model_alignment(pairs, ig_data)
 
     print_report(metrics, alignment_metrics)
-    save_outputs(pairs, metrics, args.output_dir, alignment_df, alignment_metrics)
+    save_outputs(pairs, metrics, output_dir, alignment_df, alignment_metrics)
 
 
 if __name__ == "__main__":

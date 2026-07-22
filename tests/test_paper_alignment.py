@@ -13,6 +13,7 @@ from scripts.evaluate_surface_adv import SurfaceTestDataset
 from modeling.social_debias import infer_bottleneck_dim
 from scripts.compute_nli_p_entail import resolve_nli_label_indices
 from scripts.prepare_nrc_emolex import load_long, load_translation_map, write_long
+from scripts.analyze_human_eval import load_human_eval
 from utils.contrastive_dataloader import ContrastiveFakeNewsDataset
 from utils.explanation_metrics import js_divergence, top_k_overlap
 from utils.surface_features import SurfaceFeatureExtractor
@@ -33,6 +34,23 @@ class FakeSurfaceExtractor:
 
 
 class PaperAlignmentTests(unittest.TestCase):
+    def test_legacy_gb18030_human_eval_is_normalized(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "legacy.csv"
+            path.write_text(
+                "ID,真实标签,文本类型,人类圈选关键词,人类判断,置信度 (1-5),标注备注\n"
+                "pf_test_000,real,original,Obama,Real,4,原文\n"
+                "pf_test_000,real,adv_C,Obama,Uncertain,3,改写\n",
+                encoding="gb18030",
+            )
+            frame = load_human_eval(path)
+        self.assertEqual(frame.attrs["source_encoding"], "gb18030")
+        self.assertEqual(frame.columns[:6].tolist(), [
+            "id", "label", "text_type", "human_keywords",
+            "human_judgment", "confidence",
+        ])
+        self.assertEqual(frame["human_judgment"].tolist(), ["real", "uncertain"])
+
     def test_surface_eval_accepts_list_normalizer_from_checkpoint(self):
         dataset = SurfaceTestDataset(
             [{"text": "ab", "label": 1}],
