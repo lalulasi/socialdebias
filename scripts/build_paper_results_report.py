@@ -10,8 +10,10 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
+import re
 import statistics
 from collections import defaultdict
 from datetime import datetime
@@ -333,6 +335,75 @@ def add_boolean_check(checks, stage, item, ok, actual, expected, path, required=
     })
 
 
+def file_sha256(path: Path):
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def validate_socialdebias_adv_release(project_root: Path, results_root: Path):
+    """Validate the published filtered dataset as an alternative to raw API files."""
+    filtered_dir = project_root / "data/socialdebias_adv/filtered"
+    filter_report = filtered_dir / "filter_report.csv"
+    manifest_dir = results_root / "manifests"
+    commit_file = manifest_dir / "socialdebias_adv_dataset_commit.txt"
+    hash_file = manifest_dir / "socialdebias_adv_dataset_sha256.txt"
+
+    datasets = ("politifact", "gossipcop", "weibo21")
+    tones = ("neutral", "objective", "sensational", "emotionally_triggering")
+    sources = ("qwen", "deepseek")
+    expected_names = {
+        f"{dataset}_test_adv_{tone}_{source}.pkl"
+        for dataset in datasets
+        for tone in tones
+        for source in sources
+    }
+
+    filtered_files = {
+        path.name: path for path in filtered_dir.glob("*_test_adv_*.pkl")
+        if path.is_file() and path.stat().st_size > 0
+    }
+    names_ok = set(filtered_files) == expected_names
+
+    report_rows = read_csv(filter_report)
+    report_names = {row.get("file", "") for row in report_rows}
+    report_ok = len(report_rows) == 24 and report_names == expected_names
+
+    commit_ok = False
+    if commit_file.is_file():
+        commit_text = commit_file.read_text(encoding="utf-8").strip()
+        commit_ok = re.fullmatch(r"[0-9a-fA-F]{40,64}", commit_text) is not None
+
+    recorded_hashes = {}
+    if hash_file.is_file():
+        for line in hash_file.read_text(encoding="utf-8").splitlines():
+            parts = line.strip().split(maxsplit=1)
+            if len(parts) != 2 or re.fullmatch(r"[0-9a-fA-F]{64}", parts[0]) is None:
+                continue
+            recorded_hashes[Path(parts[1].lstrip("* ")).name] = parts[0].lower()
+
+    artifacts = dict(filtered_files)
+    if filter_report.is_file() and filter_report.stat().st_size > 0:
+        artifacts[filter_report.name] = filter_report
+    expected_hash_names = expected_names | {"filter_report.csv"}
+    hashes_ok = set(recorded_hashes) == expected_hash_names
+    if hashes_ok:
+        hashes_ok = all(
+            recorded_hashes[name] == file_sha256(artifacts[name])
+            for name in expected_hash_names
+        )
+
+    ok = names_ok and report_ok and commit_ok and hashes_ok
+    actual = (
+        f"filtered={len(filtered_files)}/24, report={len(report_rows)}/24, "
+        f"commit={'yes' if commit_ok else 'no'}, "
+        f"sha256={'25/25' if hashes_ok else 'invalid'}"
+    )
+    return ok, actual, manifest_dir
+
+
 def build_checks(project_root, results_root, endef_root):
     checks = []
     p1_files = [
@@ -352,7 +423,7 @@ def build_checks(project_root, results_root, endef_root):
         ("P3", "surface_all checkpoint", results_root / "models", "*_surface_all.pt", 9),
         ("P3", "surface_all history", results_root / "models", "*_surface_all_history.json", 9),
         ("P4", "surface_all 对抗 JSON", results_root / "surface_adv", "*_surface_all.json", 6),
-        ("P5", "SocialDebias-Adv 原始集", project_root / "data/socialdebias_adv", "*_test_adv_*.pkl", 24),
+        ("P5", "SocialDebias-Adv 数据来源", project_root / "data/socialdebias_adv", "*_test_adv_*.pkl", 24),
         ("P5", "SocialDebias-Adv 过滤集", project_root / "data/socialdebias_adv/filtered", "*.pkl", 24),
         ("P6", "IG 三 seed JSON", results_root / "explanation", "politifact_surface_all_seed*.json", 3),
         ("P7", "消融 history", results_root / "models", "*_abl_*_history.json", 42),
@@ -367,6 +438,33 @@ def build_checks(project_root, results_root, endef_root):
     ]
     for stage, item, directory, pattern, expected in specs:
         add_check(checks, stage, item, len(list(directory.glob(pattern))), expected, directory / pattern)
+
+    raw_dir = project_root / "data/socialdebias_adv"
+    raw_count = sum(
+        path.is_file() and path.stat().st_size > 0
+        for path in raw_dir.glob("*_test_adv_*.pkl")
+    )
+    release_ok, release_actual, release_path = validate_socialdebias_adv_release(
+        project_root, results_root
+    )
+    source_check = next(
+        check for check in checks
+        if check["stage"] == "P5" and check["item"] == "SocialDebias-Adv 数据来源"
+    )
+    if raw_count == 24:
+        source_check.update({
+            "actual": "raw=24/24",
+            "expected": "raw=24/24 或可验证发布集=24/24",
+            "ok": True,
+            "path": str(raw_dir / "*_test_adv_*.pkl"),
+        })
+    else:
+        source_check.update({
+            "actual": f"raw={raw_count}/24; published release: {release_actual}",
+            "expected": "raw=24/24 或可验证发布集=24/24",
+            "ok": release_ok,
+            "path": str(release_path),
+        })
     if endef_root:
         specs = [
             ("ENDEF English backup", endef_root / "ENDEF_en/backup_ckpt", 12),
